@@ -1,0 +1,30 @@
+{
+  "Materials": {
+    "Sprite": { 
+      "Techniques": [
+        {"ProgramName": "Sprite"}
+      ]
+    },
+    "GuiPanel": {
+      "Techniques": [
+        {"ProgramName": "GuiPanel"}
+      ]
+    },
+    "GuiText": {
+      "Techniques": [
+        {"ProgramName": "GuiText"}
+      ]
+    },
+    "GuiImage": {
+      "Techniques": [
+        {"ProgramName": "GuiImage"}
+      ]
+    }
+  },
+  "Programs": {
+    "Sprite": {"VSName": "dat1/sprite.vs", "FSName": "dat1/sprite.fs"},
+    "GuiPanel": {"VSName": "dat1/gui/panel.vs", "FSName": "dat1/gui/panel.fs"},
+    "GuiText": {"VSName": "dat1/gui/text.vs", "FSName": "dat1/gui/text.fs"},
+    "GuiImage": {"VSName": "dat1/gui/image.vs", "FSName": "dat1/gui/image.fs"}
+  }
+}
