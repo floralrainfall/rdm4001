@@ -12,7 +12,7 @@ struct RGamePrivate {
   float cameraPitch;
   float cameraYaw;
 };
-  
+
 RGame::RGame() {
   Input::singleton()->newAxis("ForwardBackward", SDLK_w, SDLK_s);
   Input::singleton()->newAxis("LeftRight", SDLK_a, SDLK_d);
@@ -20,13 +20,11 @@ RGame::RGame() {
   game = new RGamePrivate();
 }
 
-RGame::~RGame() {
-  delete game;
-}
+RGame::~RGame() { delete game; }
 
 void RGame::initialize() {
   std::scoped_lock lock(world->worldLock);
-  world->stepped.listen([this]{
+  world->stepped.listen([this] {
     glm::vec2 mouseDelta = Input::singleton()->getMouseDelta();
 
     Input::Axis* fbA = Input::singleton()->getAxis("ForwardBackward");
@@ -46,11 +44,10 @@ void RGame::initialize() {
     cam.setPosition(
         cam.getPosition() +
         (vm * glm::vec3(lrA->value, 0.0, fbA->value) * speed * (1.f / 60.f)));
-    cam.setTarget(cam.getPosition() + vm * forward);    
+    cam.setTarget(cam.getPosition() + vm * forward);
   });
 
-  gfxEngine->initialized.listen([this]{
-    gfxEngine->setFullscreenMaterial("RayMarch");
-  });
+  gfxEngine->initialized.listen(
+      [this] { gfxEngine->setFullscreenMaterial("RayMarch"); });
 }
-};
+};  // namespace rm

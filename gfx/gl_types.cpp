@@ -144,12 +144,12 @@ void GLProgram::link() {
   std::string programName;
   for (auto [type, shader] : shaders) {
     Log::printf(LOG_INFO, "Compiling shader %s", shader.name.c_str());
-    
+
     GLuint _shader = glCreateShader(shaderType(type));
     glObjectLabel(GL_SHADER, _shader, shader.name.size(), shader.name.data());
     programName += shader.name + " ";
     GLchar* code = (GLchar*)shader.code.c_str();
-    int codeLength[] = { (int)shader.code.size() };
+    int codeLength[] = {(int)shader.code.size()};
     glShaderSource(_shader, 1, &code, (const GLint*)&codeLength);
     glCompileShader(_shader);
 

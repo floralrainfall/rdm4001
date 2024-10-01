@@ -248,7 +248,7 @@ Point ray_march(in vec3 ro, in vec3 rd)
             //p.col = base_color;
             float updot = dot(rd, vec3(0.0, 1.0, 0.0));
             vec3 fogcolor = mix(vec3(0.77,0.79,1.0),vec3(0.16,0.20,0.96),updot);
-            p.col = mix(p.col, fogcolor, total_distance_traveled/MAXIMUM_TRACE_DISTANCE);
+            p.col = mix(p.col, fogcolor, min(total_distance_traveled/(MAXIMUM_TRACE_DISTANCE/2), 1.0));
             return p;
           }
         }
@@ -257,6 +257,8 @@ Point ray_march(in vec3 ro, in vec3 rd)
         {
           float updot = dot(rd, vec3(0.0, 1.0, 0.0));
           p.col = mix(vec3(0.77,0.79,1.0),vec3(0.16,0.20,0.96),updot);
+	  float cloudNoise = noise(rd + vec3(time, 0, 0)) * max(0.0, updot);
+	  p.col = mix(p.col,vec3(1,1,1),max(0.0,cloudNoise));
           float sundot = dot(rd, normalize(light_position));
           if(sundot > 0.995) 
             p.col = vec3(1.0, 1.0, 1.0);

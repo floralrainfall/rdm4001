@@ -1,8 +1,8 @@
 #include "scheduler.hpp"
 
 #include <chrono>
-#include "input.hpp"
 
+#include "input.hpp"
 #include "logging.hpp"
 
 #ifdef __linux
