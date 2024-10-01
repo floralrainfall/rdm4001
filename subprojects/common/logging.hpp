@@ -91,12 +91,16 @@ struct LogMessage {
 
 class Log {
   std::deque<LogMessage> log;
+  LogType level;
+
+  Log();
 public:
   static Log* singleton();
 
   static void printf(LogType type, const char* f, ...);
   static void print(LogType type, const char* f);
 
+  void setLevel(LogType level) { this->level = level; };
   void addLogMessage(LogMessage m);
 };
 }

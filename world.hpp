@@ -1,9 +1,10 @@
 #pragma once
 
 #include <memory>
-#include "scheduler.hpp"
-#include "graph.hpp"
 #include <mutex>
+
+#include "graph.hpp"
+#include "scheduler.hpp"
 
 namespace rdm {
 class World {
@@ -14,15 +15,16 @@ class World {
   bool running;
 
   void tick();
-public:
+
+ public:
   World();
 
   Signal<> stepping;
   Signal<> stepped;
 
-  std::mutex worldLock; // lock when writing to world state
+  std::mutex worldLock;  // lock when writing to world state
 
   Scheduler* getScheduler() { return scheduler.get(); }
   bool getRunning() { return running; };
 };
-}
+}  // namespace rdm

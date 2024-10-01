@@ -1,0 +1,1 @@
+option('vcpkg', type: 'feature', value: 'disabled')

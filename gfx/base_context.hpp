@@ -3,11 +3,18 @@
 #include <mutex>
 
 namespace rdm::gfx {
+/**
+ * @brief The context, which is bound to a 'window' or an analagous widget.
+ *
+ * When using in threads other then Render, please lock using something like
+ * `std::scoped_lock lock(context->getMutex());`
+ */
 class BaseContext {
   void* hwnd;
 
   std::mutex mutex;
-public:
+
+ public:
   BaseContext(void* hwnd);
   virtual ~BaseContext() {};
 
@@ -22,4 +29,4 @@ public:
 
   void* getHwnd() { return hwnd; }
 };
-};
+};  // namespace rdm::gfx

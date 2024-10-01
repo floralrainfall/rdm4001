@@ -1,12 +1,15 @@
 #pragma once
-#include "base_context.hpp"
 #include <SDL2/SDL.h>
+
 #include <mutex>
 
-namespace rdm::gfx {
+#include "base_context.hpp"
+
+namespace rdm::gfx::gl {
 class GLContext : public BaseContext {
   SDL_GLContext context;
-public:
+
+ public:
   GLContext(void* hwnd);
 
   virtual void setCurrent();
@@ -14,4 +17,4 @@ public:
   virtual void swapBuffers();
   virtual glm::ivec2 getBufferSize();
 };
-};
+};  // namespace rdm::gfx::gl

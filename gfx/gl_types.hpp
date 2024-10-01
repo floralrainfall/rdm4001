@@ -1,13 +1,15 @@
 #pragma once
-#include "base_types.hpp"
 #include <glad/glad.h>
 
-namespace rdm::gfx {
+#include "base_types.hpp"
+
+namespace rdm::gfx::gl {
 GLenum fromDataType(DataType t);
 
 class GLTexture : public BaseTexture {
   GLuint texture;
-public:
+
+ public:
   GLTexture();
   virtual ~GLTexture();
 
@@ -17,13 +19,18 @@ public:
   static GLenum texFormat(Format format);
   static GLenum texInternalFormat(InternalFormat format);
 
-  virtual void upload2d(int width, int height, DataType type, Format format, void* data, int mipmapLevels = 0);
+  virtual void reserve2d(int width, int height, InternalFormat format,
+                         int mipmapLevels);
+  virtual void upload2d(int width, int height, DataType type, Format format,
+                        void* data, int mipmapLevels);
+  virtual void destroyAndCreate();
   virtual void bind();
 };
 
 class GLProgram : public BaseProgram {
   GLuint program;
-public:
+
+ public:
   GLProgram();
   virtual ~GLProgram();
 
@@ -40,7 +47,8 @@ public:
 class GLBuffer : public BaseBuffer {
   GLuint buffer;
   Type type;
-public:
+
+ public:
   GLBuffer();
   virtual ~GLBuffer();
 
@@ -55,11 +63,26 @@ public:
 
 class GLArrayPointers : public BaseArrayPointers {
   GLuint array;
-public:
+
+ public:
   GLArrayPointers();
   virtual ~GLArrayPointers();
 
   virtual void upload();
   virtual void bind();
 };
-}
+
+class GLFrameBuffer : public BaseFrameBuffer {
+  GLuint framebuffer;
+
+ public:
+  GLFrameBuffer();
+  ~GLFrameBuffer();
+
+  virtual void setTarget(BaseTexture* texture, AttachmentPoint point);
+  virtual Status getStatus();
+  virtual void destroyAndCreate();
+
+  GLuint getId() { return framebuffer; }
+};
+}  // namespace rdm::gfx::gl

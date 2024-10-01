@@ -1,65 +1,80 @@
 #pragma once
-#include <deque>
-#include <mutex>
-#include <string>
-#include <map>
-#include "signal.hpp"
 #include <SDL2/SDL_keycode.h>
 
+#include <deque>
+#include <glm/glm.hpp>
+#include <map>
+#include <mutex>
+#include <string>
+
+#include "signal.hpp"
+
 namespace rdm {
-  struct InputObject {
-    enum Type {
-      KeyPress,
-      KeyUp,
-      MouseMove,
-      MousePress,
-      MouseUp,
-      MouseScroll,
-      Quit,
-      TextEdit,
-    };
-
-    Type type;
-    union {
-      struct {
-        SDL_Keycode key;
-        char sym;
-        SDL_Keymod mod;
-      } key;
-      struct {
-        int delta[2];
-        int position[2];
-        int global_position[2];
-        bool pressed[3]; // mb 1 = 0
-        int wheel;
-      } mouse;
-    } data;
+struct InputObject {
+  enum Type {
+    KeyPress,
+    KeyUp,
+    MouseMove,
+    MousePress,
+    MouseUp,
+    MouseScroll,
+    Quit,
+    TextEdit,
   };
 
+  Type type;
+  union {
+    struct {
+      SDL_Keycode key;
+      char sym;
+      SDL_Keymod mod;
+    } key;
+    struct {
+      int delta[2];
+      int position[2];
+      int global_position[2];
+      bool pressed[3];  // mb 1 = 0
+      int wheel;
+    } mouse;
+  } data;
+};
 
-  class Input {
-    Input();
+class Input {
+  Input();
 
-    std::mutex flushing;
-    std::deque<InputObject> events;
-  public:
-    static Input* singleton();
+  std::mutex flushing;
+  glm::vec2 mouseDelta;
+  std::deque<InputObject> events;
+  bool mouseLocked;
+  float mouseSensitivity;
 
-    void postEvent(InputObject object);
-    void flushEvents();
+ public:
+  static Input* singleton();
 
-    struct Axis {
-      float value;
-      SDL_Keycode positive;
-      SDL_Keycode negative;
-    };
+  void postEvent(InputObject object);
+  void flushEvents();
 
-    Axis* newAxis(std::string axis, SDL_Keycode positive, SDL_Keycode negative);
-    Axis* getAxis(std::string axis);
-
-    Signal<InputObject> quitSignal;
-    Signal<InputObject> onEvent;
-  private:
-    std::map<std::string, Axis> axis;
+  struct Axis {
+    float value;
+    SDL_Keycode positive;
+    SDL_Keycode negative;
   };
-}
+
+  glm::vec2 getMouseDelta() { return mouseDelta; };
+
+  Axis* newAxis(std::string axis, SDL_Keycode positive, SDL_Keycode negative);
+  Axis* getAxis(std::string axis);
+
+  Signal<> mousePressed;
+  Signal<> mouseReleased;
+
+  void setMouseLocked(bool b) { mouseLocked = b; }
+  bool getMouseLocked() { return mouseLocked; }
+
+  Signal<InputObject> quitSignal;
+  Signal<InputObject> onEvent;
+
+ private:
+  std::map<std::string, Axis> axis;
+};
+}  // namespace rdm

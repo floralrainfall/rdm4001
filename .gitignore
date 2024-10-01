@@ -1,3 +1,13 @@
 subprojects/obz
 build
 .vscode
+data/dat2 
+data/dat4
+data/datS
+docs
+*~
+\#*\#
+.\#*
+compile_commands.json
+.cache
+.exclude

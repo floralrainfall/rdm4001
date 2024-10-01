@@ -1,5 +1,17 @@
 dat1/materials.json
-dat1/sprite.fs
-dat1/sprite.vs
-dat1/test.fs
-dat1/test.vs
+dat1/gui/image.fs.glsl
+dat1/gui/panel.fs.glsl
+dat1/gui/panel.vs.glsl
+dat1/gui/text.fs.glsl
+dat1/heightmap.fs.glsl
+dat1/heightmap.gs.glsl
+dat1/heightmap.vs.glsl
+dat1/post.fs.glsl
+dat1/post.vs.glsl
+dat1/ray_march.fs.glsl
+dat2/andi wizard.jpg
+dat3/Debug.json
+dat3/default.ttf
+dat3/gui.json
+dat4/AssemblyMain.dll
+dat5/hmap1.png

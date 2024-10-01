@@ -1,0 +1,28 @@
+{
+  "Name": "Debug",
+  "Elements": [
+    {
+      "Type": 0,
+      "Text": "FPS: 0",
+      "Wrapped": true
+    },
+    {
+      "Type": 0,
+      "Text": "FPS: 0",
+      "Wrapped": true
+    },
+    {
+      "Type": 0,
+      "Text": "FPS: 0",
+      "Wrapped": true
+    },
+    {
+      "Type": 0,
+      "Text": "FPS: 0",
+      "Wrapped": true
+    }
+  ],
+  "Positioning": 0, 
+  "Grid": "Vertical",
+  "GridGrow": "Negative"
+}

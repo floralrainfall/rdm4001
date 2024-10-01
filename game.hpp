@@ -1,24 +1,27 @@
 #pragma once
-#include <memory>
-#include "world.hpp"
-#include "gfx/engine.hpp"
 #include <SDL2/SDL.h>
 
+#include <memory>
+
+#include "gfx/engine.hpp"
+#include "world.hpp"
+
 namespace rdm {
-  class Game {
-  protected:
-    std::unique_ptr<World> world;
-    std::unique_ptr<gfx::Engine> gfxEngine;
+class Game {
+ protected:
+  std::unique_ptr<World> world;
+  std::unique_ptr<gfx::Engine> gfxEngine;
 
-  private:
-    SDL_Window* window;
-  public:
-    Game();
+ private:
+  SDL_Window* window;
 
-    virtual void initialize() = 0;
+ public:
+  Game();
 
-    void mainLoop();
+  virtual void initialize() = 0;
 
-    World* getWorld() { return world.get(); }
-  };
-}
+  void mainLoop();
+
+  World* getWorld() { return world.get(); }
+};
+}  // namespace rdm

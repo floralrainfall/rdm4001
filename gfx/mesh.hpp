@@ -1,15 +1,12 @@
 #pragma once
-#include "base_types.hpp"
-#include "base_device.hpp"
-#include "engine.hpp"
 #include <memory>
 
+#include "base_device.hpp"
+#include "base_types.hpp"
+
 namespace rdm::gfx {
-class Mesh {
-  std::unique_ptr<BaseBuffer> buffer;
-public:
-  Mesh(Engine* engine, const char* path);
-  
-  void draw(BaseDevice* device);
+class MeshCache {
+ public:
+  MeshCache();
 };
-}
+}  // namespace rdm::gfx

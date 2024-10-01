@@ -1,6 +1,6 @@
 #pragma once
-#include "graph.hpp"
 #include "base_device.hpp"
+#include "graph.hpp"
 #include "material.hpp"
 
 namespace rdm::gfx {
@@ -10,10 +10,10 @@ class Entity {
 
   bool enableRender;
 
-protected:
+ protected:
   virtual void renderTechnique(BaseDevice* device, int id) = 0;
 
-public:
+ public:
   Entity(Graph::Node* node);
   virtual ~Entity() {};
 
@@ -22,7 +22,9 @@ public:
   bool canRender() { return enableRender; }
   void setCanRender(bool s) { enableRender = s; }
 
-  void setMaterial(std::shared_ptr<Material> material) { this->material = material; };
+  void setMaterial(std::shared_ptr<Material> material) {
+    this->material = material;
+  };
 };
 
 class BufferEntity : public Entity {
@@ -31,8 +33,10 @@ class BufferEntity : public Entity {
   int count;
 
   virtual void renderTechnique(BaseDevice* device, int id);
-public:
 
-  BufferEntity(std::unique_ptr<BaseBuffer> buff, int count, std::unique_ptr<BaseArrayPointers> arrayPointers, Graph::Node* node);
+ public:
+  BufferEntity(std::unique_ptr<BaseBuffer> buff, int count,
+               std::unique_ptr<BaseArrayPointers> arrayPointers,
+               Graph::Node* node);
 };
-}
+}  // namespace rdm::gfx
