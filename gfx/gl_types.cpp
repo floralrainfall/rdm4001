@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <vector>
 
+#include "gfx/base_types.hpp"
+#include "glad/glad.h"
 #include "logging.hpp"
 
 namespace rdm::gfx::gl {
@@ -109,6 +111,21 @@ void GLTexture::upload2d(int width, int height, DataType type,
   if (mipmapLevels != 1) {
     glGenerateMipmap(target);
   }
+  glBindTexture(target, 0);
+}
+
+void GLTexture::uploadCubeMap(int width, int height, std::vector<void*> data) {
+  textureType = CubeMap;
+  GLenum target = texType(textureType);
+  glBindTexture(target, texture);
+  if(data.size() == 6) {
+    throw std::runtime_error("std::vector<void*> data.size() must be equal to 6, fill unchanged elements with NULL");
+  }
+
+  for(void* p : data) {
+
+  }
+  
   glBindTexture(target, 0);
 }
 

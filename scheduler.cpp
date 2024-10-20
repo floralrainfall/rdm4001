@@ -21,8 +21,9 @@ void Scheduler::waitToWrapUp() {
   }
 }
 
-void Scheduler::addJob(SchedulerJob* job) {
+SchedulerJob* Scheduler::addJob(SchedulerJob* job) {
   jobs.push_back(std::unique_ptr<SchedulerJob>(job));
+  return job;
 }
 
 void Scheduler::startAllJobs() {
@@ -101,14 +102,13 @@ void SchedulerJob::task(SchedulerJob* job) {
       std::chrono::duration sleep =
           std::chrono::duration<double>(frameRate) - execution;
       if (job->stopOnCancel) {
-        if (job->killMutex.try_lock_until(std::chrono::system_clock::now() +
-                                          sleep)) {
+        if (job->killMutex.try_lock_until(end + sleep)) {
           Log::printf(LOG_DEBUG, "killMutex unlocked on %s",
                       job->getStats().name);
           running = false;
         }
       } else {
-        std::this_thread::sleep_for(sleep);
+        std::this_thread::sleep_until(end + sleep);
       }
     }
     end = std::chrono::high_resolution_clock::now();

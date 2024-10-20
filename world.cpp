@@ -1,6 +1,7 @@
 #include "world.hpp"
 
 #include <chrono>
+#include <format>
 
 #include "input.hpp"
 #include "logging.hpp"
@@ -18,6 +19,13 @@ class WorldJob : public SchedulerJob {
     if (!world->getRunning()) return Cancel;
     Input::singleton()->flushEvents();
     world->tick();
+
+    std::string title = "A rdm presentation";
+    if(SchedulerJob* renderJob = world->scheduler->getJob("Render")) {
+      world->changingTitle.fire(std::format("{} (W: {:0.2f}, R: {:0.2f})", title, 1.0 /getStats().totalDeltaTime, 1.0 / renderJob->getStats().totalDeltaTime));
+    } else {
+      world->changingTitle.fire(std::format("{} ({:0.2f})", title, 1.0 / getStats().totalDeltaTime));
+    }
     return Stepped;
   }
 
@@ -38,7 +46,7 @@ World::World() {
 
 void World::tick() {
   stepping.fire();
-
+  
   stepped.fire();
 }
 }  // namespace rdm

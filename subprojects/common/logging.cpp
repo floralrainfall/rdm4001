@@ -14,19 +14,12 @@ Log* Log::singleton() {
   return _singleton;
 }
 
-void Log::print(LogType t, const char* s) {
+  void Log::print(LogType t, const char* s, const std::source_location loc) {
   LogMessage m;
   m.t = t;
   m.message = std::string(s);
+  m.loc = loc;
   singleton()->addLogMessage(m);
-}
-
-void Log::printf(LogType t, const char* s, ...) {
-  char buf[4096];
-  va_list v;
-  va_start(v, s);
-  vsnprintf(buf, sizeof(buf), s, v);
-  print(t, buf);
 }
 
 void Log::addLogMessage(LogMessage m) {
@@ -34,6 +27,7 @@ void Log::addLogMessage(LogMessage m) {
     char* clr = "";
     switch(m.t) {
     default:
+    case LOG_EXTERNAL:
     case LOG_DEBUG:
       clr = HBLK;
       break;
@@ -50,7 +44,11 @@ void Log::addLogMessage(LogMessage m) {
       clr = BRED;
       break;
     }
+#ifndef NDEBUG
+    ::printf("%s%s:%i: %s" COLOR_RESET "\n",clr,m.loc.file_name(),m.loc.line(),m.message.c_str());
+#else
     ::printf("%s%s" COLOR_RESET "\n",clr,m.message.c_str());
+#endif
   }
 
   log.push_front(m);

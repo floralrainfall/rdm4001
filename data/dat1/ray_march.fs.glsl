@@ -180,9 +180,19 @@ vec3 boardColor(vec3 p)
 		return vec3(0.0, 1.0, 0.0);
 }
 
+float getCloud(in vec3 ro, in vec3 rd) {
+     float updot = dot(rd, vec3(0.0, 1.0, 0.0));
+     float timed = 4;
+     vec3 cloudPos = (ro / 100) + vec3(rd.x + (time / timed), rd.y + (time / timed), rd.z + (time / timed));
+     float cloudNoise = noise(cloudPos * 2) * max(0.0, updot);
+     float cloudNoise2 = noise(cloudPos * 4 + vec3(time,0,0)) * max(0.0, updot - 0.7);
+     return cloudNoise + cloudNoise2;
+}
+
 float getShadow(in vec3 ro, in vec3 rd, in float min_t, in float max_t, in float k)
 {
     float res = 1.0;
+    float cloud = getCloud(ro, rd);
     for (float t = min_t; t < max_t;)
     {
         float dist = map_the_world(ro + rd * t).dist;
@@ -191,7 +201,7 @@ float getShadow(in vec3 ro, in vec3 rd, in float min_t, in float max_t, in float
         res = min(res, k * dist / t);
         t += dist;
     }
-    return (res);
+    return min(res, cloud);
 }
 
 vec3 sun_pos = vec3(5.0, 5.0, -5.0);
@@ -209,7 +219,7 @@ Point ray_march(in vec3 ro, in vec3 rd)
     for (int i = 0; i < NUMBER_OF_STEPS; ++i)
     {
         num_steps += 1;
-        vec3 current_position =  (ro + (total_distance_traveled * rd));
+        vec3 current_position = (ro + (total_distance_traveled * rd));
 
         Intersect intersect = map_the_world(current_position);
         maxClosest = min(intersect.dist, maxClosest);
@@ -233,7 +243,7 @@ Point ray_march(in vec3 ro, in vec3 rd)
             //p.col = normal/3;
             p.norm = normal;
             p.idx = intersect.idx;
-            vec3 base_color = vec3(0.2, 0.2, 0.2);
+            vec3 base_color = vec3(0.0);
             if(intersect.idx == PLANE)
               base_color = boardColor(p.pos) * 0.6;
 
@@ -257,7 +267,7 @@ Point ray_march(in vec3 ro, in vec3 rd)
         {
           float updot = dot(rd, vec3(0.0, 1.0, 0.0));
           p.col = mix(vec3(0.77,0.79,1.0),vec3(0.16,0.20,0.96),updot);
-	  float cloudNoise = noise(rd + vec3(time, 0, 0)) * max(0.0, updot);
+	  float cloudNoise = getCloud(camera_position, rd);
 	  p.col = mix(p.col,vec3(1,1,1),max(0.0,cloudNoise));
           float sundot = dot(rd, normalize(light_position));
           if(sundot > 0.995) 
@@ -275,7 +285,7 @@ Point ray_march(in vec3 ro, in vec3 rd)
     return p;
 }
 
-vec3 trace(vec3 ro, vec3 rd) {
+vec4 trace(vec3 ro, vec3 rd) {
   Point a = ray_march(ro, rd);
   vec3 color = a.col;
   if(a.norm != vec3(0.0) && a.idx == SPHERES) {
@@ -294,7 +304,7 @@ vec3 trace(vec3 ro, vec3 rd) {
         break;
     }
   }
-  return color;
+  return vec4(color, a.dist);
 }
 
 void main() {
@@ -303,11 +313,12 @@ void main() {
   mat3 vm;
   vec3 rd;
 
-  vec3 color;
+  vec4 color;
   vm = viewMatrix(camera_target + vec3(0.0, 0.0, 0.0), ro, vec3(0.0, 1.0, 0.0));
   rd = normalize(vm * vec3(uv, 1.0));
   color = trace(ro, rd);
 
   vec4 base_color = texture(texture0, f_uv);
-  o_color = mix(vec4(color, 1.0), base_color, base_color.a);
+  o_color = mix(vec4(color.xyz, 1.0), base_color, base_color.a);
+  gl_FragDepth = 1.0 - (1.0 / color.w);
 }

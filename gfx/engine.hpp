@@ -11,6 +11,7 @@
 #include "entity.hpp"
 #include "gfx/base_types.hpp"
 #include "gfx/gui/gui.hpp"
+#include "scheduler.hpp"
 #include "signal.hpp"
 
 namespace rdm {
@@ -40,13 +41,14 @@ class TextureCache {
   BaseTexture* cacheExistingTexture(const char* path,
                                     std::unique_ptr<BaseTexture>& texture,
                                     Info info);
-
+  BaseTexture* createCacheTexture(const char* path, Info info);
  private:
   std::map<std::string, std::pair<Info, std::unique_ptr<BaseTexture>>> textures;
 };
 
 class Engine {
   friend class RenderJob;
+  SchedulerJob* renderJob;
 
   std::unique_ptr<BaseContext> context;
   std::unique_ptr<BaseDevice> device;
@@ -88,7 +90,19 @@ class Engine {
   Signal<> renderStepped;
   Signal<> initialized;
 
+  /**
+   * @brief Use Engine::addEntity<T>();
+   */
   Entity* addEntity(std::unique_ptr<Entity> entity);
+  SchedulerJob* getRenderJob() { return renderJob; }
+
+  template<typename T, class... Types>
+  T* addEntity(Types... args) {
+    static_assert(std::is_base_of<Entity, T>::value, "T must derive from Entity");
+    T* t = (T*)addEntity(std::unique_ptr<Entity>(new T(args...)));
+    t->initialize();
+    return t;
+  }
 
   BaseContext* getContext() { return context.get(); }
   BaseDevice* getDevice() { return device.get(); }

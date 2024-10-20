@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <mutex>
+#include <string>
 
 #include "graph.hpp"
 #include "scheduler.hpp"
@@ -21,6 +22,7 @@ class World {
 
   Signal<> stepping;
   Signal<> stepped;
+  Signal<std::string> changingTitle;
 
   std::mutex worldLock;  // lock when writing to world state
 

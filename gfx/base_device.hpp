@@ -56,9 +56,18 @@ class BaseDevice {
     OneMinusConstantAlpha,
   };
 
+  enum CullState {
+    FrontCCW,
+    BackCCW,
+    FrontCW,
+    BackCW,
+    None,
+  };
+
   virtual void setDepthState(DepthStencilState s) = 0;
   virtual void setStencilState(DepthStencilState s) = 0;
   virtual void setBlendState(BlendState a, BlendState b) = 0;
+  virtual void setCullState(CullState s) = 0;
 
   /**
    * @brief Clears the color buffer of the current framebuffer.

@@ -23,6 +23,7 @@ class GLTexture : public BaseTexture {
                          int mipmapLevels);
   virtual void upload2d(int width, int height, DataType type, Format format,
                         void* data, int mipmapLevels);
+  virtual void uploadCubeMap(int width, int height, std::vector<void*> data);
   virtual void destroyAndCreate();
   virtual void bind();
 };

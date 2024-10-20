@@ -40,19 +40,20 @@ TextureCache::getOrLoad2d(const char* path, bool keepData) {
             break;
         }
 
+        std::unique_ptr<BaseTexture> tx = device->createTexture();
+        tx->upload2d(i.width, i.height, DtUnsignedByte, i.format, uc);
+        textures[path] =
+            std::pair<TextureCache::Info, std::unique_ptr<BaseTexture>>(
+                i, std::move(tx));
+
         if (keepData) {
           i.data = uc;
         } else {
           i.data = 0;
           stbi_image_free(uc);
         }
-
-        std::unique_ptr<BaseTexture> tx = device->createTexture();
-        tx->upload2d(i.width, i.height, DtUnsignedByte, i.format, uc);
-        textures[path] =
-            std::pair<TextureCache::Info, std::unique_ptr<BaseTexture>>(
-                i, std::move(tx));
-        return std::pair<TextureCache::Info, BaseTexture*>(i, tx.get());
+	
+        return std::pair<TextureCache::Info, BaseTexture*>(i, textures[path].second.get());
       } else {
         throw std::runtime_error("stbi_load_from_memory");
       }
@@ -79,7 +80,7 @@ std::optional<std::pair<TextureCache::Info, BaseTexture*>> TextureCache::get(
 BaseTexture* TextureCache::cacheExistingTexture(
     const char* path, std::unique_ptr<BaseTexture>& texture, Info info) {
   auto it = textures.find(path);
-  if (it != textures.end()) {
+  if (it == textures.end()) {
     textures[path] =
         std::pair<TextureCache::Info, std::unique_ptr<BaseTexture>>(
             info, std::move(texture));
@@ -93,11 +94,27 @@ BaseTexture* TextureCache::cacheExistingTexture(
   }
 }
 
+BaseTexture* TextureCache::createCacheTexture(const char* path, Info info) {
+  auto it = textures.find(path);
+  if (it == textures.end()) {
+    textures[path] = std::pair<TextureCache::Info, std::unique_ptr<BaseTexture>>(info, device->createTexture());
+  } else {
+    throw std::runtime_error("Texture already exists");
+  }
+}
+
 class RenderJob : public SchedulerJob {
   Engine* engine;
 
  public:
   RenderJob(Engine* engine) : SchedulerJob("Render"), engine(engine) {}
+
+  virtual double getFrameRate() {
+    double renderFr = Settings::singleton()->getSetting("RenderFrameRate", 60.0);
+    if(renderFr == 0.0)
+      return 0.0;
+    return 1.0 / renderFr;
+  }
 
   virtual Result step() {
     BaseDevice* device = engine->device.get();
@@ -145,6 +162,7 @@ class RenderJob : public SchedulerJob {
       device->clear(0.3, 0.3, 0.3, 0.0);
       device->clearDepth();
       device->setDepthState(BaseDevice::LEqual);
+      device->setCullState(BaseDevice::FrontCCW);
 
       engine->getCamera().updateCamera(glm::vec2(fbSize.x, fbSize.y));
 
@@ -160,6 +178,7 @@ class RenderJob : public SchedulerJob {
       engine->device->unbindFramebuffer(_);
 
       device->setDepthState(BaseDevice::Always);
+      device->setCullState(BaseDevice::None);
       engine->renderFullscreenQuad(engine->fullscreenTexture.get());
 
       engine->context->swapBuffers();
@@ -213,7 +232,7 @@ Engine::Engine(World* world, void* hwnd) {
     throw std::runtime_error("Could not load PostProcess material!!!");
   }
 
-  world->getScheduler()->addJob(new RenderJob(this));
+  renderJob = world->getScheduler()->addJob(new RenderJob(this));
   world->stepped.listen([this] { stepped(); });
   isInitialized = false;
 }
@@ -222,9 +241,11 @@ void Engine::renderFullscreenQuad(BaseTexture* texture, Material* material) {
   if (material == 0) material = fullscreenMaterial.get();
   BaseProgram* fullscreenProgram = material->prepareDevice(device.get(), 0);
   if (fullscreenProgram) {
-    fullscreenProgram->setParameter(
-        "texture0", DtSampler,
-        BaseProgram::Parameter{.texture.slot = 0, .texture.texture = texture});
+    if (texture)
+      fullscreenProgram->setParameter(
+          "texture0", DtSampler,
+          BaseProgram::Parameter{.texture.slot = 0,
+                                 .texture.texture = texture});
     fullscreenProgram->bind();
   }
   fullScreenArrayPointers->bind();

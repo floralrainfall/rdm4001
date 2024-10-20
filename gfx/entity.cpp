@@ -9,11 +9,12 @@ Entity::Entity(Graph::Node* node) {
 }
 
 void Entity::render(BaseDevice* device) {
-  if (!material) {
-    throw std::runtime_error("No material specified for Entity");
-  }
-  for (int i = 0; i < material->numTechniques(); i++) {
-    material->prepareDevice(device, i);
+  int numTechniques = 1;
+  if(material)
+    numTechniques = material->numTechniques();
+  for (int i = 0; i < numTechniques; i++) {
+    if(material)
+      material->prepareDevice(device, i);
     renderTechnique(device, i);
   }
 }

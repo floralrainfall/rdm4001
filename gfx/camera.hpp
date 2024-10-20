@@ -28,6 +28,14 @@ class Camera {
     this->fov = fov;
     pdirty = true;
   }
+  void setUp(glm::vec3 up) {
+    this->up = up;
+    vdirty = true;
+  }
+  void setLeftHanded(bool b) {
+    this->leftHanded = b;
+    vdirty = true;
+  }
 
   glm::mat4 getProjectionMatrix() { return pmatrix; }
   glm::mat4 getUiProjectionMatrix() { return uipmatrix; }
@@ -39,9 +47,11 @@ class Camera {
   Projection p;
   float fov;
   glm::vec3 eye;
+  glm::vec3 up;
   glm::vec3 target;
   glm::mat4 pmatrix;
   glm::mat4 vmatrix;
   glm::mat4 uipmatrix;
+  bool leftHanded;
 };
 }  // namespace rdm::gfx

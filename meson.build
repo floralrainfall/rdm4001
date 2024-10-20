@@ -8,7 +8,7 @@ endif
 
 sdl2 = dependency('sdl2')
 sdl_ttf = dependency('SDL2_ttf')
-cglm = dependency('cglm')
+glm = dependency('glm')
 openal = dependency('openal')
 assimp = dependency('assimp')
 enet = dependency('libenet')
@@ -87,7 +87,7 @@ gamelib = static_library('game', [
   'gfx/gl_device.hpp',
   'gfx/gl_types.cpp',
   'gfx/gl_types.hpp',
-], cpp_args: obz_options, include_directories: [inc], dependencies: [sdl_ttf, boost_dep, enet, common_dep, glad_dep, obz_dep, sdl2, cglm, openal, assimp, bullet])
+], cpp_args: obz_options, include_directories: [inc], dependencies: [sdl_ttf, boost_dep, enet, common_dep, glad_dep, obz_dep, sdl2, glm, openal, assimp, bullet])
 
 inc2 = include_directories('wawaworld')
 
@@ -95,12 +95,12 @@ executable('raymarcher', [
   'raymarcher/main.cpp',
   'raymarcher/rgame.hpp',
   'raymarcher/rgame.cpp'
-], include_directories: [inc, inc2], dependencies: [common_dep], link_with: gamelib)
+], include_directories: [inc, inc2], dependencies: [common_dep, sdl2, glm], link_with: gamelib)
 
 executable('wawaworld', [
   'wawaworld/main.cpp',
-  'wawaworld/tile.cpp',
-  'wawaworld/tile.hpp',
+  'wawaworld/map.cpp',
+  'wawaworld/map.hpp',
   'wawaworld/wgame.cpp',
   'wawaworld/wgame.hpp'
-], include_directories: [inc, inc2], dependencies: [common_dep], link_with: gamelib)
+], include_directories: [inc, inc2], dependencies: [common_dep, sdl2, glm], link_with: gamelib)

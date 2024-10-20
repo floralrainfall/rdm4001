@@ -15,6 +15,8 @@ class Entity {
 
  public:
   Entity(Graph::Node* node);
+
+  virtual void initialize() {};
   virtual ~Entity() {};
 
   void render(BaseDevice* device);

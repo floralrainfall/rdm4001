@@ -52,6 +52,34 @@ void GLDevice::setBlendState(BlendState a, BlendState b) {
   }
 }
 
+void GLDevice::setCullState(CullState s) {
+  switch(s) {
+  case FrontCCW:
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
+    glFrontFace(GL_CCW);
+    break;
+  case FrontCW:
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
+    glFrontFace(GL_CW);
+    break;
+  case BackCCW:
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+    break;
+  case BackCW:
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CW);
+    break;
+  case None:
+    glDisable(GL_CULL_FACE);
+    break;
+  }
+}
+
 void GLDevice::clear(float r, float g, float b, float a) {
   glClearColor(r, g, b, a);
   glClear(GL_COLOR_BUFFER_BIT);

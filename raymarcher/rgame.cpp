@@ -11,6 +11,8 @@ namespace rm {
 struct RGamePrivate {
   float cameraPitch;
   float cameraYaw;
+
+  std::shared_ptr<gfx::Material> rayMarchMaterial;
 };
 
 RGame::RGame() {
@@ -47,7 +49,12 @@ void RGame::initialize() {
     cam.setTarget(cam.getPosition() + vm * forward);
   });
 
-  gfxEngine->initialized.listen(
-      [this] { gfxEngine->setFullscreenMaterial("RayMarch"); });
+  gfxEngine->initialized.listen([this] {
+    game->rayMarchMaterial = gfxEngine->getMaterialCache()->getOrLoad("RayMarch").value_or(nullptr);
+  });
+
+  gfxEngine->renderStepped.listen([this] {
+    gfxEngine->renderFullscreenQuad(NULL, game->rayMarchMaterial.get());
+  });
 }
 };  // namespace rm

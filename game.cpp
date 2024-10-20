@@ -1,7 +1,10 @@
 #include "game.hpp"
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_mouse.h>
+#include <SDL2/SDL_video.h>
 
+#include <cstdlib>
 #include <stdexcept>
 
 #include "input.hpp"
@@ -43,7 +46,7 @@ Game::Game() {
   SDL_GL_LoadLibrary(NULL);
 
   window = SDL_CreateWindow("A rdm presentation", SDL_WINDOWPOS_CENTERED,
-                            SDL_WINDOWPOS_CENTERED, 640, 480,
+                            SDL_WINDOWPOS_CENTERED, 800, 600,
                             SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
 #ifndef DISABLE_OBZ
@@ -61,21 +64,30 @@ Game::Game() {
 
   if (!window)
     Log::printf(LOG_FATAL, "Unable to create Window (%s)", SDL_GetError());
-  world = std::unique_ptr<World>(new World());
+  world.reset(new World());
 #ifndef DISABLE_OBZ
   if (obzFsApi) obzFsApi->addToScheduler(world->getScheduler());
 #endif
 
-  gfxEngine =
-      std::unique_ptr<gfx::Engine>(new gfx::Engine(world.get(), (void*)window));
+  gfxEngine.reset(new gfx::Engine(world.get(), (void*)window));
   gfxEngine->getContext()->unsetCurrent();
+
+  world->changingTitle.listen([this](std::string title){
+    SDL_SetWindowTitle(window, title.c_str());    
+  });
 }
 
 void Game::mainLoop() {
-  initialize();
+  try {
+    initialize();
+  } catch (std::exception& e) {
+    Log::printf(LOG_FATAL, "Error initializing game: %s", e.what());
+    exit(EXIT_FAILURE);
+  }
 
   world->getScheduler()->startAllJobs();
   SDL_Event event;
+  bool ignoreNextMouseMoveEvent = false;
   while (world->getRunning()) {
     while (SDL_PollEvent(&event)) {
       InputObject object;
@@ -92,19 +104,34 @@ void Game::mainLoop() {
           Input::singleton()->postEvent(object);
           break;
         case SDL_MOUSEMOTION:
+	  if(ignoreNextMouseMoveEvent) {
+	    ignoreNextMouseMoveEvent = false;
+	    break;
+	  }
           object.type = InputObject::MouseMove;
           object.data.mouse.delta[0] = event.motion.xrel;
           object.data.mouse.delta[1] = event.motion.yrel;
+	  if(Input::singleton()->getMouseLocked()) {
+	    int w, h;
+	    SDL_GetWindowSize(window, &w, &h);
+	    SDL_WarpMouseInWindow(window, w/2, h/2);
+	    object.data.mouse.position[0] = w/2;
+	    object.data.mouse.position[1] = w/2;
+	    ignoreNextMouseMoveEvent = true;
+	  } else {
+	    object.data.mouse.position[0] = event.motion.x;
+	    object.data.mouse.position[1] = event.motion.y;
+	  }
           Input::singleton()->postEvent(object);
           break;
         default:
           break;
       }
     }
-    if (Input::singleton()->getMouseLocked()) {
-      SDL_SetRelativeMouseMode(
-          Input::singleton()->getMouseLocked() ? SDL_TRUE : SDL_FALSE);
-    }
+    /*if (Input::singleton()->getMouseLocked()) {
+       SDL_SetRelativeMouseMode(
+       Input::singleton()->getMouseLocked() ? SDL_TRUE : SDL_FALSE);
+       }*/
     std::this_thread::yield();
   }
   world->getScheduler()->waitToWrapUp();

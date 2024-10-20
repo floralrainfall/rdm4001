@@ -120,7 +120,7 @@ class Scheduler {
    * @param job The job to be added. The Scheduler will take exclusive ownership
    * over the lifetime of the job pointer.
    */
-  void addJob(SchedulerJob* job);
+  SchedulerJob* addJob(SchedulerJob* job);
 
   void waitToWrapUp();
 

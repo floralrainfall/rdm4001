@@ -152,6 +152,7 @@ void GuiManager::render() {
                                             DtUnsignedByte, BaseTexture::RGBA,
                                             texSurfConv->pixels);
             if (element.override) {
+	      element.maxScale = glm::vec2(texSurfConv->w, texSurfConv->h);
               layout.second.update(
                   layout.second.size);  // requires layout update to take max
                                         // scale into account
@@ -165,7 +166,7 @@ void GuiManager::render() {
 
           bp = _text;
           bp->setParameter(
-              "texture0", DtSampler,
+	      "texture0", DtSampler,
               BaseProgram::Parameter{.texture.slot = 0,
                                      .texture.texture = element.uniqueTexture});
           bp->setParameter("scale", DtVec2,

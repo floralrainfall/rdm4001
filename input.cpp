@@ -1,5 +1,4 @@
 #include "input.hpp"
-
 #include "logging.hpp"
 
 namespace rdm {
