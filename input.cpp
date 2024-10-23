@@ -6,6 +6,8 @@ Input::Input() {
   mouseLocked = false;
   mouseSensitivity = 2.0;
   mouseDelta = glm::vec3(0);
+
+  memset(keysDown, 0, sizeof(keysDown));
 }
 
 rdm::Input* _singleton = 0;
@@ -19,6 +21,9 @@ rdm::Input* Input::singleton() {
 void Input::postEvent(InputObject object) {
   std::scoped_lock lock(flushing);
   events.push_back(object);
+
+  if(events.size() > 1000)
+    Log::printf(LOG_WARN, "Too many events in event buffer (%i)", events.size());
 }
 
 void Input::flushEvents() {
@@ -50,6 +55,9 @@ void Input::flushEvents() {
           }
           axis[name] = _axis;
         }
+	if(event.data.key.key < 255) {
+	  keysDown[event.data.key.key] = keyPressed;
+	}
         break;
       case InputObject::MouseMove:
         mouseDelta.x = ((float)event.data.mouse.delta[0]) / mouseSensitivity;

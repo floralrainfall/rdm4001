@@ -42,7 +42,6 @@ Game::Game() {
   SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
   SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-
   SDL_GL_LoadLibrary(NULL);
 
   window = SDL_CreateWindow("A rdm presentation", SDL_WINDOWPOS_CENTERED,
@@ -111,6 +110,7 @@ void Game::mainLoop() {
           object.type = InputObject::MouseMove;
           object.data.mouse.delta[0] = event.motion.xrel;
           object.data.mouse.delta[1] = event.motion.yrel;
+	  SDL_ShowCursor(!Input::singleton()->getMouseLocked());
 	  if(Input::singleton()->getMouseLocked()) {
 	    int w, h;
 	    SDL_GetWindowSize(window, &w, &h);

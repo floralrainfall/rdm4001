@@ -31,6 +31,8 @@ WGame::~WGame() { delete game; }
 
 void WGame::initialize() {
   Input::singleton()->setMouseLocked(true);
+  game->file = new BSPFile("dat5/baseq3/maps/malach.bsp");
+  game->file->addToPhysicsWorld(world->getPhysicsWorld());
   
   std::scoped_lock lock(world->worldLock);
   world->stepped.listen([this] {
@@ -50,9 +52,14 @@ void WGame::initialize() {
     glm::vec3 forward = glm::vec3(0, 0, -1);
     gfx::Camera& cam = gfxEngine->getCamera();
     float speed = 100.0;
+    glm::vec3 newPosition = (vm * glm::vec3(lrA->value, 0.0, fbA->value) * speed * (1.f / 60.f));
+    {
+      std::scoped_lock l(world->getPhysicsWorld()->mutex);
+      
+    }
+       
     cam.setPosition(
-        cam.getPosition() +
-        (vm * glm::vec3(lrA->value, 0.0, fbA->value) * speed * (1.f / 60.f)));
+        cam.getPosition() + newPosition);
     cam.setTarget(cam.getPosition() + vm * forward);
 
     if (gfxEngine->getGuiManager()) {
@@ -69,7 +76,6 @@ void WGame::initialize() {
     game->file->updatePosition(cam.getPosition());
   });
 
-  game->file = new BSPFile("dat5/baseq3/maps/malach.bsp");
   gfxEngine->initialized.listen([this] {
     game->file->initGfx(gfxEngine.get());
     gfxEngine->addEntity<MapEntity>(game->file);

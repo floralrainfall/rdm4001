@@ -13,6 +13,7 @@ class Settings {
 
   std::map<std::string, json> settings;
   std::string settingsPath;
+  std::string gamePath;
 
  public:
   static Settings* singleton();
@@ -21,6 +22,8 @@ class Settings {
   void load();
   void save();
 
+  std::string getGamePath() { return gamePath; }
+  
   json getSetting(std::string setting, json unset = json());
 };
 }  // namespace rdm

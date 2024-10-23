@@ -1,18 +1,78 @@
 #include "rgame.hpp"
 
+#include <format>
+
+#include "BulletCollision/CollisionShapes/btStaticPlaneShape.h"
+#include "BulletDynamics/Dynamics/btRigidBody.h"
+#include "LinearMath/btDefaultMotionState.h"
+#include "LinearMath/btMotionState.h"
+#include "LinearMath/btVector3.h"
+#include "gfx/base_types.hpp"
 #include "gfx/gui/gui.hpp"
 #include "input.hpp"
+#include "physics.hpp"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 
 namespace rm {
+struct REntity {
+  int type;
+  glm::vec3 position;
+  float user0;
+
+  btRigidBody* body;
+  btMotionState* state;
+
+  enum MotionType {
+    STATIC, // state = NULL
+    DYNAMIC
+  } motionType;
+};
+
 struct RGamePrivate {
   float cameraPitch;
   float cameraYaw;
 
   std::shared_ptr<gfx::Material> rayMarchMaterial;
+  std::vector<REntity> entities;
+
+  void createBall(PhysicsWorld* world, float radius, glm::vec3 pos = glm::vec3(0.0)) {
+    std::scoped_lock l(world->mutex);
+    REntity e;
+    e.position = pos;
+    e.type = 2;
+    e.user0 = radius;
+    btScalar mass(1.0);
+    btSphereShape* sphere = new btSphereShape(radius);
+    btTransform trans = btTransform::getIdentity(); 
+    trans.setOrigin(btVector3(pos.x, pos.y, pos.z));
+    e.state = new btDefaultMotionState(trans);
+    btVector3 inertia;
+    sphere->calculateLocalInertia(mass, inertia);
+    btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, e.state, sphere, inertia);
+    rbInfo.m_friction = 0.1;
+    rbInfo.m_restitution = 1.0;
+    e.body = new btRigidBody(rbInfo);
+    e.motionType = REntity::DYNAMIC;
+    world->getWorld()->addRigidBody(e.body);
+    entities.push_back(e);
+  }
+
+  void createPlane(PhysicsWorld* world) {
+    std::scoped_lock l(world->mutex);
+    REntity e;
+    e.motionType = REntity::STATIC;
+    e.type = 1;
+    //btStaticPlaneShape* plane = new btStaticPlaneShape(btVector3(0, 1, 0), 2.2);
+    btBoxShape* box = new btBoxShape(btVector3(50,1,50));
+    btRigidBody::btRigidBodyConstructionInfo rbInfo(0.0, NULL, box);
+    rbInfo.m_restitution = 1.0;
+    e.body = new btRigidBody(rbInfo);
+    world->getWorld()->addRigidBody(e.body);
+    entities.push_back(e);
+  }
 };
 
 RGame::RGame() {
@@ -47,14 +107,60 @@ void RGame::initialize() {
         cam.getPosition() +
         (vm * glm::vec3(lrA->value, 0.0, fbA->value) * speed * (1.f / 60.f)));
     cam.setTarget(cam.getPosition() + vm * forward);
+
+    if(Input::singleton()->isKeyDown(SDLK_q)) {
+      glm::vec3 pos = glm::vec3(0.0);
+      {
+	std::scoped_lock l(world->getPhysicsWorld()->mutex);
+	btVector3 start = BulletHelpers::toVector3(cam.getPosition());
+	btVector3 end = BulletHelpers::toVector3(vm * (100.f * forward));
+	btDynamicsWorld::ClosestRayResultCallback callback(start, end);
+	world->getPhysicsWorld()->getWorld()->rayTest(start, end, callback);
+	pos = BulletHelpers::fromVector3(callback.m_hitPointWorld) - ((vm * forward) * 2.f);
+      }
+      game->createBall(world->getPhysicsWorld(), 1.f, pos);
+    }
+  });
+  
+  gfxEngine->initialized.listen([this] {
+    game->rayMarchMaterial =
+        gfxEngine->getMaterialCache()->getOrLoad("RayMarch").value_or(nullptr);
   });
 
-  gfxEngine->initialized.listen([this] {
-    game->rayMarchMaterial = gfxEngine->getMaterialCache()->getOrLoad("RayMarch").value_or(nullptr);
-  });
+  game->createPlane(world->getPhysicsWorld());
 
   gfxEngine->renderStepped.listen([this] {
-    gfxEngine->renderFullscreenQuad(NULL, game->rayMarchMaterial.get());
+    gfxEngine->renderFullscreenQuad(
+        NULL, game->rayMarchMaterial.get(), [this](gfx::BaseProgram* program) {
+          for (int i = 0; i < game->entities.size(); i++) {
+            REntity& e = game->entities[i];
+
+	    if(e.motionType == REntity::DYNAMIC) {
+	      // update entity positioning
+	      PhysicsWorld* physics = world->getPhysicsWorld();
+	      std::scoped_lock l(physics->mutex);
+	      btTransform trans;
+	      e.state->getWorldTransform(trans);
+	      btVector3 origin = trans.getOrigin();
+	      e.position = glm::vec3(origin.x(), origin.y(), origin.z());
+	    }
+	    
+            std::string prefix = std::format("entities[{}].", i);
+            program->setParameter(
+                prefix + "position", gfx::DtVec3,
+                gfx::BaseProgram::Parameter{.vec3 = e.position});
+            program->setParameter(
+                prefix + "type", gfx::DtInt,
+                gfx::BaseProgram::Parameter{.integer = e.type});
+            program->setParameter(
+                prefix + "user0", gfx::DtFloat,
+                gfx::BaseProgram::Parameter{.number = e.user0});
+          }
+          program->setParameter("numEntities", gfx::DtInt,
+                                gfx::BaseProgram::Parameter{
+                                    .integer = (int)game->entities.size()});
+	  // program->dbgPrintParameters();
+        });
   });
 }
 };  // namespace rm

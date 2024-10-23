@@ -3,6 +3,8 @@
 
 #include "gfx/base_types.hpp"
 #include "gfx/engine.hpp"
+#include "physics.hpp"
+
 namespace ww {
 using namespace rdm;
 const int BSP_VERSION = 0x2e;
@@ -148,14 +150,14 @@ class BSPFile {
   bool m_useVis;
   bool m_gfxEnabled;
   std::string m_name;
-  // PhysicsWorld* m_physicsWorld;
+  PhysicsWorld* m_physicsWorld;
 
   BSPHeader m_header;
   std::vector<BSPLeafModel> m_leafs;
   std::vector<BSPFaceModel> m_models;
   std::vector<BSPBrushModel> m_brushes;
   std::vector<std::unique_ptr<gfx::BaseTexture>> m_textures;
-  // std::vector<btRigidBody*> m_brushBodies;
+  std::vector<btRigidBody*> m_brushBodies;
   glm::vec3 vecpos;
   int m_currentClusterIndex;
   int skyboxCluster;
@@ -177,8 +179,8 @@ class BSPFile {
   ~BSPFile();
 
   std::unique_ptr<gfx::BaseArrayPointers> createModelLayout();
-  // void addToPhysicsWorld(PhysicsWorld* world);
-  // void removeFromPhysicsWorld(PhysicsWorld* world);
+  void addToPhysicsWorld(PhysicsWorld* world);
+  void removeFromPhysicsWorld(PhysicsWorld* world);
   bool getUsingVis() { return m_useVis; }
   bool getGfxEnabled() { return m_gfxEnabled; }
   int getVisCluster() { return m_currentClusterIndex; }

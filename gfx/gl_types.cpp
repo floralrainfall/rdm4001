@@ -216,8 +216,10 @@ void GLProgram::link() {
 void GLProgram::bindParameters() {
   for (auto& [name, pair] : parameters) {
     GLuint object = glGetUniformLocation(program, name.c_str());
-
     switch (pair.first.type) {
+      case DtInt:
+	glUniform1i(object, pair.second.integer);
+	break;
       case DtMat2:
         glUniformMatrix2fv(object, 1, false,
                            glm::value_ptr(pair.second.matrix2x2));

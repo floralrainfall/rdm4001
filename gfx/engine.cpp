@@ -237,7 +237,7 @@ Engine::Engine(World* world, void* hwnd) {
   isInitialized = false;
 }
 
-void Engine::renderFullscreenQuad(BaseTexture* texture, Material* material) {
+void Engine::renderFullscreenQuad(BaseTexture* texture, Material* material, std::function<void(BaseProgram*)> setParameters) {
   if (material == 0) material = fullscreenMaterial.get();
   BaseProgram* fullscreenProgram = material->prepareDevice(device.get(), 0);
   if (fullscreenProgram) {
@@ -246,6 +246,7 @@ void Engine::renderFullscreenQuad(BaseTexture* texture, Material* material) {
           "texture0", DtSampler,
           BaseProgram::Parameter{.texture.slot = 0,
                                  .texture.texture = texture});
+    setParameters(fullscreenProgram);
     fullscreenProgram->bind();
   }
   fullScreenArrayPointers->bind();

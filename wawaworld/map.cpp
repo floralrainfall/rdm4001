@@ -2,6 +2,7 @@
 
 #include <climits>
 #include <stdexcept>
+#include <bullet/Bullet3Geometry/b3GeometryUtil.h>
 
 #include "filesystem.hpp"
 #include "gfx/base_device.hpp"
@@ -343,11 +344,11 @@ void BSPFile::draw() {
   engine->getDevice()->setCullState(gfx::BaseDevice::FrontCCW); // reset state
 }
 
-/*void BSPFile::removeFromPhysicsWorld(PhysicsWorld* world) {
+void BSPFile::removeFromPhysicsWorld(PhysicsWorld* world) {
   for (btRigidBody* body : m_brushBodies) {
     delete body->getMotionState();
     delete body->getCollisionShape();
-    world->removeRigidBody(body);
+    world->getWorld()->removeRigidBody(body);
     delete body;
   }
   m_brushBodies.clear();
@@ -382,14 +383,13 @@ void BSPFile::addToPhysicsWorld(PhysicsWorld* world) {
           (btScalar*)intermediate.data(), intermediate.size());
       btRigidBody* brushbody = new btRigidBody(0.f, NULL, brushshape);
       brushbody->setUserPointer(this);
-      world->addRigidBody(brushbody);
+      world->getWorld()->addRigidBody(brushbody);
       m_brushBodies.push_back(brushbody);
       rb_added++;
     }
   }
-  DEV_MSG("added %i brushes to physicsworld", rb_added);
   m_physicsWorld = world;
-}*/
+}
 
 int BSPFile::getCluster(glm::vec3 p) {
   glm::ivec3 posi =

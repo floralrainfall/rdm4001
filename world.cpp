@@ -5,6 +5,7 @@
 
 #include "input.hpp"
 #include "logging.hpp"
+#include "physics.hpp"
 #include "scheduler.hpp"
 
 namespace rdm {
@@ -20,21 +21,45 @@ class WorldJob : public SchedulerJob {
     Input::singleton()->flushEvents();
     world->tick();
 
-    std::string title = "A rdm presentation";
-    if(SchedulerJob* renderJob = world->scheduler->getJob("Render")) {
-      world->changingTitle.fire(std::format("{} (W: {:0.2f}, R: {:0.2f})", title, 1.0 /getStats().totalDeltaTime, 1.0 / renderJob->getStats().totalDeltaTime));
-    } else {
-      world->changingTitle.fire(std::format("{} ({:0.2f})", title, 1.0 / getStats().totalDeltaTime));
-    }
     return Stepped;
   }
 
   virtual void error(std::exception& e) { world->running = false; }
 };
 
+class WorldTitleJob : public SchedulerJob {
+  World* world;
+public:
+  WorldTitleJob(World* world) : SchedulerJob("WorldTitleJob"), world(world) {}
+
+  virtual double getFrameRate() {
+    return 1.0 / 10.0;
+  }
+  
+  virtual Result step() {
+    std::string title = "A rdm presentation";
+    std::string fpsStatus = "";
+    if(SchedulerJob* worldJob = world->scheduler->getJob("World")) {
+      fpsStatus = std::format("W: {:0.2f}", 1.0 / worldJob->getStats().totalDeltaTime);
+    }
+    if(SchedulerJob* physicsJob = world->scheduler->getJob("Physics")) {
+      fpsStatus += std::format(" P: {:0.2f}", 1.0 / physicsJob->getStats().totalDeltaTime);
+    }
+    if(SchedulerJob* renderJob = world->scheduler->getJob("Render")) {
+      fpsStatus += std::format(" R: {:0.2f}", 1.0 / renderJob->getStats().totalDeltaTime);
+    }
+    world->changingTitle.fire(std::format("{} ({})", title, fpsStatus));
+
+    return Stepped;
+  }
+};
+
 World::World() {
-  scheduler = std::unique_ptr<Scheduler>(new Scheduler());
+  scheduler.reset(new Scheduler());
   scheduler->addJob(new WorldJob(this));
+  scheduler->addJob(new WorldTitleJob(this));
+
+  physics.reset(new PhysicsWorld(this));
   running = true;
 
   Input::singleton()->quitSignal.listen([this](InputObject o) {

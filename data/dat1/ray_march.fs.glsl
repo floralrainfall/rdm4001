@@ -50,7 +50,8 @@ float distance_from_box( vec3 p, vec3 b )
 float distance_from_plane(in vec3 pos, in vec4 normal)
 {
     float distCenter = distance(vec2(0,0), pos.xz);
-    return (dot(pos, normal.xyz) + (normal.w - (noise(vec3(pos.xz / 100, 0.0)) * (1.0 + (min(100, distCenter) * 0.6)))));
+    float map = noise(vec3(pos.xz / 100, 0.0)) * (1.0 + (min(100, distCenter) * 0.6));
+    return (dot(pos, normal.xyz) + (normal.w));
 }
 
 float intersect(float distA, float distB) {
@@ -110,9 +111,19 @@ float sierpinskiPyramid(vec3 pt) {
     return length(pt) * pow(scale, float(-n));
 }
 
+struct Entity {
+  int type;
+  vec3 position;
+  float user0;
+};
+
+#define MAX_ENTITIES 100
+uniform Entity entities[MAX_ENTITIES];
+uniform int numEntities;
+
 Intersect map_the_world(in vec3 p)
 {
-    vec3 s = vec3(10, 10, 10);
+    /*vec3 s = vec3(10, 10, 10);
     vec3 q = p - s*round(p/s);
 
     float displacement = sin(5.0 * p.x) * sin(5.0 * p.y) * sin(5.0 * p.z) * 0.25;
@@ -135,7 +146,27 @@ Intersect map_the_world(in vec3 p)
     else if(res.dist == sierpinski || res.dist == sphere_1)
       res.idx = WARP;
     else if(res.dist == box_0)
-      res.idx = SPHERES;
+      res.idx = SPHERES;*/
+
+    Intersect res;
+    float dist = 1000.0;
+    for(int i = 0; i < numEntities; i++) {
+      Entity ent = entities[i];
+      float dfun = 1000.0;
+      switch(ent.type) {
+      case FLAT:
+      case SPHERES:
+	  dfun = distance_from_sphere(p, ent.position, ent.user0);
+	  break;
+      case PLANE:
+	  dfun = distance_from_box(p, vec3(50,1,50));
+	  break;
+      }
+      dist = unioncsg(dist, dfun);
+      if(dist == dfun)
+	res.idx = ent.type;
+    }
+    res.dist = dist;
     return res;
 }
 
@@ -246,7 +277,9 @@ Point ray_march(in vec3 ro, in vec3 rd)
             vec3 base_color = vec3(0.0);
             if(intersect.idx == PLANE)
               base_color = boardColor(p.pos) * 0.6;
-
+	    if(intersect.idx == FLAT)
+	      base_color = vec3(0.5);
+	    
             float shadow = getShadow(p.pos + (direction_to_light2), direction_to_light2, 0.0, 100.0, 8.0);
 
             vec3 blinn_phong = base_color * diffuse_intensity + base_color * specular_intensity;
@@ -257,7 +290,7 @@ Point ray_march(in vec3 ro, in vec3 rd)
             //return mix(vec3(0.02,0.61,0.86),vec3(0.2,0.34,1.0),maxClosest);
             //p.col = base_color;
             float updot = dot(rd, vec3(0.0, 1.0, 0.0));
-            vec3 fogcolor = mix(vec3(0.77,0.79,1.0),vec3(0.16,0.20,0.96),updot);
+            vec3 fogcolor = mix(vec3(0.77,0.79,1.0),vec3(0.16,0.20,0.96),updot+0.5);
             p.col = mix(p.col, fogcolor, min(total_distance_traveled/(MAXIMUM_TRACE_DISTANCE/2), 1.0));
             return p;
           }
@@ -266,7 +299,7 @@ Point ray_march(in vec3 ro, in vec3 rd)
         if (total_distance_traveled > MAXIMUM_TRACE_DISTANCE)
         {
           float updot = dot(rd, vec3(0.0, 1.0, 0.0));
-          p.col = mix(vec3(0.77,0.79,1.0),vec3(0.16,0.20,0.96),updot);
+          p.col = mix(vec3(0.77,0.79,1.0),vec3(0.16,0.20,0.96),updot+0.5);
 	  float cloudNoise = getCloud(camera_position, rd);
 	  p.col = mix(p.col,vec3(1,1,1),max(0.0,cloudNoise));
           float sundot = dot(rd, normalize(light_position));

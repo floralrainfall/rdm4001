@@ -138,7 +138,8 @@ class BaseProgram {
 
   void addShader(ShaderFile file, Shader type) { shaders[type] = file; };
   void setParameter(std::string param, DataType type, Parameter parameter);
-
+  void dbgPrintParameters();
+  
   virtual void link() = 0;
   virtual void bind() = 0;
 

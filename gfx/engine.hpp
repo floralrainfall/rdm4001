@@ -78,7 +78,7 @@ class Engine {
  public:
   Engine(World* world, void* hwnd);
 
-  void renderFullscreenQuad(BaseTexture* texture, Material* material = 0);
+  void renderFullscreenQuad(BaseTexture* texture, Material* material = 0, std::function<void(BaseProgram*)> setParameters= [](BaseProgram*){});
   void setFullscreenMaterial(const char* name);
 
   /**

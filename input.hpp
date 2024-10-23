@@ -48,6 +48,8 @@ class Input {
   bool mouseLocked;
   float mouseSensitivity;
 
+  bool keysDown[255];
+
  public:
   static Input* singleton();
 
@@ -74,6 +76,7 @@ class Input {
   Signal<InputObject> quitSignal;
   Signal<InputObject> onEvent;
 
+  bool isKeyDown(int c) { return keysDown[c]; };
  private:
   std::map<std::string, Axis> axis;
 };

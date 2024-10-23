@@ -13,7 +13,7 @@ openal = dependency('openal')
 assimp = dependency('assimp')
 enet = dependency('libenet')
 # easy_profiler = dependency('easy_profiler')
-bullet = dependency('bullet')
+bullet = dependency('Bullet')
 boost_dep = dependency('boost', modules: ['program_options'])
 
 common_proj = subproject('common')
@@ -32,7 +32,7 @@ glad_dep = glad_proj.get_variable('libglad_dep')
 
 assembly_proj = subproject('assembly')
 
-inc = include_directories('.')
+inc = include_directories(['.', '/usr/include/bullet'])
 
 gamelib = static_library('game', [
   'game.cpp',
@@ -49,6 +49,8 @@ gamelib = static_library('game', [
   'signal.hpp',
   'world.cpp',
   'world.hpp',
+  'physics.cpp',
+  'physics.hpp',
 
   'network/network.cpp',
   'network/network.hpp',
@@ -91,16 +93,21 @@ gamelib = static_library('game', [
 
 inc2 = include_directories('wawaworld')
 
+executable('launcher', [
+  'launcher.cpp'
+], include_directories: [inc, inc2], dependencies: [common_dep], link_with: gamelib)
+
 executable('raymarcher', [
   'raymarcher/main.cpp',
   'raymarcher/rgame.hpp',
   'raymarcher/rgame.cpp'
 ], include_directories: [inc, inc2], dependencies: [common_dep, sdl2, glm], link_with: gamelib)
 
+b3geometry_dep = declare_dependency(link_args : ['-lBullet3Geometry', '-lBullet3Common'] ) 
 executable('wawaworld', [
   'wawaworld/main.cpp',
   'wawaworld/map.cpp',
   'wawaworld/map.hpp',
   'wawaworld/wgame.cpp',
   'wawaworld/wgame.hpp'
-], include_directories: [inc, inc2], dependencies: [common_dep, sdl2, glm], link_with: gamelib)
+], include_directories: [inc, inc2], dependencies: [common_dep, sdl2, glm, b3geometry_dep], link_with: gamelib)
