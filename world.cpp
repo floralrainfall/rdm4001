@@ -18,7 +18,8 @@ class WorldJob : public SchedulerJob {
   virtual Result step() {
     using namespace std::chrono_literals;
     if (!world->getRunning()) return Cancel;
-    Input::singleton()->flushEvents();
+
+    if (getStats().schedulerId == 0) Input::singleton()->flushEvents();
     world->tick();
 
     return Stepped;
@@ -29,24 +30,26 @@ class WorldJob : public SchedulerJob {
 
 class WorldTitleJob : public SchedulerJob {
   World* world;
-public:
+
+ public:
   WorldTitleJob(World* world) : SchedulerJob("WorldTitleJob"), world(world) {}
 
-  virtual double getFrameRate() {
-    return 1.0 / 10.0;
-  }
-  
+  virtual double getFrameRate() { return 1.0; }
+
   virtual Result step() {
-    std::string title = "A rdm presentation";
+    std::string title = world->title;
     std::string fpsStatus = "";
-    if(SchedulerJob* worldJob = world->scheduler->getJob("World")) {
-      fpsStatus = std::format("W: {:0.2f}", 1.0 / worldJob->getStats().totalDeltaTime);
+    if (SchedulerJob* worldJob = world->scheduler->getJob("World")) {
+      fpsStatus =
+          std::format("W: {:0.2f}", 1.0 / worldJob->getStats().totalDeltaTime);
     }
-    if(SchedulerJob* physicsJob = world->scheduler->getJob("Physics")) {
-      fpsStatus += std::format(" P: {:0.2f}", 1.0 / physicsJob->getStats().totalDeltaTime);
+    if (SchedulerJob* physicsJob = world->scheduler->getJob("Physics")) {
+      fpsStatus += std::format(" P: {:0.2f}",
+                               1.0 / physicsJob->getStats().totalDeltaTime);
     }
-    if(SchedulerJob* renderJob = world->scheduler->getJob("Render")) {
-      fpsStatus += std::format(" R: {:0.2f}", 1.0 / renderJob->getStats().totalDeltaTime);
+    if (SchedulerJob* renderJob = world->scheduler->getJob("Render")) {
+      fpsStatus += std::format(" R: {:0.2f}",
+                               1.0 / renderJob->getStats().totalDeltaTime);
     }
     world->changingTitle.fire(std::format("{} ({})", title, fpsStatus));
 
@@ -55,11 +58,15 @@ public:
 };
 
 World::World() {
+  title = "A rdm presentation";
+
   scheduler.reset(new Scheduler());
   scheduler->addJob(new WorldJob(this));
   scheduler->addJob(new WorldTitleJob(this));
 
   physics.reset(new PhysicsWorld(this));
+  networkManager.reset(new network::NetworkManager(this));
+
   running = true;
 
   Input::singleton()->quitSignal.listen([this](InputObject o) {
@@ -71,7 +78,9 @@ World::World() {
 
 void World::tick() {
   stepping.fire();
-  
+
   stepped.fire();
 }
+
+void World::setTitle(std::string title) { this->title = title; }
 }  // namespace rdm

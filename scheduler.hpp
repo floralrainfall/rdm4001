@@ -31,6 +31,7 @@ struct JobStatistics {
    *
    */
   double time;
+  size_t schedulerId;
 };
 
 class SchedulerJob {
@@ -88,9 +89,9 @@ class SchedulerJob {
   /**
    * @brief Returns the statistics of a job.
    *
-   * @return JobStatistics The statistics.
+   * @return JobStatistics& The statistics.
    */
-  JobStatistics getStats() { return stats; }
+  JobStatistics& getStats() { return stats; }
 
   /**
    * @brief Blocks and waits until a job is stopped.
@@ -108,9 +109,11 @@ class SchedulerJob {
 };
 
 class Scheduler {
+  size_t id;
   std::vector<std::unique_ptr<SchedulerJob>> jobs;
 
  public:
+  Scheduler();
   ~Scheduler();
 
   /**

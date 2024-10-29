@@ -1,8 +1,9 @@
 #include "map.hpp"
 
+#include <bullet/Bullet3Geometry/b3GeometryUtil.h>
+
 #include <climits>
 #include <stdexcept>
-#include <bullet/Bullet3Geometry/b3GeometryUtil.h>
 
 #include "filesystem.hpp"
 #include "gfx/base_device.hpp"
@@ -82,10 +83,11 @@ void BSPFile::addLeafFaces(BSPLeaf* leaf, bool brushen, bool leaffaceen) {
   m.m_cluster = leaf->cluster;
 
   if (leaf->cluster > visdata->n_vecs) return;
-  
+
   for (int b = leaf->leafbrush; b < (leaf->leafbrush + leaf->n_leafbrushes);
        b++) {
-    if (b > m_header.dirents[BSP_LEAFBRUSHES].length / sizeof(BSP_LEAFBRUSHES)) {
+    if (b >
+        m_header.dirents[BSP_LEAFBRUSHES].length / sizeof(BSP_LEAFBRUSHES)) {
       Log::printf(LOG_ERROR, "BSP error: loaded bad leaf brush %i", b);
       return;
     }
@@ -112,10 +114,11 @@ void BSPFile::addLeafFaces(BSPLeaf* leaf, bool brushen, bool leaffaceen) {
     if (m_gfxEnabled && leaffaceen) {
       for (int f = leaf->leafface; f < (leaf->leafface + leaf->n_leaffaces);
            f++) {
-	if (f > m_header.dirents[BSP_LEAFFACES].length / sizeof(BSP_LEAFFACES)) {
-	  Log::printf(LOG_ERROR, "BSP error: loaded bad leaf face %i", f);
-	  return;
-	}
+        if (f >
+            m_header.dirents[BSP_LEAFFACES].length / sizeof(BSP_LEAFFACES)) {
+          Log::printf(LOG_ERROR, "BSP error: loaded bad leaf face %i", f);
+          return;
+        }
 
         BSPFace* face = &faces[leaffaces[f]];
         m.m_models.push_back(addFaceModel(face));
@@ -173,7 +176,7 @@ BSPFaceModel BSPFile::addFaceModel(BSPFace* face) {
   }
 
   m.m_lightmap = 0;
-  if(face->lm_index >= 0) {
+  if (face->lm_index >= 0) {
     BSPLightmap* lm = &lightmaps[abs(face->lm_index)];
     char tname[64];
     memset(tname, 0, 64);
@@ -182,17 +185,17 @@ BSPFaceModel BSPFile::addFaceModel(BSPFace* face) {
     if (!lmt) {
       Log::printf(LOG_DEBUG, "loading lightmap %i", tname);
       std::unique_ptr<gfx::BaseTexture> _lmt =
-	engine->getDevice()->createTexture();
+          engine->getDevice()->createTexture();
       _lmt->upload2d(128, 128, gfx::DataType::DtUnsignedByte,
-		     gfx::BaseTexture::RGB, lm->lightmap);
+                     gfx::BaseTexture::RGB, lm->lightmap);
       lmt = std::pair<gfx::TextureCache::Info, gfx::BaseTexture*>(
-								  gfx::TextureCache::Info{},
-								  engine->getTextureCache()->cacheExistingTexture(
-														  tname, _lmt, gfx::TextureCache::Info{}));
+          gfx::TextureCache::Info{},
+          engine->getTextureCache()->cacheExistingTexture(
+              tname, _lmt, gfx::TextureCache::Info{}));
     }
     m.m_lightmap = lmt->second;
   }
-    
+
   // first part is designed to fit with ModelComponent layout so i can reuse
   // materials
 
@@ -206,43 +209,39 @@ BSPFaceModel BSPFile::addFaceModel(BSPFace* face) {
 
   try {
     if (texture.name ==
-	std::string("textures/skies/skybox"))  // TODO: make this not hardcoded
-      {
-	m.m_program =
-	  engine->getMaterialCache()
-	  ->getOrLoad("BspSky")
-	  .value();  // Material::getMaterial("materials/bsp/sky.mmf")->getProgram();
-	m.m_texture = m_skybox;
-      } else {
+        std::string("textures/skies/skybox"))  // TODO: make this not hardcoded
+    {
+      m.m_program =
+          engine->getMaterialCache()
+              ->getOrLoad("BspSky")
+              .value();  // Material::getMaterial("materials/bsp/sky.mmf")->getProgram();
+      m.m_texture = m_skybox;
+    } else {
       m.m_program = engine->getMaterialCache()->getOrLoad("BspBrush").value();
       std::string extensions[] = {
-	".png",
-	".jpg",
-	".tga",
-	".PNG",
-       	".JPG",
-	".TGA",
+          ".png", ".jpg", ".tga", ".PNG", ".JPG", ".TGA",
       };
       m.m_texture = 0;
-      for(std::string extension : extensions) {
-	std::string txpath = std::string("dat5/baseq3/") + texture.name + extension;
-	auto t =
-	  engine->getTextureCache()->getOrLoad2d(txpath.c_str());
-	if(t) {
-	  m.m_texture = t->second;
-	  break;
-	} 
+      for (std::string extension : extensions) {
+        std::string txpath =
+            std::string("dat5/baseq3/") + texture.name + extension;
+        auto t = engine->getTextureCache()->getOrLoad2d(txpath.c_str());
+        if (t) {
+          m.m_texture = t->second;
+          break;
+        }
       }
-      if(m.m_texture == 0) {
-	Log::printf(LOG_WARN, "Could not find texture %s", texture.name);
-	auto t = engine->getTextureCache()->getOrLoad2d("dat5/missingtexture.png");
-	if(t)
-	  m.m_texture = t->second;
-	else
-	  m.m_texture = 0;
+      if (m.m_texture == 0) {
+        Log::printf(LOG_WARN, "Could not find texture %s", texture.name);
+        auto t =
+            engine->getTextureCache()->getOrLoad2d("dat5/missingtexture.png");
+        if (t)
+          m.m_texture = t->second;
+        else
+          m.m_texture = 0;
       }
     }
-  } catch(std::exception& e) {
+  } catch (std::exception& e) {
     m.m_texture = 0;
     m.m_program = 0;
   }
@@ -256,14 +255,14 @@ BSPFaceModel BSPFile::addFaceModel(BSPFace* face) {
 void BSPFile::updatePosition(glm::vec3 new_pos) {
   int oldCluster = m_currentClusterIndex;
   m_currentClusterIndex = getCluster(new_pos);
-  if(oldCluster != m_currentClusterIndex) {
+  if (oldCluster != m_currentClusterIndex) {
     Log::printf(LOG_DEBUG, "new cluster %i", m_currentClusterIndex);
   }
 }
 
 void BSPFile::parseTreeNode(BSPNode* node, bool brush, bool leafface) {
-  Log::printf(LOG_DEBUG, "node %p, a: %i, b: %i", node, node->children[0],
-	      node->children[1]);
+  // Log::printf(LOG_DEBUG, "node %p, a: %i, b: %i", node, node->children[0],
+  //	      node->children[1]);
   BSPLeaf* leafs = (BSPLeaf*)direntData[BSP_LEAFS];
   BSPNode* nodes = (BSPNode*)direntData[BSP_NODES];
   int leafcount = m_header.dirents[BSP_LEAFS].length;
@@ -293,10 +292,18 @@ void BSPFile::renderFaceModel(BSPFaceModel* model, gfx::BaseProgram* program) {
   if (!program) return;
 
   model->m_layout->bind();
-  program->setParameter("lightmap", gfx::DtSampler, gfx::BaseProgram::Parameter{.texture.texture = model->m_lightmap, .texture.slot = 2});
-  program->setParameter("surface", gfx::DtSampler, gfx::BaseProgram::Parameter{.texture.texture = model->m_texture, .texture.slot = 0});
+  program->setParameter(
+      "lightmap", gfx::DtSampler,
+      gfx::BaseProgram::Parameter{.texture.texture = model->m_lightmap,
+                                  .texture.slot = 2});
+  program->setParameter(
+      "surface", gfx::DtSampler,
+      gfx::BaseProgram::Parameter{.texture.texture = model->m_texture,
+                                  .texture.slot = 0});
   program->bind();
-  engine->getDevice()->draw(model->m_index.get(), gfx::DtUnsignedInt, gfx::BaseDevice::Triangles, model->m_indexCount / sizeof(int));
+  engine->getDevice()->draw(model->m_index.get(), gfx::DtUnsignedInt,
+                            gfx::BaseDevice::Triangles,
+                            model->m_indexCount / sizeof(int));
 }
 
 void BSPFile::draw() {
@@ -304,12 +311,11 @@ void BSPFile::draw() {
 
   engine->getDevice()->setCullState(gfx::BaseDevice::BackCCW);
 
-  
   engine->getDevice()->setDepthState(gfx::BaseDevice::LEqual);
 
   m_facesRendered = 0;
   m_leafsRendered = 0;
-  if (true) { // TODO: use Settings or bring back matrix style ConVar system
+  if (true) {  // TODO: use Settings or bring back matrix style ConVar system
     for (int i = 0; i < m_leafs.size(); i++) {
       BSPLeafModel& leaf = m_leafs.at(i);
 
@@ -322,10 +328,11 @@ void BSPFile::draw() {
 
       for (int j = 0; j < leaf.m_models.size(); j++) {
         BSPFaceModel& model = leaf.m_models[j];
-	if(model.m_program) {
-	  gfx::BaseProgram* program = model.m_program->prepareDevice(engine->getDevice(), 0);
-	  renderFaceModel(&model, program);
-	  m_facesRendered++;
+        if (model.m_program) {
+          gfx::BaseProgram* program =
+              model.m_program->prepareDevice(engine->getDevice(), 0);
+          renderFaceModel(&model, program);
+          m_facesRendered++;
         }
       }
       m_leafsRendered++;
@@ -333,15 +340,16 @@ void BSPFile::draw() {
   } else {
     for (int i = 0; i < m_models.size(); i++) {
       BSPFaceModel& model = m_models.at(i);
-      if(model.m_program) {
-	gfx::BaseProgram* program = model.m_program->prepareDevice(engine->getDevice(), 0);
-	renderFaceModel(&model, program);
-	m_facesRendered++;
+      if (model.m_program) {
+        gfx::BaseProgram* program =
+            model.m_program->prepareDevice(engine->getDevice(), 0);
+        renderFaceModel(&model, program);
+        m_facesRendered++;
       }
     }
   }
 
-  engine->getDevice()->setCullState(gfx::BaseDevice::FrontCCW); // reset state
+  engine->getDevice()->setCullState(gfx::BaseDevice::FrontCCW);  // reset state
 }
 
 void BSPFile::removeFromPhysicsWorld(PhysicsWorld* world) {
@@ -410,10 +418,9 @@ bool BSPFile::canSeeCluster(int x, int y) {
 
   BSPVisdata* vdata = (BSPVisdata*)direntData[BSP_VISDATA];
   int vidx = x * vdata->sz_vecs + (y / 8);
-  if(vidx > m_header.dirents[BSP_VISDATA].length)
-    return false;
-  
-  //return vdata->data[vidx] & (1 << y % 8);
+  if (vidx > m_header.dirents[BSP_VISDATA].length) return false;
+
+  // return vdata->data[vidx] & (1 << y % 8);
   return vdata->data[vidx] & (1 << (y & 7));
 }
 
@@ -438,9 +445,14 @@ void BSPFile::initGfx(gfx::Engine* engine) {
 
   BSPNode* root = (BSPNode*)direntData[BSP_NODES];
 
-  Log::printf(LOG_DEBUG, "loading gfx: %i nodes, %i leafs, %i brushes", m_header.dirents[BSP_NODES].length / sizeof(BSPNode), m_header.dirents[BSP_LEAFS].length / sizeof(BSPLeaf), m_header.dirents[BSP_BRUSHES].length / sizeof(BSPBrush));
-  Log::printf(LOG_DEBUG, "%i lightmaps, %i textures", m_header.dirents[BSP_LIGHTMAPS].length / sizeof(BSPLightmap), m_header.dirents[BSP_TEXTURES].length / sizeof(BSPTexture));
-  
+  Log::printf(LOG_DEBUG, "loading gfx: %i nodes, %i leafs, %i brushes",
+              m_header.dirents[BSP_NODES].length / sizeof(BSPNode),
+              m_header.dirents[BSP_LEAFS].length / sizeof(BSPLeaf),
+              m_header.dirents[BSP_BRUSHES].length / sizeof(BSPBrush));
+  Log::printf(LOG_DEBUG, "%i lightmaps, %i textures",
+              m_header.dirents[BSP_LIGHTMAPS].length / sizeof(BSPLightmap),
+              m_header.dirents[BSP_TEXTURES].length / sizeof(BSPTexture));
+
   parseTreeNode(root, false, true);
 }
 
@@ -453,8 +465,7 @@ MapEntity::~MapEntity() {}
 void MapEntity::initialize() {}
 
 void MapEntity::renderTechnique(gfx::BaseDevice* device, int id) {
-  if(!f)
-    return;
+  if (!f) return;
   f->draw();
 }
 };  // namespace ww

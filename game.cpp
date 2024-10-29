@@ -16,10 +16,16 @@
 #endif
 #include "settings.hpp"
 
+#ifdef __linux
+#include <signal.h>
+#endif
+
 namespace rdm {
 Game::Game() {
   Log::singleton()->setLevel(Settings::singleton()->getSetting("LogLevel", 1));
+}
 
+void Game::startClient() {
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0) {
     if (!window)
       Log::printf(LOG_FATAL, "Unable to init SDL (%s)", SDL_GetError());
@@ -71,69 +77,84 @@ Game::Game() {
   gfxEngine.reset(new gfx::Engine(world.get(), (void*)window));
   gfxEngine->getContext()->unsetCurrent();
 
-  world->changingTitle.listen([this](std::string title){
-    SDL_SetWindowTitle(window, title.c_str());    
-  });
+  world->changingTitle.listen(
+      [this](std::string title) { SDL_SetWindowTitle(window, title.c_str()); });
+}
+
+void Game::startServer() {
+  worldServer.reset(new World());
+  worldServer->getNetworkManager()->start();
 }
 
 void Game::mainLoop() {
   try {
     initialize();
+
+    if (world) {
+      initializeClient();
+      world->getScheduler()->startAllJobs();
+    }
+    if (worldServer) {
+      initializeServer();
+      worldServer->getScheduler()->startAllJobs();
+    }
   } catch (std::exception& e) {
     Log::printf(LOG_FATAL, "Error initializing game: %s", e.what());
     exit(EXIT_FAILURE);
   }
 
-  world->getScheduler()->startAllJobs();
-  SDL_Event event;
-  bool ignoreNextMouseMoveEvent = false;
-  while (world->getRunning()) {
-    while (SDL_PollEvent(&event)) {
-      InputObject object;
-      switch (event.type) {
-        case SDL_KEYUP:
-        case SDL_KEYDOWN:
-          object.type = event.type == SDL_KEYDOWN ? InputObject::KeyPress
-                                                  : InputObject::KeyUp;
-          object.data.key.key = event.key.keysym.sym;
-          Input::singleton()->postEvent(object);
-          break;
-        case SDL_QUIT:
-          object.type = InputObject::Quit;
-          Input::singleton()->postEvent(object);
-          break;
-        case SDL_MOUSEMOTION:
-	  if(ignoreNextMouseMoveEvent) {
-	    ignoreNextMouseMoveEvent = false;
-	    break;
-	  }
-          object.type = InputObject::MouseMove;
-          object.data.mouse.delta[0] = event.motion.xrel;
-          object.data.mouse.delta[1] = event.motion.yrel;
-	  SDL_ShowCursor(!Input::singleton()->getMouseLocked());
-	  if(Input::singleton()->getMouseLocked()) {
-	    int w, h;
-	    SDL_GetWindowSize(window, &w, &h);
-	    SDL_WarpMouseInWindow(window, w/2, h/2);
-	    object.data.mouse.position[0] = w/2;
-	    object.data.mouse.position[1] = w/2;
-	    ignoreNextMouseMoveEvent = true;
-	  } else {
-	    object.data.mouse.position[0] = event.motion.x;
-	    object.data.mouse.position[1] = event.motion.y;
-	  }
-          Input::singleton()->postEvent(object);
-          break;
-        default:
-          break;
+  if (world) {
+    SDL_Event event;
+    bool ignoreNextMouseMoveEvent = false;
+    while (world->getRunning()) {
+      while (SDL_PollEvent(&event)) {
+        InputObject object;
+        switch (event.type) {
+          case SDL_KEYUP:
+          case SDL_KEYDOWN:
+            object.type = event.type == SDL_KEYDOWN ? InputObject::KeyPress
+                                                    : InputObject::KeyUp;
+            object.data.key.key = event.key.keysym.sym;
+            Input::singleton()->postEvent(object);
+            break;
+          case SDL_QUIT:
+            object.type = InputObject::Quit;
+            Input::singleton()->postEvent(object);
+            break;
+          case SDL_MOUSEMOTION:
+            if (ignoreNextMouseMoveEvent) {
+              ignoreNextMouseMoveEvent = false;
+              break;
+            }
+            object.type = InputObject::MouseMove;
+            object.data.mouse.delta[0] = event.motion.xrel;
+            object.data.mouse.delta[1] = event.motion.yrel;
+            SDL_ShowCursor(!Input::singleton()->getMouseLocked());
+            if (Input::singleton()->getMouseLocked()) {
+              int w, h;
+              SDL_GetWindowSize(window, &w, &h);
+              SDL_WarpMouseInWindow(window, w / 2, h / 2);
+              object.data.mouse.position[0] = w / 2;
+              object.data.mouse.position[1] = w / 2;
+              ignoreNextMouseMoveEvent = true;
+            } else {
+              object.data.mouse.position[0] = event.motion.x;
+              object.data.mouse.position[1] = event.motion.y;
+            }
+            Input::singleton()->postEvent(object);
+            break;
+          default:
+            break;
+        }
       }
+      /*if (Input::singleton()->getMouseLocked()) {
+        SDL_SetRelativeMouseMode(
+        Input::singleton()->getMouseLocked() ? SDL_TRUE : SDL_FALSE);
+        }*/
+      std::this_thread::yield();
     }
-    /*if (Input::singleton()->getMouseLocked()) {
-       SDL_SetRelativeMouseMode(
-       Input::singleton()->getMouseLocked() ? SDL_TRUE : SDL_FALSE);
-       }*/
-    std::this_thread::yield();
   }
-  world->getScheduler()->waitToWrapUp();
+  if (world) world->getScheduler()->waitToWrapUp();
+  if (worldServer) worldServer->getScheduler()->waitToWrapUp();
 }
 }  // namespace rdm

@@ -11,7 +11,10 @@
 #include <sys/prctl.h>
 #endif
 
+static size_t schedulerId = 0;
+
 namespace rdm {
+Scheduler::Scheduler() { this->id = schedulerId++; }
 Scheduler::~Scheduler() { waitToWrapUp(); }
 
 void Scheduler::waitToWrapUp() {
@@ -23,6 +26,7 @@ void Scheduler::waitToWrapUp() {
 
 SchedulerJob* Scheduler::addJob(SchedulerJob* job) {
   jobs.push_back(std::unique_ptr<SchedulerJob>(job));
+  job->getStats().schedulerId = id;
   return job;
 }
 
@@ -41,12 +45,18 @@ SchedulerJob::~SchedulerJob() { stopBlocking(); }
 void SchedulerJob::task(SchedulerJob* job) {
 #ifndef NDEBUG
 #ifdef __linux
-  pthread_setname_np(pthread_self(), job->stats.name);
-  prctl(PR_SET_NAME, job->stats.name);
+  std::string jobName = job->getStats().name;
+  jobName += "/" + std::to_string(job->getStats().schedulerId);
+  pthread_setname_np(pthread_self(), jobName.c_str());
+  prctl(PR_SET_NAME, jobName.c_str());
 #endif
 #endif
   job->stats.time = 0.0;
   bool running = true;
+#ifndef NDEBUG
+  Log::printf(LOG_DEBUG, "Starting job %s/%i", job->getStats().name,
+              job->getStats().schedulerId);
+#endif
   while (running) {
     std::chrono::time_point start = std::chrono::high_resolution_clock::now();
 
@@ -54,8 +64,9 @@ void SchedulerJob::task(SchedulerJob* job) {
     try {
       r = job->step();
     } catch (std::exception& e) {
-      Log::printf(LOG_FATAL, "Fatal unhandled exception in %s, what() = '%s'",
-                  job->getStats().name, e.what());
+      Log::printf(LOG_FATAL,
+                  "Fatal unhandled exception in %s/%i, what() = '%s'",
+                  job->getStats().name, job->getStats().schedulerId, e.what());
       r = Cancel;
 
       try {
@@ -119,7 +130,8 @@ void SchedulerJob::task(SchedulerJob* job) {
   }
   job->state = Stopped;
 #ifndef NDEBUG
-  Log::printf(LOG_DEBUG, "Task %s stopped", job->getStats().name);
+  Log::printf(LOG_DEBUG, "Task %s/%i stopped", job->getStats().name,
+              job->getStats().schedulerId);
 #endif
 }
 

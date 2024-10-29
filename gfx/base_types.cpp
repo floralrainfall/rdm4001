@@ -26,6 +26,9 @@ void BaseProgram::setParameter(std::string param, DataType type,
     case DtVec3:
       dirty = parameters[param].second.vec3 != parameter.vec3;
       break;
+    case DtMat4:
+      dirty = parameters[param].second.matrix4x4 != parameter.matrix4x4;
+      break;
     default:
       dirty = true;
       break;

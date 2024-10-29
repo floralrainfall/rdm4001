@@ -52,8 +52,14 @@ gamelib = static_library('game', [
   'physics.cpp',
   'physics.hpp',
 
+  'network/bitstream.cpp',
+  'network/bitstream.hpp',
   'network/network.cpp',
   'network/network.hpp',
+  'network/entity.cpp',
+  'network/entity.hpp',
+  'network/player.cpp',
+  'network/player.hpp',
 
   'gfx/gui/element.cpp',
   'gfx/gui/element.hpp',

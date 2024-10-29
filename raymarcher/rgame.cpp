@@ -26,7 +26,7 @@ struct REntity {
   btMotionState* state;
 
   enum MotionType {
-    STATIC, // state = NULL
+    STATIC,  // state = NULL
     DYNAMIC
   } motionType;
 };
@@ -37,21 +37,24 @@ struct RGamePrivate {
 
   std::shared_ptr<gfx::Material> rayMarchMaterial;
   std::vector<REntity> entities;
+  std::mutex entitiesMutex;
 
-  void createBall(PhysicsWorld* world, float radius, glm::vec3 pos = glm::vec3(0.0)) {
-    std::scoped_lock l(world->mutex);
+  void createBall(PhysicsWorld* world, float radius,
+                  glm::vec3 pos = glm::vec3(0.0)) {
+    std::scoped_lock l(world->mutex, entitiesMutex);
     REntity e;
     e.position = pos;
     e.type = 2;
     e.user0 = radius;
     btScalar mass(1.0);
     btSphereShape* sphere = new btSphereShape(radius);
-    btTransform trans = btTransform::getIdentity(); 
+    btTransform trans = btTransform::getIdentity();
     trans.setOrigin(btVector3(pos.x, pos.y, pos.z));
     e.state = new btDefaultMotionState(trans);
     btVector3 inertia;
     sphere->calculateLocalInertia(mass, inertia);
-    btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, e.state, sphere, inertia);
+    btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, e.state, sphere,
+                                                    inertia);
     rbInfo.m_friction = 0.1;
     rbInfo.m_restitution = 1.0;
     e.body = new btRigidBody(rbInfo);
@@ -61,12 +64,13 @@ struct RGamePrivate {
   }
 
   void createPlane(PhysicsWorld* world) {
-    std::scoped_lock l(world->mutex);
+    std::scoped_lock l(world->mutex, entitiesMutex);
     REntity e;
     e.motionType = REntity::STATIC;
     e.type = 1;
-    //btStaticPlaneShape* plane = new btStaticPlaneShape(btVector3(0, 1, 0), 2.2);
-    btBoxShape* box = new btBoxShape(btVector3(50,1,50));
+    // btStaticPlaneShape* plane = new btStaticPlaneShape(btVector3(0, 1,
+    // 0), 2.2);
+    btBoxShape* box = new btBoxShape(btVector3(50, 1, 50));
     btRigidBody::btRigidBodyConstructionInfo rbInfo(0.0, NULL, box);
     rbInfo.m_restitution = 1.0;
     e.body = new btRigidBody(rbInfo);
@@ -86,6 +90,8 @@ RGame::~RGame() { delete game; }
 
 void RGame::initialize() {
   std::scoped_lock lock(world->worldLock);
+  world->setTitle("Ray-marcher demo");
+
   world->stepped.listen([this] {
     glm::vec2 mouseDelta = Input::singleton()->getMouseDelta();
 
@@ -108,20 +114,36 @@ void RGame::initialize() {
         (vm * glm::vec3(lrA->value, 0.0, fbA->value) * speed * (1.f / 60.f)));
     cam.setTarget(cam.getPosition() + vm * forward);
 
-    if(Input::singleton()->isKeyDown(SDLK_q)) {
+    if (Input::singleton()->isKeyDown(SDLK_q)) {
       glm::vec3 pos = glm::vec3(0.0);
       {
-	std::scoped_lock l(world->getPhysicsWorld()->mutex);
-	btVector3 start = BulletHelpers::toVector3(cam.getPosition());
-	btVector3 end = BulletHelpers::toVector3(vm * (100.f * forward));
-	btDynamicsWorld::ClosestRayResultCallback callback(start, end);
-	world->getPhysicsWorld()->getWorld()->rayTest(start, end, callback);
-	pos = BulletHelpers::fromVector3(callback.m_hitPointWorld) - ((vm * forward) * 2.f);
+        std::scoped_lock l(world->getPhysicsWorld()->mutex);
+        btVector3 start = BulletHelpers::toVector3(cam.getPosition());
+        btVector3 end = BulletHelpers::toVector3(vm * (100.f * forward));
+        btDynamicsWorld::ClosestRayResultCallback callback(start, end);
+        world->getPhysicsWorld()->getWorld()->rayTest(start, end, callback);
+        pos = BulletHelpers::fromVector3(callback.m_hitPointWorld) -
+              ((vm * forward) * 2.f);
       }
       game->createBall(world->getPhysicsWorld(), 1.f, pos);
     }
+
+    for (int i = 0; i < game->entities.size(); i++) {
+      REntity& e = game->entities[i];
+      btTransform trans;
+      if (e.motionType == REntity::DYNAMIC) {
+        e.state->getWorldTransform(trans);
+        btVector3 origin = trans.getOrigin();
+
+        if (origin.y() < -100.0) {
+          world->getPhysicsWorld()->getWorld()->removeRigidBody(e.body);
+          game->entities.erase(game->entities.begin() + i);
+          i--;
+        }
+      }
+    }
   });
-  
+
   gfxEngine->initialized.listen([this] {
     game->rayMarchMaterial =
         gfxEngine->getMaterialCache()->getOrLoad("RayMarch").value_or(nullptr);
@@ -132,19 +154,18 @@ void RGame::initialize() {
   gfxEngine->renderStepped.listen([this] {
     gfxEngine->renderFullscreenQuad(
         NULL, game->rayMarchMaterial.get(), [this](gfx::BaseProgram* program) {
+          std::scoped_lock lock(game->entitiesMutex);
           for (int i = 0; i < game->entities.size(); i++) {
             REntity& e = game->entities[i];
 
-	    if(e.motionType == REntity::DYNAMIC) {
-	      // update entity positioning
-	      PhysicsWorld* physics = world->getPhysicsWorld();
-	      std::scoped_lock l(physics->mutex);
-	      btTransform trans;
-	      e.state->getWorldTransform(trans);
-	      btVector3 origin = trans.getOrigin();
-	      e.position = glm::vec3(origin.x(), origin.y(), origin.z());
-	    }
-	    
+            if (e.motionType == REntity::DYNAMIC) {
+              // update entity positioning
+              btTransform trans;
+              e.state->getWorldTransform(trans);
+              btVector3 origin = trans.getOrigin();
+              e.position = glm::vec3(origin.x(), origin.y(), origin.z());
+            }
+
             std::string prefix = std::format("entities[{}].", i);
             program->setParameter(
                 prefix + "position", gfx::DtVec3,
@@ -159,7 +180,7 @@ void RGame::initialize() {
           program->setParameter("numEntities", gfx::DtInt,
                                 gfx::BaseProgram::Parameter{
                                     .integer = (int)game->entities.size()});
-	  // program->dbgPrintParameters();
+          // program->dbgPrintParameters();
         });
   });
 }

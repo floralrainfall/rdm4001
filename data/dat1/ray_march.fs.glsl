@@ -8,7 +8,7 @@ uniform vec3 camera_position;
 uniform vec3 camera_target;
 uniform sampler2D texture0;
 
-#define EPS	0.001
+#define EPS	0.01
 
 float mod289(float x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
 vec4 mod289(vec4 x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
