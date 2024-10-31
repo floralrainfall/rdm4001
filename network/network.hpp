@@ -12,6 +12,10 @@
 #define NETWORK_STREAM_META 0
 #define NETWORK_STREAM_ENTITY 1
 
+#define NETWORK_DISCONNECT_FORCED 0
+#define NETWORK_DISCONNECT_USER 1
+#define NETWORK_DISCONNECT_TIMEOUT 2
+
 namespace rdm {
 class World;
 }
@@ -64,6 +68,7 @@ class NetworkManager {
   enum PacketId {
     WelcomePacket,       // S -> C, beginning of handshake
     AuthenticatePacket,  // C -> S
+    DisconnectPacket,    // S -> C
     NewIdPacket,         // S -> C
     DelIdPacket,         // S -> C
     NewPeerPacket,       // S -> C

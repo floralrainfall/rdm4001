@@ -9,6 +9,9 @@
 #include "scheduler.hpp"
 #include "world.hpp"
 
+static const char* disconnectReasons[] = {"Disconnect by engine",
+                                          "Disconnect by user", "Timeout"};
+
 namespace rdm::network {
 Peer::Peer() {
   playerEntity = NULL;
@@ -42,7 +45,25 @@ NetworkManager::NetworkManager(World* world) {
 }
 
 NetworkManager::~NetworkManager() {
-  if (host) enet_host_destroy(host);
+  if (host) {
+    ENetEvent event;
+    if (backend) {
+      BitStream shutdownMessage;
+      shutdownMessage.write<PacketId>(DisconnectPacket);
+      shutdownMessage.writeString("Server is shutting down");
+      enet_host_broadcast(
+          host, 0, shutdownMessage.createPacket(ENET_PACKET_FLAG_RELIABLE));
+      enet_host_service(host, &event,
+                        1);  // service to flush disconnect packet
+    } else {
+      if (localPeer.type != Peer::Unconnected) {
+        enet_peer_disconnect(localPeer.peer, NETWORK_DISCONNECT_FORCED);
+        enet_host_service(host, &event,
+                          1);  // service to flush disconnect packet
+      }
+    }
+    enet_host_destroy(host);
+  }
   enet_deinitialize();
 }
 
@@ -82,6 +103,7 @@ void NetworkManager::service() {
                 std::string username = stream.readString();
 
                 Log::printf(LOG_INFO, "%s authenticating", username.c_str());
+                remotePeer->type = Peer::ConnectedPlayer;
                 remotePeer->playerEntity = (Player*)instantiate("Player");
                 remotePeer->playerEntity->remotePeerId.set(remotePeer->peerId);
                 remotePeer->playerEntity->displayName.set(username);
@@ -143,6 +165,18 @@ void NetworkManager::service() {
                       "Attempted to delete non-existent peer");
                 }
               }
+            case DisconnectPacket:
+              if (backend) {
+                throw std::runtime_error(
+                    "Received DisconnectPacket on backend");
+              } else {
+                std::string message = stream.readString();
+                Log::printf(LOG_INFO, "Disconnected from server (%s)",
+                            message.c_str());
+                enet_peer_disconnect_now(localPeer.peer, 0);
+                localPeer.type = Peer::Unconnected;
+              }
+              break;
             default:
               Log::printf(LOG_WARN, "%s: Unknown packet %i",
                           backend ? "Backend" : "Frontend", packetId);
@@ -157,6 +191,9 @@ void NetworkManager::service() {
         if (backend) {
           Peer* peer = (Peer*)event.peer->data;
           if (peer) {
+            Log::printf(LOG_INFO, "Peer disconnecting (reason: %s)",
+                        disconnectReasons[event.data]);
+
             BitStream peerRemoving;
             peerRemoving.write<PacketId>(DelPeerPacket);
             peerRemoving.write<int>(peer->peerId);

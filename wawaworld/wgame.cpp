@@ -7,6 +7,7 @@
 #include "logging.hpp"
 #include "map.hpp"
 #include "putil/fpscontroller.hpp"
+#include "settings.hpp"
 
 namespace ww {
 struct WGamePrivate {
@@ -63,7 +64,10 @@ void WGame::initializeClient() {
 void WGame::initializeServer() { worldServer->getNetworkManager()->start(); }
 
 void WGame::initialize() {
-  startClient();
-  startServer();
+  if (rdm::Settings::singleton()->getHintDs()) {
+    startServer();
+  } else {
+    startClient();
+  }
 }
 }  // namespace ww

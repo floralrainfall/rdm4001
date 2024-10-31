@@ -27,8 +27,12 @@ void Settings::parseCommandLine(char* argv[], int argc) {
       "loadSettings,L", po::value<std::string>(),
       "load settings from custom location")(
       "logLevel,l", po::value<int>(),
-      "0 - external, 1 - debug, 2 - info, 3 - warning, 4 - error, 5 - fatal")
-    ("game,g", po::value<std::string>(), "loaded game library path (only works on supported programs like the launcher)");
+      "0 - external, 1 - debug, 2 - info, 3 - warning, 4 - error, 5 - fatal")(
+      "game,g", po::value<std::string>(),
+      "loaded game library path (only works on supported programs like the "
+      "launcher)")(
+      "hintDs,D",
+      "Hint to use dedicated server mode (only works on supported programs)");
 
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -51,6 +55,8 @@ void Settings::parseCommandLine(char* argv[], int argc) {
   if (vm.count("game")) {
     gamePath = vm["game"].as<std::string>();
   }
+
+  hintDs = vm.count("hintDs");
 }
 
 void Settings::load() {

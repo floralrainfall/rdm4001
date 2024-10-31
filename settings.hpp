@@ -11,6 +11,8 @@ typedef std::variant<std::string, int, float> Setting;
 class Settings {
   Settings();
 
+  bool hintDs;
+
   std::map<std::string, json> settings;
   std::string settingsPath;
   std::string gamePath;
@@ -23,7 +25,9 @@ class Settings {
   void save();
 
   std::string getGamePath() { return gamePath; }
-  
+
+  bool getHintDs() { return hintDs; }
+
   json getSetting(std::string setting, json unset = json());
 };
 }  // namespace rdm
