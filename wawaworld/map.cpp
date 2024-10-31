@@ -82,8 +82,6 @@ void BSPFile::addLeafFaces(BSPLeaf* leaf, bool brushen, bool leaffaceen) {
 
   m.m_cluster = leaf->cluster;
 
-  if (leaf->cluster > visdata->n_vecs) return;
-
   for (int b = leaf->leafbrush; b < (leaf->leafbrush + leaf->n_leafbrushes);
        b++) {
     if (b >
@@ -106,6 +104,8 @@ void BSPFile::addLeafFaces(BSPLeaf* leaf, bool brushen, bool leaffaceen) {
     }
     m_brushes.push_back(brushmodel);
   }
+
+  if (leaf->cluster > visdata->n_vecs) return;
 
   if (m.m_cluster < 0) {
     Log::printf(LOG_INFO, "Cluster is out of world or invalid");
@@ -183,7 +183,7 @@ BSPFaceModel BSPFile::addFaceModel(BSPFace* face) {
     snprintf(tname, 64, "lm:%s%i", m_name.c_str(), face->lm_index);
     auto lmt = engine->getTextureCache()->get(tname);
     if (!lmt) {
-      Log::printf(LOG_DEBUG, "loading lightmap %i", tname);
+      Log::printf(LOG_DEBUG, "loading lightmap %s", tname);
       std::unique_ptr<gfx::BaseTexture> _lmt =
           engine->getDevice()->createTexture();
       _lmt->upload2d(128, 128, gfx::DataType::DtUnsignedByte,
@@ -396,6 +396,7 @@ void BSPFile::addToPhysicsWorld(PhysicsWorld* world) {
       rb_added++;
     }
   }
+  Log::printf(LOG_DEBUG, "added %i brush bodies", rb_added);
   m_physicsWorld = world;
 }
 

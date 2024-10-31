@@ -81,10 +81,7 @@ void Game::startClient() {
       [this](std::string title) { SDL_SetWindowTitle(window, title.c_str()); });
 }
 
-void Game::startServer() {
-  worldServer.reset(new World());
-  worldServer->getNetworkManager()->start();
-}
+void Game::startServer() { worldServer.reset(new World()); }
 
 void Game::mainLoop() {
   try {
@@ -122,6 +119,14 @@ void Game::mainLoop() {
             Input::singleton()->postEvent(object);
             break;
           case SDL_MOUSEMOTION:
+            if (Input::singleton()->getMouseLocked()) {
+              int flags = SDL_GetWindowFlags(window);
+              if (!(flags & SDL_WINDOW_INPUT_FOCUS)) {
+                SDL_ShowCursor(true);
+                break;
+              }
+            }
+
             if (ignoreNextMouseMoveEvent) {
               ignoreNextMouseMoveEvent = false;
               break;

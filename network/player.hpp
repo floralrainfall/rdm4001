@@ -7,13 +7,15 @@
 
 namespace rdm::network {
 class Player : public Entity {
+ public:
   ReplicateProperty<int> remotePeerId;  // -1 if not controlled
   ReplicateProperty<std::string> displayName;
 
- public:
   Player(NetworkManager* manager, EntityId id);
 
   virtual const char* getTypeName() { return "Player"; };
-  int getRemotePeerId() { return remotePeerId.get(); }
+
+  virtual void serialize(BitStream& stream);
+  virtual void deserialize(BitStream& stream);
 };
 }  // namespace rdm::network

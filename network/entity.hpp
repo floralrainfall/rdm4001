@@ -5,6 +5,11 @@
 
 #include "bitstream.hpp"
 #include "signal.hpp"
+
+namespace rdm {
+class World;
+}
+
 namespace rdm::network {
 typedef uint16_t EntityId;
 
@@ -63,6 +68,12 @@ class Entity {
   Entity(NetworkManager* manager, EntityId id);
   virtual ~Entity();
 
+  World* getWorld();
+
+  EntityId getEntityId() { return id; }
+
+  virtual void serialize(BitStream& stream) {};
+  virtual void deserialize(BitStream& stream) {};
   virtual const char* getTypeName() { return "Entity"; };
 };
 

@@ -9,10 +9,11 @@
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id,
                                 GLenum severity, GLsizei length,
                                 const GLchar* message, const void* userParam) {
-  rdm::Log::printf(type == GL_DEBUG_TYPE_ERROR ? rdm::LOG_ERROR : rdm::LOG_EXTERNAL,
-                   "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s",
-                   (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type,
-                   severity, message);
+  rdm::Log::printf(
+      type == GL_DEBUG_TYPE_ERROR ? rdm::LOG_ERROR : rdm::LOG_EXTERNAL,
+      "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s",
+      (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity,
+      message);
   if (type == GL_DEBUG_TYPE_ERROR) throw std::runtime_error(message);
 }
 

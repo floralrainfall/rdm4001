@@ -89,6 +89,8 @@ RGame::RGame() {
 RGame::~RGame() { delete game; }
 
 void RGame::initialize() {
+  startClient();
+
   std::scoped_lock lock(world->worldLock);
   world->setTitle("Ray-marcher demo");
 

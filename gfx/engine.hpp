@@ -42,6 +42,7 @@ class TextureCache {
                                     std::unique_ptr<BaseTexture>& texture,
                                     Info info);
   BaseTexture* createCacheTexture(const char* path, Info info);
+
  private:
   std::map<std::string, std::pair<Info, std::unique_ptr<BaseTexture>>> textures;
 };
@@ -56,11 +57,13 @@ class Engine {
   std::vector<std::unique_ptr<Entity>> entities;
 
   std::unique_ptr<BaseTexture> fullscreenTexture;
+  std::unique_ptr<BaseTexture> fullscreenTextureBloom;
   std::unique_ptr<BaseTexture> fullscreenTextureDepth;
   std::unique_ptr<BaseBuffer> fullscreenBuffer;
   std::unique_ptr<BaseArrayPointers> fullScreenArrayPointers;
   std::shared_ptr<Material> fullscreenMaterial;
   std::unique_ptr<BaseFrameBuffer> postProcessFrameBuffer;
+  int fullscreenSamples;
 
   float time;
 
@@ -78,7 +81,9 @@ class Engine {
  public:
   Engine(World* world, void* hwnd);
 
-  void renderFullscreenQuad(BaseTexture* texture, Material* material = 0, std::function<void(BaseProgram*)> setParameters= [](BaseProgram*){});
+  void renderFullscreenQuad(
+      BaseTexture* texture, Material* material = 0,
+      std::function<void(BaseProgram*)> setParameters = [](BaseProgram*) {});
   void setFullscreenMaterial(const char* name);
 
   /**
@@ -96,9 +101,10 @@ class Engine {
   Entity* addEntity(std::unique_ptr<Entity> entity);
   SchedulerJob* getRenderJob() { return renderJob; }
 
-  template<typename T, class... Types>
+  template <typename T, class... Types>
   T* addEntity(Types... args) {
-    static_assert(std::is_base_of<Entity, T>::value, "T must derive from Entity");
+    static_assert(std::is_base_of<Entity, T>::value,
+                  "T must derive from Entity");
     T* t = (T*)addEntity(std::unique_ptr<Entity>(new T(args...)));
     t->initialize();
     return t;

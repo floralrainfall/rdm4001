@@ -21,6 +21,8 @@ class GLTexture : public BaseTexture {
 
   virtual void reserve2d(int width, int height, InternalFormat format,
                          int mipmapLevels);
+  virtual void reserve2dMultisampled(int width, int height,
+                                     InternalFormat format, int samples);
   virtual void upload2d(int width, int height, DataType type, Format format,
                         void* data, int mipmapLevels);
   virtual void uploadCubeMap(int width, int height, std::vector<void*> data);

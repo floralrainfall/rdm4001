@@ -1,8 +1,10 @@
 #pragma once
+#include <enet/enet.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 
+#include <string>
 #include <typeinfo>
 namespace rdm::network {
 class BitStream {
@@ -16,6 +18,9 @@ class BitStream {
   BitStream();
   ~BitStream();
 
+  void* getData() { return data; }
+  size_t getSize() { return c; }
+
   BitStream(void* data, size_t size);
   BitStream(BitStream& stream);
 
@@ -24,7 +29,6 @@ class BitStream {
     makeSpaceFor(sizeof(T));
     memcpy(&data[c], &t, sizeof(T));
     c += sizeof(T);
-    printf("%s\n", typeid(T).name());
   }
 
   template <typename T>
@@ -32,8 +36,12 @@ class BitStream {
     T t;
     memcpy(&t, &data[c], sizeof(T));
     c += sizeof(T);
-    printf("%s\n", typeid(T).name());
     return t;
   }
+
+  void writeString(std::string s);
+  std::string readString();
+
+  ENetPacket* createPacket(enet_uint32 flags);
 };
 }  // namespace rdm::network

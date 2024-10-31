@@ -6,15 +6,13 @@
 #include "input.hpp"
 #include "logging.hpp"
 #include "map.hpp"
-
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
+#include "putil/fpscontroller.hpp"
 
 namespace ww {
 struct WGamePrivate {
   float cameraPitch;
   float cameraYaw;
+  putil::FpsController* controller;
 
   BSPFile* file;
 };
@@ -33,31 +31,14 @@ void WGame::initializeClient() {
   Input::singleton()->setMouseLocked(true);
   game->file = new BSPFile("dat5/baseq3/maps/malach.bsp");
   game->file->addToPhysicsWorld(world->getPhysicsWorld());
+  game->controller = new putil::FpsController(world->getPhysicsWorld());
+  world->getPhysicsWorld()->getWorld()->setGravity(btVector3(0, 0, -106.67));
 
   std::scoped_lock lock(world->worldLock);
   world->stepped.listen([this] {
-    glm::vec2 mouseDelta = Input::singleton()->getMouseDelta();
-
-    Input::Axis* fbA = Input::singleton()->getAxis("ForwardBackward");
-    Input::Axis* lrA = Input::singleton()->getAxis("LeftRight");
-
-    game->cameraPitch += mouseDelta.x * (M_PI / 180.0);
-    game->cameraYaw += mouseDelta.y * (M_PI / 180.0);
-
-    glm::quat yawQuat =
-        glm::angleAxis(game->cameraYaw, glm::vec3(-1.f, 0.f, 0.f));
-    glm::quat pitchQuat =
-        glm::angleAxis(game->cameraPitch, glm::vec3(0.f, 0.f, -1.f));
-    glm::mat3 vm = glm::toMat3(pitchQuat * yawQuat);
-    glm::vec3 forward = glm::vec3(0, 0, -1);
     gfx::Camera& cam = gfxEngine->getCamera();
-    float speed = 100.0;
-    glm::vec3 newPosition =
-        (vm * glm::vec3(lrA->value, 0.0, fbA->value) * speed * (1.f / 60.f));
-    { std::scoped_lock l(world->getPhysicsWorld()->mutex); }
-
-    cam.setPosition(cam.getPosition() + newPosition);
-    cam.setTarget(cam.getPosition() + vm * forward);
+    game->controller->updateCamera(cam);
+    game->file->updatePosition(cam.getPosition());
 
     if (gfxEngine->getGuiManager()) {
       auto& layout = gfxEngine->getGuiManager()->getLayout("Debug");
@@ -69,18 +50,20 @@ void WGame::initializeClient() {
                1.0 / renderJob->getStats().totalDeltaTime);
       layout.getElements()[0].setText(buf);
     }
-
-    game->file->updatePosition(cam.getPosition());
   });
 
   gfxEngine->initialized.listen([this] {
     game->file->initGfx(gfxEngine.get());
     gfxEngine->addEntity<MapEntity>(game->file);
   });
+
+  world->getNetworkManager()->connect("127.0.0.1");
 }
 
+void WGame::initializeServer() { worldServer->getNetworkManager()->start(); }
+
 void WGame::initialize() {
-  // startClient();
+  startClient();
   startServer();
 }
 }  // namespace ww

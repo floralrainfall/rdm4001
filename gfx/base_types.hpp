@@ -59,6 +59,9 @@ class BaseTexture {
 
   virtual void reserve2d(int width, int height, InternalFormat format,
                          int mipmapLevels = 1) = 0;
+  virtual void reserve2dMultisampled(int width, int height,
+                                     InternalFormat format,
+                                     int samples = 2) = 0;
   virtual void upload2d(int width, int height, DataType type, Format format,
                         void* data, int mipmapLevels = 0) = 0;
 
@@ -68,7 +71,8 @@ class BaseTexture {
   // data[3] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y
   // data[4] = GL_TEXTURE_CUBE_MAP_POSITIVE_Z
   // data[5] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
-  virtual void uploadCubeMap(int width, int height, std::vector<void*> data) = 0;
+  virtual void uploadCubeMap(int width, int height,
+                             std::vector<void*> data) = 0;
 
   /**
    * @brief Recreates the underlying texture. Reuploads are necessary
@@ -139,7 +143,7 @@ class BaseProgram {
   void addShader(ShaderFile file, Shader type) { shaders[type] = file; };
   void setParameter(std::string param, DataType type, Parameter parameter);
   void dbgPrintParameters();
-  
+
   virtual void link() = 0;
   virtual void bind() = 0;
 

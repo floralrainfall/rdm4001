@@ -52,6 +52,9 @@ gamelib = static_library('game', [
   'physics.cpp',
   'physics.hpp',
 
+  'putil/fpscontroller.cpp',
+  'putil/fpscontroller.hpp',
+
   'network/bitstream.cpp',
   'network/bitstream.hpp',
   'network/network.cpp',

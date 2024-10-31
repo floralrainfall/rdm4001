@@ -1,5 +1,6 @@
 #pragma once
 #include <deque>
+#include <mutex>
 #include <source_location>
 #include <string>
 
@@ -77,7 +78,14 @@
 #define COLOR_RESET "\e[0m"
 
 namespace rdm {
-enum LogType { LOG_EXTERNAL, LOG_DEBUG, LOG_INFO, LOG_WARN, LOG_ERROR, LOG_FATAL };
+enum LogType {
+  LOG_EXTERNAL,
+  LOG_DEBUG,
+  LOG_INFO,
+  LOG_WARN,
+  LOG_ERROR,
+  LOG_FATAL
+};
 
 struct LogMessage {
   LogType t;
@@ -87,6 +95,7 @@ struct LogMessage {
 
 class Log {
   std::deque<LogMessage> log;
+  std::mutex mutex;
   LogType level;
 
   Log();

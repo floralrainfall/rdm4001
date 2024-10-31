@@ -9,6 +9,9 @@
 #include "entity.hpp"
 #include "player.hpp"
 
+#define NETWORK_STREAM_META 0
+#define NETWORK_STREAM_ENTITY 1
+
 namespace rdm {
 class World;
 }
@@ -29,6 +32,8 @@ struct Peer {
 
   std::vector<EntityId> pendingNewIds;
   std::vector<EntityId> pendingDelIds;
+
+  Peer();
 };
 
 typedef std::function<Entity*(NetworkManager*, EntityId)>
@@ -45,15 +50,26 @@ class NetworkManager {
 
   EntityId lastId;
   int lastPeerId;
+  size_t ticks;
 
   std::map<std::string, EntityConstructorFunction> constructors;
   std::map<EntityId, std::unique_ptr<Entity>> entities;
 
-  Entity* receiveEntity(std::string typeName, EntityId id);
-
  public:
   NetworkManager(World* world);
   ~NetworkManager();
+
+  World* getWorld() { return world; }
+
+  enum PacketId {
+    WelcomePacket,       // S -> C, beginning of handshake
+    AuthenticatePacket,  // C -> S
+    NewIdPacket,         // S -> C
+    DelIdPacket,         // S -> C
+    NewPeerPacket,       // S -> C
+    DelPeerPacket,       // S -> C
+    PeerInfoPacket,      // S -> C
+  };
 
   void service();
 
@@ -62,7 +78,8 @@ class NetworkManager {
   void connect(std::string address, int port = 7938);
   void requestDisconnect();
 
-  Entity* instantiate(std::string typeName);
+  void deleteEntity(EntityId id);
+  Entity* instantiate(std::string typeName, int id = -1);
   void registerConstructor(EntityConstructorFunction func,
                            std::string typeName);
 };

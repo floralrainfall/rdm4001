@@ -3,6 +3,7 @@
 #include <stdexcept>
 
 #include "filesystem.hpp"
+#include "gfx/base_types.hpp"
 #include "gl_device.hpp"
 #include "logging.hpp"
 #include "scheduler.hpp"
@@ -52,8 +53,9 @@ TextureCache::getOrLoad2d(const char* path, bool keepData) {
           i.data = 0;
           stbi_image_free(uc);
         }
-	
-        return std::pair<TextureCache::Info, BaseTexture*>(i, textures[path].second.get());
+
+        return std::pair<TextureCache::Info, BaseTexture*>(
+            i, textures[path].second.get());
       } else {
         throw std::runtime_error("stbi_load_from_memory");
       }
@@ -97,7 +99,9 @@ BaseTexture* TextureCache::cacheExistingTexture(
 BaseTexture* TextureCache::createCacheTexture(const char* path, Info info) {
   auto it = textures.find(path);
   if (it == textures.end()) {
-    textures[path] = std::pair<TextureCache::Info, std::unique_ptr<BaseTexture>>(info, device->createTexture());
+    textures[path] =
+        std::pair<TextureCache::Info, std::unique_ptr<BaseTexture>>(
+            info, device->createTexture());
   } else {
     throw std::runtime_error("Texture already exists");
   }
@@ -110,9 +114,9 @@ class RenderJob : public SchedulerJob {
   RenderJob(Engine* engine) : SchedulerJob("Render"), engine(engine) {}
 
   virtual double getFrameRate() {
-    double renderFr = Settings::singleton()->getSetting("RenderFrameRate", 60.0);
-    if(renderFr == 0.0)
-      return 0.0;
+    double renderFr =
+        Settings::singleton()->getSetting("RenderFrameRate", 60.0);
+    if (renderFr == 0.0) return 0.0;
     return 1.0 / renderFr;
   }
 
@@ -135,13 +139,21 @@ class RenderJob : public SchedulerJob {
 
         engine->postProcessFrameBuffer->destroyAndCreate();
         engine->fullscreenTexture->destroyAndCreate();
-        engine->fullscreenTexture->reserve2d(fbSizeF.x, fbSizeF.y,
-                                             BaseTexture::RGBA8);
+        engine->fullscreenTexture->reserve2dMultisampled(
+            fbSizeF.x, fbSizeF.y, BaseTexture::RGBA8,
+            engine->fullscreenSamples);
         engine->fullscreenTextureDepth->destroyAndCreate();
-        engine->fullscreenTextureDepth->reserve2d(fbSizeF.x, fbSizeF.y,
-                                                  BaseTexture::D24S8);
+        engine->fullscreenTextureDepth->reserve2dMultisampled(
+            fbSizeF.x, fbSizeF.y, BaseTexture::D24S8,
+            engine->fullscreenSamples);
+        engine->fullscreenTextureBloom->destroyAndCreate();
+        engine->fullscreenTextureBloom->reserve2dMultisampled(
+            fbSizeF.x, fbSizeF.y, BaseTexture::RGBA8,
+            engine->fullscreenSamples);
         engine->postProcessFrameBuffer->setTarget(
             engine->fullscreenTexture.get());
+        engine->postProcessFrameBuffer->setTarget(
+            engine->fullscreenTextureBloom.get(), BaseFrameBuffer::Color1);
         engine->postProcessFrameBuffer->setTarget(
             engine->fullscreenTextureDepth.get(),
             BaseFrameBuffer::DepthStencil);
@@ -179,7 +191,14 @@ class RenderJob : public SchedulerJob {
 
       device->setDepthState(BaseDevice::Always);
       device->setCullState(BaseDevice::None);
-      engine->renderFullscreenQuad(engine->fullscreenTexture.get());
+      engine->renderFullscreenQuad(
+          engine->fullscreenTexture.get(), NULL, [this](BaseProgram* p) {
+            p->setParameter(
+                "bloomChannel", DtSampler,
+                BaseProgram::Parameter{
+                    .texture.slot = 1,
+                    .texture.texture = engine->fullscreenTextureBloom.get()});
+          });
 
       engine->context->swapBuffers();
 
@@ -195,6 +214,7 @@ class RenderJob : public SchedulerJob {
 };
 
 Engine::Engine(World* world, void* hwnd) {
+  fullscreenSamples = 4;
   context = std::unique_ptr<BaseContext>(new gl::GLContext(hwnd));
   std::scoped_lock lock(context->getMutex());
   device = std::unique_ptr<BaseDevice>(
@@ -217,10 +237,18 @@ Engine::Engine(World* world, void* hwnd) {
         DataType::DtVec2, 0, 3, 0, 0, fullscreenBuffer.get()));
     fullscreenTexture = device->createTexture();
     fullscreenTextureDepth = device->createTexture();
+    fullscreenTextureBloom = device->createTexture();
 
-    fullscreenTextureDepth->reserve2d(800, 600, BaseTexture::D24S8);
-    fullscreenTexture->reserve2d(800, 600, BaseTexture::RGBA8);
+    fullscreenTexture->reserve2dMultisampled(1, 1, BaseTexture::RGBA8,
+                                             fullscreenSamples);
+    fullscreenTextureBloom->reserve2dMultisampled(1, 1, BaseTexture::RGBA8,
+                                                  fullscreenSamples);
+    fullscreenTextureDepth->reserve2dMultisampled(1, 1, BaseTexture::D24S8,
+                                                  fullscreenSamples);
+
     postProcessFrameBuffer->setTarget(fullscreenTexture.get());
+    postProcessFrameBuffer->setTarget(fullscreenTexture.get(),
+                                      BaseFrameBuffer::Color1);
     postProcessFrameBuffer->setTarget(fullscreenTextureDepth.get(),
                                       BaseFrameBuffer::DepthStencil);
 
@@ -237,7 +265,9 @@ Engine::Engine(World* world, void* hwnd) {
   isInitialized = false;
 }
 
-void Engine::renderFullscreenQuad(BaseTexture* texture, Material* material, std::function<void(BaseProgram*)> setParameters) {
+void Engine::renderFullscreenQuad(
+    BaseTexture* texture, Material* material,
+    std::function<void(BaseProgram*)> setParameters) {
   if (material == 0) material = fullscreenMaterial.get();
   BaseProgram* fullscreenProgram = material->prepareDevice(device.get(), 0);
   if (fullscreenProgram) {

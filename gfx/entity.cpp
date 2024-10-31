@@ -10,11 +10,9 @@ Entity::Entity(Graph::Node* node) {
 
 void Entity::render(BaseDevice* device) {
   int numTechniques = 1;
-  if(material)
-    numTechniques = material->numTechniques();
+  if (material) numTechniques = material->numTechniques();
   for (int i = 0; i < numTechniques; i++) {
-    if(material)
-      material->prepareDevice(device, i);
+    if (material) material->prepareDevice(device, i);
     renderTechnique(device, i);
   }
 }

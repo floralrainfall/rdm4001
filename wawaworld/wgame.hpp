@@ -13,5 +13,6 @@ class WGame : public Game {
 
   virtual void initialize();
   virtual void initializeClient();
+  virtual void initializeServer();
 };
 };  // namespace ww

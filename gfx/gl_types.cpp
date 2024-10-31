@@ -39,6 +39,9 @@ GLenum GLTexture::texType(BaseTexture::Type type) {
     case Texture2D:
       return GL_TEXTURE_2D;
       break;
+    case Texture2D_MultiSample:
+      return GL_TEXTURE_2D_MULTISAMPLE;
+      break;
     default:
       throw std::runtime_error("Invalid type");
   }
@@ -83,6 +86,18 @@ void GLTexture::reserve2d(int width, int height, InternalFormat format,
   glBindTexture(target, 0);
 }
 
+void GLTexture::reserve2dMultisampled(int width, int height,
+                                      InternalFormat format, int samples) {
+  textureType = Texture2D_MultiSample;
+  textureFormat = format;
+
+  GLenum target = texType(textureType);
+  glBindTexture(target, texture);
+  glTexImage2DMultisample(target, samples, texInternalFormat(textureFormat),
+                          width, height, GL_TRUE);
+  glBindTexture(target, 0);
+}
+
 void GLTexture::upload2d(int width, int height, DataType type,
                          BaseTexture::Format format, void* data,
                          int mipmapLevels) {
@@ -118,14 +133,19 @@ void GLTexture::uploadCubeMap(int width, int height, std::vector<void*> data) {
   textureType = CubeMap;
   GLenum target = texType(textureType);
   glBindTexture(target, texture);
-  if(data.size() == 6) {
-    throw std::runtime_error("std::vector<void*> data.size() must be equal to 6, fill unchanged elements with NULL");
+  if (data.size() == 6) {
+    throw std::runtime_error(
+        "std::vector<void*> data.size() must be equal to 6, fill unchanged "
+        "elements with NULL");
   }
 
-  for(void* p : data) {
-
+  GLenum dt[] = {
+      GL_TEXTURE_CUBE_MAP_POSITIVE_X, GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+      GL_TEXTURE_CUBE_MAP_POSITIVE_Y, GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+      GL_TEXTURE_CUBE_MAP_POSITIVE_Z, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z};
+  for (int i = 0; i < 6; i++) {
   }
-  
+
   glBindTexture(target, 0);
 }
 
@@ -218,8 +238,8 @@ void GLProgram::bindParameters() {
     GLuint object = glGetUniformLocation(program, name.c_str());
     switch (pair.first.type) {
       case DtInt:
-	glUniform1i(object, pair.second.integer);
-	break;
+        glUniform1i(object, pair.second.integer);
+        break;
       case DtMat2:
         glUniformMatrix2fv(object, 1, false,
                            glm::value_ptr(pair.second.matrix2x2));
@@ -340,9 +360,12 @@ void GLFrameBuffer::setTarget(BaseTexture* texture, AttachmentPoint point) {
       atp = GL_COLOR_ATTACHMENT0 + point;
       break;
   }
-  glFramebufferTexture2D(GL_FRAMEBUFFER, atp,
-                         GLTexture::texType(texture->getType()),
-                         _gltexture->getId(), 0);
+  glFramebufferTexture(GL_FRAMEBUFFER, atp, _gltexture->getId(), 0);
+  GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+  if (status != GL_FRAMEBUFFER_COMPLETE) {
+    Log::printf(LOG_ERROR, "Framebuffer status: %04x", status);
+    throw std::runtime_error("Incomplete framebuffer");
+  }
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 

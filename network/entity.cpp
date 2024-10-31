@@ -2,20 +2,17 @@
 
 #include <string>
 
+#include "world.hpp"
+
 namespace rdm::network {
 template <>
 void ReplicateProperty<std::string>::serialize(BitStream& stream) {
-  stream.write<uint16_t>(value.size());
-  for (int i = 0; i < value.size(); i++) stream.write<char>(value[i]);
+  stream.writeString(value);
 }
 
 template <>
 void ReplicateProperty<std::string>::deserialize(BitStream& stream) {
-  uint16_t size = stream.read<uint16_t>();
-  std::string str;
-  str.resize(size);
-  for (int i = 0; i < size; i++) str[i] = stream.read<char>();
-  setRemote(str);
+  setRemote(stream.readString());
 }
 
 template <>
@@ -34,4 +31,6 @@ Entity::Entity(NetworkManager* manager, EntityId id) {
 }
 
 Entity::~Entity() {}
+
+World* Entity::getWorld() { return this->manager->getWorld(); }
 }  // namespace rdm::network
