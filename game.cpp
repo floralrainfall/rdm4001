@@ -77,6 +77,7 @@ void Game::startClient() {
   gfxEngine.reset(new gfx::Engine(world.get(), (void*)window));
   gfxEngine->getContext()->unsetCurrent();
 
+  world->getNetworkManager()->setGfxEngine(gfxEngine.get());
   world->changingTitle.listen(
       [this](std::string title) { SDL_SetWindowTitle(window, title.c_str()); });
 }

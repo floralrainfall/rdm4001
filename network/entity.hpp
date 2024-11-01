@@ -8,7 +8,11 @@
 
 namespace rdm {
 class World;
+
+namespace gfx {
+class Engine;
 }
+}  // namespace rdm
 
 namespace rdm::network {
 typedef uint16_t EntityId;
@@ -35,8 +39,6 @@ class ReplicateProperty {
     dirty = false;
   }
 
-  void clearDirty() { dirty = false; }
-
  public:
   // old, new
   Signal<T, T> changingLocally;
@@ -51,6 +53,9 @@ class ReplicateProperty {
   }
 
   T get() { return value; }
+
+  bool isDirty() { return dirty; };
+  void clearDirty() { dirty = false; }
 
   void serialize(BitStream& stream);
   void deserialize(BitStream& stream);
@@ -69,11 +74,13 @@ class Entity {
   virtual ~Entity();
 
   World* getWorld();
+  gfx::Engine* getGfxEngine();
 
   EntityId getEntityId() { return id; }
 
   virtual void serialize(BitStream& stream) {};
   virtual void deserialize(BitStream& stream) {};
+  virtual bool dirty() { return false; }
   virtual const char* getTypeName() { return "Entity"; };
 };
 

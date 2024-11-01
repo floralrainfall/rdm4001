@@ -33,4 +33,5 @@ Entity::Entity(NetworkManager* manager, EntityId id) {
 Entity::~Entity() {}
 
 World* Entity::getWorld() { return this->manager->getWorld(); }
+gfx::Engine* Entity::getGfxEngine() { return this->manager->getGfxEngine(); }
 }  // namespace rdm::network

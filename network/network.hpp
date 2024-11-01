@@ -50,11 +50,14 @@ class NetworkManager {
   Peer localPeer;
   std::map<int, Peer> peers;
   World* world;
+  gfx::Engine* gfxEngine;
   bool backend;
 
   EntityId lastId;
   int lastPeerId;
   size_t ticks;
+
+  std::string playerType;
 
   std::map<std::string, EntityConstructorFunction> constructors;
   std::map<EntityId, std::unique_ptr<Entity>> entities;
@@ -87,5 +90,13 @@ class NetworkManager {
   Entity* instantiate(std::string typeName, int id = -1);
   void registerConstructor(EntityConstructorFunction func,
                            std::string typeName);
+  Entity* findEntityByType(std::string typeName);
+
+  void setGfxEngine(gfx::Engine* engine) { gfxEngine = engine; }
+  gfx::Engine* getGfxEngine() { return gfxEngine; }
+
+  void setPlayerType(std::string type) { playerType = type; };
+  Peer& getLocalPeer() { return localPeer; }
+  bool isBackend() { return backend; }
 };
 }  // namespace rdm::network

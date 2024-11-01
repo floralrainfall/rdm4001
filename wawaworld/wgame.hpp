@@ -1,5 +1,6 @@
 #pragma once
 #include "game.hpp"
+#include "network/network.hpp"
 
 namespace ww {
 using namespace rdm;
@@ -10,6 +11,8 @@ class WGame : public Game {
  public:
   WGame();
   ~WGame();
+
+  void addEntityConstructors(network::NetworkManager* manager);
 
   virtual void initialize();
   virtual void initializeClient();

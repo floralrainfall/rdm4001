@@ -42,6 +42,7 @@ NetworkManager::NetworkManager(World* world) {
   ticks = 0;
 
   registerConstructor(EntityConstructor<Player>, "Player");
+  playerType = "Player";
 }
 
 NetworkManager::~NetworkManager() {
@@ -104,7 +105,7 @@ void NetworkManager::service() {
 
                 Log::printf(LOG_INFO, "%s authenticating", username.c_str());
                 remotePeer->type = Peer::ConnectedPlayer;
-                remotePeer->playerEntity = (Player*)instantiate("Player");
+                remotePeer->playerEntity = (Player*)instantiate(playerType);
                 remotePeer->playerEntity->remotePeerId.set(remotePeer->peerId);
                 remotePeer->playerEntity->displayName.set(username);
                 for (auto& e : entities)
@@ -378,5 +379,12 @@ Entity* NetworkManager::instantiate(std::string typeName, int _id) {
                 typeName.c_str());
     throw std::runtime_error("Could not instantiate unknown entity");
   }
+}
+
+Entity* NetworkManager::findEntityByType(std::string typeName) {
+  for (auto& entity : entities) {
+    if (entity.second->getTypeName() == typeName) return entity.second.get();
+  }
+  return NULL;
 }
 }  // namespace rdm::network

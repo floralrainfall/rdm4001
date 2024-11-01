@@ -118,5 +118,7 @@ executable('wawaworld', [
   'wawaworld/map.cpp',
   'wawaworld/map.hpp',
   'wawaworld/wgame.cpp',
-  'wawaworld/wgame.hpp'
+  'wawaworld/wgame.hpp',
+  'wawaworld/worldspawn.cpp',
+  'wawaworld/worldspawn.hpp'
 ], include_directories: [inc, inc2], dependencies: [common_dep, sdl2, glm, b3geometry_dep], link_with: gamelib)

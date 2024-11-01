@@ -15,6 +15,7 @@ class Player : public Entity {
 
   virtual const char* getTypeName() { return "Player"; };
 
+  virtual bool isDirty() { return remotePeerId.isDirty(); }
   virtual void serialize(BitStream& stream);
   virtual void deserialize(BitStream& stream);
 };
