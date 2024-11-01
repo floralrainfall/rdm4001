@@ -42,6 +42,9 @@ GLenum GLTexture::texType(BaseTexture::Type type) {
     case Texture2D_MultiSample:
       return GL_TEXTURE_2D_MULTISAMPLE;
       break;
+    case CubeMap:
+      return GL_TEXTURE_CUBE_MAP;
+      break;
     default:
       throw std::runtime_error("Invalid type");
   }
@@ -133,7 +136,7 @@ void GLTexture::uploadCubeMap(int width, int height, std::vector<void*> data) {
   textureType = CubeMap;
   GLenum target = texType(textureType);
   glBindTexture(target, texture);
-  if (data.size() == 6) {
+  if (data.size() != 6) {
     throw std::runtime_error(
         "std::vector<void*> data.size() must be equal to 6, fill unchanged "
         "elements with NULL");
@@ -144,7 +147,15 @@ void GLTexture::uploadCubeMap(int width, int height, std::vector<void*> data) {
       GL_TEXTURE_CUBE_MAP_POSITIVE_Y, GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
       GL_TEXTURE_CUBE_MAP_POSITIVE_Z, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z};
   for (int i = 0; i < 6; i++) {
+    glTexImage2D(dt[i], 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE,
+                 data[i]);
   }
+
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
   glBindTexture(target, 0);
 }

@@ -8,188 +8,188 @@ default
 
 0 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/seaboxs
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	shader textures/rdm/seabox
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-1 // SURFACE_META V: 4 I: 6 planar
+1 // SURFACE_META V: 5 I: 9 planar
 {
-	shader textures/rdm/seaboxs
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-2 // SURFACE_META V: 5 I: 9 planar
-{
-	shader textures/rdm/seaboxs
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
-}
-
-3 // SURFACE_META V: 5 I: 9 planar
-{
-	shader textures/rdm/seaboxs
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-4 // SURFACE_META V: 6 I: 12 planar
-{
-	shader textures/rdm/seaboxs
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
-}
-
-5 // SURFACE_META V: 7 I: 15 planar
-{
-	shader textures/rdm/seaboxs
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
-}
-
-6 // SURFACE_META V: 7 I: 15 planar
-{
-	shader textures/rdm/seaboxs
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-7 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/seaboxs
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-8 // SURFACE_META V: 5 I: 9 planar
-{
-	shader textures/rdm/seaboxs
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
-}
-
-9 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/seaboxs
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
-}
-
-10 // SURFACE_META V: 5 I: 9 planar
-{
-	shader textures/rdm/seaboxs
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-11 // SURFACE_META V: 5 I: 9 planar
-{
-	shader textures/rdm/seaboxs
+	shader textures/rdm/seabox
 	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-12 // SURFACE_META V: 7 I: 15 planar
+2 // SURFACE_META V: 6 I: 12 planar
 {
-	shader textures/rdm/seaboxs
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	shader textures/rdm/seabox
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-13 // SURFACE_META V: 8 I: 18 planar
+3 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/seaboxs
+	shader textures/rdm/seabox
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+4 // SURFACE_META V: 5 I: 9 planar
+{
+	shader textures/rdm/seabox
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+5 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/seabox
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+6 // SURFACE_META V: 5 I: 9 planar
+{
+	shader textures/rdm/seabox
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+7 // SURFACE_META V: 7 I: 15 planar
+{
+	shader textures/rdm/seabox
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+8 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/seabox
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+9 // SURFACE_META V: 5 I: 9 planar
+{
+	shader textures/rdm/seabox
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+10 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/seabox
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+11 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/seabox
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+12 // SURFACE_META V: 5 I: 9 planar
+{
+	shader textures/rdm/seabox
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+13 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/seabox
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 14 // SURFACE_META V: 5 I: 9 planar
 {
-	shader textures/rdm/seaboxs
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	shader textures/rdm/seabox
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 15 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/seaboxs
+	shader textures/rdm/seabox
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+16 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/seabox
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+17 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/seabox
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-16 // SURFACE_META V: 6 I: 12 planar
+18 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/seaboxs
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
-}
-
-17 // SURFACE_META V: 6 I: 12 planar
-{
-	shader textures/rdm/seaboxs
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-18 // SURFACE_META V: 5 I: 9 planar
-{
-	shader textures/rdm/seaboxs
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	shader textures/rdm/seabox
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
 19 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/seaboxs
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	shader textures/rdm/seabox
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-20 // SURFACE_META V: 4 I: 6 planar
+20 // SURFACE_META V: 5 I: 9 planar
 {
-	shader textures/rdm/seaboxs
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	shader textures/rdm/seabox
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 21 // SURFACE_META V: 5 I: 9 planar
 {
-	shader textures/rdm/seaboxs
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	shader textures/rdm/seabox
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-22 // SURFACE_META V: 6 I: 12 planar
+22 // SURFACE_META V: 5 I: 9 planar
 {
-	shader textures/rdm/seaboxs
+	shader textures/rdm/seabox
 	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-23 // SURFACE_META V: 7 I: 15 planar
+23 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/seaboxs
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+	shader textures/rdm/seabox
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 24 // SURFACE_META V: 5 I: 9 planar
 {
-	shader textures/rdm/seaboxs
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
-}
-
-25 // SURFACE_META V: 6 I: 12 planar
-{
-	shader textures/rdm/seaboxs
+	shader textures/rdm/seabox
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-26 // SURFACE_META V: 5 I: 9 planar
+25 // SURFACE_META V: 5 I: 9 planar
 {
-	shader textures/rdm/seaboxs
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-27 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/seaboxs
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-28 // SURFACE_META V: 6 I: 12 planar
-{
-	shader textures/rdm/seaboxs
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
-}
-
-29 // SURFACE_META V: 5 I: 9 planar
-{
-	shader textures/rdm/seaboxs
+	shader textures/rdm/seabox
 	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-30 // SURFACE_META V: 6 I: 12 planar
+26 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/seabox
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+27 // SURFACE_META V: 5 I: 9 planar
+{
+	shader textures/rdm/seabox
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+28 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/seabox
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+29 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/seabox
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+30 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/seaboxs
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 31 // SURFACE_META V: 4 I: 6 planar
@@ -198,10 +198,10 @@ default
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-32 // SURFACE_META V: 6 I: 12 planar
+32 // SURFACE_META V: 5 I: 9 planar
 {
 	shader textures/rdm/seaboxs
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
 33 // SURFACE_META V: 5 I: 9 planar
@@ -213,34 +213,34 @@ default
 34 // SURFACE_META V: 6 I: 12 planar
 {
 	shader textures/rdm/seaboxs
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-35 // SURFACE_META V: 5 I: 9 planar
-{
-	shader textures/rdm/seaboxs
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-36 // SURFACE_META V: 5 I: 9 planar
+35 // SURFACE_META V: 7 I: 15 planar
 {
 	shader textures/rdm/seaboxs
 	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
-37 // SURFACE_META V: 7 I: 15 planar
+36 // SURFACE_META V: 7 I: 15 planar
+{
+	shader textures/rdm/seaboxs
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+37 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/seaboxs
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+38 // SURFACE_META V: 5 I: 9 planar
 {
 	shader textures/rdm/seaboxs
 	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-38 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/seaboxs
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
-}
-
-39 // SURFACE_META V: 5 I: 9 planar
+39 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/seaboxs
 	lightmapAxis ( 0.000000 0.000000 -1.000000 )
@@ -249,37 +249,37 @@ default
 40 // SURFACE_META V: 5 I: 9 planar
 {
 	shader textures/rdm/seaboxs
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+41 // SURFACE_META V: 5 I: 9 planar
+{
+	shader textures/rdm/seaboxs
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+42 // SURFACE_META V: 7 I: 15 planar
+{
+	shader textures/rdm/seaboxs
 	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-41 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/seaboxs
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
-}
-
-42 // SURFACE_META V: 5 I: 9 planar
-{
-	shader textures/rdm/seaboxs
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-43 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/seaboxs
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-44 // SURFACE_META V: 6 I: 12 planar
-{
-	shader textures/rdm/seaboxs
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-45 // SURFACE_META V: 5 I: 9 planar
+43 // SURFACE_META V: 8 I: 18 planar
 {
 	shader textures/rdm/seaboxs
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+44 // SURFACE_META V: 5 I: 9 planar
+{
+	shader textures/rdm/seaboxs
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+45 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/seaboxs
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 46 // SURFACE_META V: 6 I: 12 planar
@@ -288,214 +288,214 @@ default
 	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
-47 // SURFACE_META V: 4 I: 6 planar
+47 // SURFACE_META V: 6 I: 12 planar
 {
 	shader textures/rdm/seaboxs
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-48 // SURFACE_META V: 4 I: 6 planar
+48 // SURFACE_META V: 5 I: 9 planar
 {
 	shader textures/rdm/seaboxs
 	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-49 // SURFACE_META V: 6 I: 12 planar
+49 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/seaboxs
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
 50 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/seaboxs
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
 51 // SURFACE_META V: 5 I: 9 planar
 {
 	shader textures/rdm/seaboxs
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+52 // SURFACE_META V: 6 I: 12 planar
+{
+	shader textures/rdm/seaboxs
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+53 // SURFACE_META V: 7 I: 15 planar
+{
+	shader textures/rdm/seaboxs
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+}
+
+54 // SURFACE_META V: 5 I: 9 planar
+{
+	shader textures/rdm/seaboxs
 	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-52 // SURFACE_META V: 4 I: 6 planar
+55 // SURFACE_META V: 6 I: 12 planar
 {
-	shader textures/rdm/seabox
+	shader textures/rdm/seaboxs
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
-}
-
-53 // SURFACE_META V: 5 I: 9 planar
-{
-	shader textures/rdm/seabox
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-54 // SURFACE_META V: 6 I: 12 planar
-{
-	shader textures/rdm/seabox
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-55 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/seabox
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
 56 // SURFACE_META V: 5 I: 9 planar
 {
-	shader textures/rdm/seabox
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	shader textures/rdm/seaboxs
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 57 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/seabox
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
-}
-
-58 // SURFACE_META V: 5 I: 9 planar
-{
-	shader textures/rdm/seabox
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-59 // SURFACE_META V: 7 I: 15 planar
-{
-	shader textures/rdm/seabox
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
-}
-
-60 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/seabox
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-61 // SURFACE_META V: 5 I: 9 planar
-{
-	shader textures/rdm/seabox
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
-}
-
-62 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/seabox
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-63 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/seabox
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-64 // SURFACE_META V: 5 I: 9 planar
-{
-	shader textures/rdm/seabox
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-65 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/seabox
+	shader textures/rdm/seaboxs
 	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+58 // SURFACE_META V: 6 I: 12 planar
+{
+	shader textures/rdm/seaboxs
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+59 // SURFACE_META V: 5 I: 9 planar
+{
+	shader textures/rdm/seaboxs
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+60 // SURFACE_META V: 6 I: 12 planar
+{
+	shader textures/rdm/seaboxs
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+61 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/seaboxs
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+62 // SURFACE_META V: 6 I: 12 planar
+{
+	shader textures/rdm/seaboxs
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+63 // SURFACE_META V: 5 I: 9 planar
+{
+	shader textures/rdm/seaboxs
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+64 // SURFACE_META V: 6 I: 12 planar
+{
+	shader textures/rdm/seaboxs
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+65 // SURFACE_META V: 5 I: 9 planar
+{
+	shader textures/rdm/seaboxs
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
 66 // SURFACE_META V: 5 I: 9 planar
 {
-	shader textures/rdm/seabox
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	shader textures/rdm/seaboxs
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
-67 // SURFACE_META V: 4 I: 6 planar
+67 // SURFACE_META V: 7 I: 15 planar
 {
-	shader textures/rdm/seabox
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	shader textures/rdm/seaboxs
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
 68 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/seabox
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	shader textures/rdm/seaboxs
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-69 // SURFACE_META V: 4 I: 6 planar
+69 // SURFACE_META V: 5 I: 9 planar
 {
-	shader textures/rdm/seabox
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	shader textures/rdm/seaboxs
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
-70 // SURFACE_META V: 4 I: 6 planar
+70 // SURFACE_META V: 5 I: 9 planar
 {
-	shader textures/rdm/seabox
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	shader textures/rdm/seaboxs
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
 71 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/seabox
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	shader textures/rdm/seaboxs
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
 72 // SURFACE_META V: 5 I: 9 planar
 {
-	shader textures/rdm/seabox
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-73 // SURFACE_META V: 5 I: 9 planar
-{
-	shader textures/rdm/seabox
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-74 // SURFACE_META V: 5 I: 9 planar
-{
-	shader textures/rdm/seabox
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-75 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/seabox
+	shader textures/rdm/seaboxs
 	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-76 // SURFACE_META V: 5 I: 9 planar
+73 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/seabox
+	shader textures/rdm/seaboxs
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+74 // SURFACE_META V: 6 I: 12 planar
+{
+	shader textures/rdm/seaboxs
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+75 // SURFACE_META V: 5 I: 9 planar
+{
+	shader textures/rdm/seaboxs
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-77 // SURFACE_META V: 5 I: 9 planar
+76 // SURFACE_META V: 6 I: 12 planar
 {
-	shader textures/rdm/seabox
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	shader textures/rdm/seaboxs
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+}
+
+77 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/seaboxs
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 78 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/seabox
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	shader textures/rdm/seaboxs
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-79 // SURFACE_META V: 5 I: 9 planar
+79 // SURFACE_META V: 6 I: 12 planar
 {
-	shader textures/rdm/seabox
+	shader textures/rdm/seaboxs
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
 80 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/seabox
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	shader textures/rdm/seaboxs
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-81 // SURFACE_META V: 4 I: 6 planar
+81 // SURFACE_META V: 5 I: 9 planar
 {
-	shader textures/rdm/seabox
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	shader textures/rdm/seaboxs
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
 82 // SURFACE_META V: 4 I: 6 planar
@@ -2400,190 +2400,190 @@ default
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-399 // SURFACE_META V: 3 I: 3 planar
-{
-	shader textures/rdm/brick
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
-}
-
-400 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/brick
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-401 // SURFACE_META V: 5 I: 9 planar
-{
-	shader textures/rdm/brick
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-402 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/brick
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
-}
-
-403 // SURFACE_META V: 6 I: 12 planar
-{
-	shader textures/rdm/brick
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-404 // SURFACE_META V: 15 I: 36 planar
-{
-	shader textures/rdm/brick
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-405 // SURFACE_META V: 6 I: 12 planar
-{
-	shader textures/rdm/brick
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-406 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/brick
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-407 // SURFACE_META V: 5 I: 9 planar
-{
-	shader textures/rdm/brick
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-408 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/brick
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-409 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/brick
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
-}
-
-410 // SURFACE_META V: 7 I: 15 planar
-{
-	shader textures/rdm/brick
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
-}
-
-411 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/brick
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-412 // SURFACE_META V: 9 I: 21 planar
-{
-	shader textures/rdm/brick
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-413 // SURFACE_META V: 3 I: 3 planar
-{
-	shader textures/rdm/brick
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
-}
-
-414 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/brick
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
-}
-
-415 // SURFACE_META V: 3 I: 3 planar
-{
-	shader textures/rdm/brick
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
-}
-
-416 // SURFACE_META V: 4 I: 6 planar
+399 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-417 // SURFACE_META V: 10 I: 18 planar
+400 // SURFACE_META V: 10 I: 18 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-418 // SURFACE_META V: 22 I: 48 planar
+401 // SURFACE_META V: 22 I: 48 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-419 // SURFACE_META V: 5 I: 9 planar
+402 // SURFACE_META V: 5 I: 9 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-420 // SURFACE_META V: 7 I: 15 planar
+403 // SURFACE_META V: 7 I: 15 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
-421 // SURFACE_META V: 4 I: 6 planar
+404 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+405 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+}
+
+406 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+407 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+408 // SURFACE_META V: 23 I: 45 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+409 // SURFACE_META V: 7 I: 15 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+}
+
+410 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+411 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+}
+
+412 // SURFACE_META V: 6 I: 12 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+}
+
+413 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+414 // SURFACE_META V: 11 I: 27 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+415 // SURFACE_META V: 6 I: 12 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+416 // SURFACE_META V: 7 I: 15 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+417 // SURFACE_META V: 13 I: 27 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+}
+
+418 // SURFACE_META V: 27 I: 57 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+419 // SURFACE_META V: 14 I: 24 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+420 // SURFACE_META V: 12 I: 18 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+421 // SURFACE_META V: 14 I: 24 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
 422 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 423 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
 424 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+425 // SURFACE_META V: 14 I: 24 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+}
+
+426 // SURFACE_META V: 8 I: 18 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+427 // SURFACE_META V: 49 I: 105 planar
+{
+	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-425 // SURFACE_META V: 23 I: 45 planar
+428 // SURFACE_META V: 26 I: 48 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-426 // SURFACE_META V: 7 I: 15 planar
+429 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
-}
-
-427 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-428 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
-}
-
-429 // SURFACE_META V: 6 I: 12 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 430 // SURFACE_META V: 4 I: 6 planar
@@ -2592,190 +2592,190 @@ default
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-431 // SURFACE_META V: 11 I: 27 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-432 // SURFACE_META V: 6 I: 12 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-433 // SURFACE_META V: 7 I: 15 planar
+431 // SURFACE_META V: 30 I: 66 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-434 // SURFACE_META V: 13 I: 27 planar
+432 // SURFACE_META V: 14 I: 30 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+433 // SURFACE_META V: 24 I: 54 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+434 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
-435 // SURFACE_META V: 27 I: 57 planar
+435 // SURFACE_META V: 9 I: 21 planar
 {
 	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-436 // SURFACE_META V: 14 I: 24 planar
+436 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-437 // SURFACE_META V: 12 I: 18 planar
+437 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-438 // SURFACE_META V: 14 I: 24 planar
+438 // SURFACE_META V: 7 I: 15 planar
 {
 	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 439 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
 440 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-441 // SURFACE_META V: 4 I: 6 planar
+441 // SURFACE_META V: 7 I: 15 planar
 {
 	shader textures/rdm/concrete
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
 442 // SURFACE_META V: 14 I: 24 planar
 {
 	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-443 // SURFACE_META V: 8 I: 18 planar
+443 // SURFACE_META V: 12 I: 18 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-444 // SURFACE_META V: 49 I: 105 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-445 // SURFACE_META V: 26 I: 48 planar
+444 // SURFACE_META V: 14 I: 24 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-446 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-447 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-448 // SURFACE_META V: 30 I: 66 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-449 // SURFACE_META V: 14 I: 30 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
-}
-
-450 // SURFACE_META V: 24 I: 54 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
-}
-
-451 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
-}
-
-452 // SURFACE_META V: 9 I: 21 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-453 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-454 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-455 // SURFACE_META V: 7 I: 15 planar
+445 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-456 // SURFACE_META V: 4 I: 6 planar
+446 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-457 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
-}
-
-458 // SURFACE_META V: 7 I: 15 planar
+447 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
-459 // SURFACE_META V: 14 I: 24 planar
+448 // SURFACE_META V: 7 I: 15 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+449 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+450 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-460 // SURFACE_META V: 12 I: 18 planar
+451 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-461 // SURFACE_META V: 14 I: 24 planar
+452 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+453 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+454 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+}
+
+455 // SURFACE_META V: 6 I: 12 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+456 // SURFACE_META V: 6 I: 12 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+457 // SURFACE_META V: 9 I: 21 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+458 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+459 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+460 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+461 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 462 // SURFACE_META V: 4 I: 6 planar
@@ -2787,7 +2787,7 @@ default
 463 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
 464 // SURFACE_META V: 4 I: 6 planar
@@ -2796,67 +2796,67 @@ default
 	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
-465 // SURFACE_META V: 7 I: 15 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-466 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-467 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-468 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
-}
-
-469 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-470 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
-}
-
-471 // SURFACE_META V: 4 I: 6 planar
+465 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
-472 // SURFACE_META V: 6 I: 12 planar
+466 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+467 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+}
+
+468 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+469 // SURFACE_META V: 5 I: 9 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+470 // SURFACE_META V: 5 I: 9 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+471 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-473 // SURFACE_META V: 6 I: 12 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
-}
-
-474 // SURFACE_META V: 9 I: 21 planar
+472 // SURFACE_META V: 31 I: 99 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-475 // SURFACE_META V: 4 I: 6 planar
+473 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+474 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+475 // SURFACE_META V: 15 I: 36 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 0.000000 1.000000 )
@@ -2865,133 +2865,133 @@ default
 476 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 477 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-478 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-479 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-480 // SURFACE_META V: 4 I: 6 planar
+478 // SURFACE_META V: 11 I: 30 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+}
+
+479 // SURFACE_META V: 3 I: 3 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+480 // SURFACE_META V: 6 I: 12 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
 481 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 482 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
-}
-
-483 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-484 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
-}
-
-485 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-486 // SURFACE_META V: 5 I: 9 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-487 // SURFACE_META V: 5 I: 9 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-488 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
-}
-
-489 // SURFACE_META V: 31 I: 99 planar
-{
-	shader textures/rdm/concrete
 	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-490 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-491 // SURFACE_META V: 4 I: 6 planar
+483 // SURFACE_META V: 10 I: 24 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-492 // SURFACE_META V: 15 I: 36 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
-}
-
-493 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-494 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-495 // SURFACE_META V: 11 I: 30 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
-}
-
-496 // SURFACE_META V: 3 I: 3 planar
+484 // SURFACE_META V: 12 I: 30 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-497 // SURFACE_META V: 6 I: 12 planar
+485 // SURFACE_META V: 29 I: 93 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+486 // SURFACE_META V: 10 I: 24 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+487 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+488 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+}
+
+489 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+490 // SURFACE_META V: 14 I: 36 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+491 // SURFACE_META V: 6 I: 12 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+492 // SURFACE_META V: 5 I: 9 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+493 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+494 // SURFACE_META V: 19 I: 51 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+495 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+496 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+497 // SURFACE_META V: 10 I: 18 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
 498 // SURFACE_META V: 4 I: 6 planar
@@ -3000,70 +3000,70 @@ default
 	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-499 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-500 // SURFACE_META V: 10 I: 24 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-501 // SURFACE_META V: 12 I: 30 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-502 // SURFACE_META V: 29 I: 93 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
-}
-
-503 // SURFACE_META V: 10 I: 24 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-504 // SURFACE_META V: 4 I: 6 planar
+499 // SURFACE_META V: 10 I: 24 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-505 // SURFACE_META V: 4 I: 6 planar
+500 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+501 // SURFACE_META V: 10 I: 24 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+502 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+503 // SURFACE_META V: 11 I: 30 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
-506 // SURFACE_META V: 4 I: 6 planar
+504 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+505 // SURFACE_META V: 7 I: 15 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-507 // SURFACE_META V: 14 I: 36 planar
+506 // SURFACE_META V: 5 I: 9 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-508 // SURFACE_META V: 6 I: 12 planar
+507 // SURFACE_META V: 8 I: 12 planar
 {
 	shader textures/rdm/concrete
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-509 // SURFACE_META V: 5 I: 9 planar
+508 // SURFACE_META V: 9 I: 15 planar
 {
 	shader textures/rdm/concrete
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+}
+
+509 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
 510 // SURFACE_META V: 4 I: 6 planar
@@ -3072,28 +3072,28 @@ default
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-511 // SURFACE_META V: 19 I: 51 planar
+511 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
 512 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+513 // SURFACE_META V: 12 I: 30 planar
+{
+	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-513 // SURFACE_META V: 4 I: 6 planar
+514 // SURFACE_META V: 10 I: 24 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
-}
-
-514 // SURFACE_META V: 10 I: 18 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
 515 // SURFACE_META V: 4 I: 6 planar
@@ -3102,31 +3102,31 @@ default
 	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-516 // SURFACE_META V: 10 I: 24 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
-}
-
-517 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-518 // SURFACE_META V: 10 I: 24 planar
+516 // SURFACE_META V: 12 I: 24 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
+517 // SURFACE_META V: 7 I: 15 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+518 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+}
+
 519 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-520 // SURFACE_META V: 11 I: 30 planar
+520 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 0.000000 -1.000000 )
@@ -3135,145 +3135,145 @@ default
 521 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-522 // SURFACE_META V: 7 I: 15 planar
+522 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-523 // SURFACE_META V: 5 I: 9 planar
+523 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-524 // SURFACE_META V: 8 I: 12 planar
+524 // SURFACE_META V: 5 I: 9 planar
+{
+	shader textures/rdm/concrete
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+}
+
+525 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/concrete
 	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-525 // SURFACE_META V: 9 I: 15 planar
+526 // SURFACE_META V: 6 I: 12 planar
 {
 	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-526 // SURFACE_META V: 4 I: 6 planar
+527 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-527 // SURFACE_META V: 4 I: 6 planar
+528 // SURFACE_META V: 3 I: 3 planar
 {
-	shader textures/rdm/concrete
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-528 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+	shader textures/rdm/brick
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
 529 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/concrete
+	shader textures/rdm/brick
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-530 // SURFACE_META V: 12 I: 30 planar
+530 // SURFACE_META V: 5 I: 9 planar
 {
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	shader textures/rdm/brick
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-531 // SURFACE_META V: 10 I: 24 planar
+531 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	shader textures/rdm/brick
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-532 // SURFACE_META V: 4 I: 6 planar
+532 // SURFACE_META V: 6 I: 12 planar
 {
-	shader textures/rdm/concrete
+	shader textures/rdm/brick
 	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-533 // SURFACE_META V: 12 I: 24 planar
+533 // SURFACE_META V: 15 I: 36 planar
 {
-	shader textures/rdm/concrete
+	shader textures/rdm/brick
 	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-534 // SURFACE_META V: 7 I: 15 planar
+534 // SURFACE_META V: 6 I: 12 planar
 {
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	shader textures/rdm/brick
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 535 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+	shader textures/rdm/brick
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-536 // SURFACE_META V: 4 I: 6 planar
+536 // SURFACE_META V: 5 I: 9 planar
 {
-	shader textures/rdm/concrete
+	shader textures/rdm/brick
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 537 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+	shader textures/rdm/brick
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
 538 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/concrete
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	shader textures/rdm/brick
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-539 // SURFACE_META V: 4 I: 6 planar
+539 // SURFACE_META V: 7 I: 15 planar
 {
-	shader textures/rdm/concrete
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	shader textures/rdm/brick
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
 540 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/concrete
+	shader textures/rdm/brick
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-541 // SURFACE_META V: 5 I: 9 planar
+541 // SURFACE_META V: 9 I: 21 planar
 {
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+	shader textures/rdm/brick
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-542 // SURFACE_META V: 4 I: 6 planar
+542 // SURFACE_META V: 3 I: 3 planar
 {
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	shader textures/rdm/brick
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-543 // SURFACE_META V: 6 I: 12 planar
+543 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	shader textures/rdm/brick
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
 544 // SURFACE_META V: 3 I: 3 planar
 {
-	shader textures/rdm/concrete
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	shader textures/rdm/brick
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
 545 // SURFACE_META V: 5 I: 9 planar
@@ -3282,7 +3282,7 @@ default
 	sampleSize 0
 }
 
-546 // SURFACE_META V: 9 I: 21 planar
+546 // SURFACE_META V: 11 I: 21 planar
 {
 	shader textures/skies/skybox
 	sampleSize 0

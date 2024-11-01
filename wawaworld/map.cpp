@@ -215,7 +215,7 @@ BSPFaceModel BSPFile::addFaceModel(BSPFace* face) {
           engine->getMaterialCache()
               ->getOrLoad("BspSky")
               .value();  // Material::getMaterial("materials/bsp/sky.mmf")->getProgram();
-      m.m_texture = m_skybox;
+      m.m_texture = m_skybox.get();
     } else {
       m.m_program = engine->getMaterialCache()->getOrLoad("BspBrush").value();
       std::string extensions[] = {
@@ -443,6 +443,54 @@ void BSPFile::initGfx(gfx::Engine* engine) {
       "textures/skybox/gen0/positive_z.png",
   };
   m_skybox->loadCubemap(cubemap_textures);*/
+
+  try {
+    std::vector<void*> cubemap_textures = {
+        engine->getTextureCache()
+            ->getOrLoad2d("dat5/baseq3/textures/skies/null_plainsky512_rt.jpg",
+                          true)
+            .value()
+            .first.data,
+        engine->getTextureCache()
+            ->getOrLoad2d("dat5/baseq3/textures/skies/null_plainsky512_lf.jpg",
+                          true)
+            .value()
+            .first.data,
+        engine->getTextureCache()
+            ->getOrLoad2d("dat5/baseq3/textures/skies/null_plainsky512_dn.jpg",
+                          true)
+            .value()
+            .first.data,
+        engine->getTextureCache()
+            ->getOrLoad2d("dat5/baseq3/textures/skies/null_plainsky512_up.jpg",
+                          true)
+            .value()
+            .first.data,
+        engine->getTextureCache()
+            ->getOrLoad2d("dat5/baseq3/textures/skies/null_plainsky512_bk.jpg",
+                          true)
+            .value()
+            .first.data,
+        engine->getTextureCache()
+            ->getOrLoad2d("dat5/baseq3/textures/skies/null_plainsky512_ft.jpg",
+                          true)
+            .value()
+            .first.data,
+    };
+    m_skybox = engine->getDevice()->createTexture();
+    m_skybox->uploadCubeMap(
+        engine->getTextureCache()
+            ->getOrLoad2d("dat5/baseq3/textures/skies/null_plainsky512_lf.jpg")
+            .value()
+            .first.width,
+        engine->getTextureCache()
+            ->getOrLoad2d("dat5/baseq3/textures/skies/null_plainsky512_lf.jpg")
+            .value()
+            .first.height,
+        cubemap_textures);
+  } catch (std::exception& e) {
+    Log::printf(LOG_ERROR, "error loading skybox, %s", e.what());
+  }
 
   BSPNode* root = (BSPNode*)direntData[BSP_NODES];
 

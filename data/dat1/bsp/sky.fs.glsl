@@ -5,6 +5,7 @@ in vec4 v_fcolor;  // the input variable from the vertex shader (same name and
                    // same type)
 in vec3 v_fnormal;
 in vec3 v_fmpos;
+in vec4 v_fvpos;
 in vec2 v_fuv;
 in vec2 v_flm_uv;
 
@@ -54,8 +55,8 @@ uniform mat4 viewMatrix;
 uniform samplerCube skybox;
 
 void main() {
-  vec3 i = normalize(v_fmpos.xyz);
+  vec3 i = normalize(v_fvpos.xyz);
   vec3 viewR = reflect(i, normalize(v_fnormal));
   vec3 worldR = inverse(mat3(viewMatrix)) * i;
-  f_color = texture(skybox, worldR);
+  f_color = texture(skybox, vec3(worldR.x, -worldR.z, worldR.y));
 }

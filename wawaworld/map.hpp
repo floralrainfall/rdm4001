@@ -133,7 +133,7 @@ struct BSPBrushSide {
 struct BSPBrushModelSide {
   BSPPlane plane;
 };
-  
+
 struct BSPBrushModel {
   std::vector<BSPBrushModelSide> brushSides;
   unsigned int texture;
@@ -164,7 +164,7 @@ class BSPFile {
   int m_facesRendered;
   int m_leafsRendered;
 
-  gfx::BaseTexture* m_skybox;
+  std::unique_ptr<gfx::BaseTexture> m_skybox;
 
   void readEntitesLump(BSPDirentry* dirent);
   void addLeafFaces(BSPLeaf* leaf, bool brush, bool leafface);
@@ -173,7 +173,7 @@ class BSPFile {
   void renderFaceModel(BSPFaceModel* model, gfx::BaseProgram* program);
 
   gfx::Engine* engine;
-  
+
  public:
   BSPFile(const char* bsp);
   ~BSPFile();
@@ -204,6 +204,7 @@ class BSPFile {
 class MapEntity : public gfx::Entity {
   virtual void renderTechnique(gfx::BaseDevice* device, int id);
   BSPFile* f;
+
  public:
   MapEntity(BSPFile* rsc, Graph::Node* node = NULL);
   virtual ~MapEntity();

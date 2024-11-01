@@ -444,8 +444,8 @@ textures/skies/skybox
 	surfaceparm nolightmap
         q3map_lightimage textures/common/white.tga
 	qer_editorimage textures/rdm/sky.tga
-        q3map_sun       0.9 0.99 1 1000 220 50
-        q3map_surfacelight 320
+        q3map_sun       0.99 0.99 1 1000 220 50
+        q3map_surfacelight 1024
 
         skyparms env/space1 - -
        {
