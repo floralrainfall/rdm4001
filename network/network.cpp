@@ -146,6 +146,8 @@ void NetworkManager::service() {
               for (int i = 0; i < numEntities; i++) {
                 EntityId id = stream.read<EntityId>();
                 Entity* ent = entities[id].get();
+                if (!ent) throw std::runtime_error("ent == NULL");
+
                 if (backend) {
                   bool allowed = false;
                   if (Player* player = dynamic_cast<Player*>(ent)) {
@@ -341,7 +343,7 @@ void NetworkManager::service() {
       for (auto id : pendingUpdatesUnreliable) {
         deltaIdStream.write<EntityId>(id);
         Entity* ent = entities[id].get();
-        ent->serialize(deltaIdStream);
+        ent->serializeUnreliable(deltaIdStream);
       }
       ENetPacket* packet = deltaIdStream.createPacket(0);
       for (auto& peer : peers) {
@@ -391,7 +393,7 @@ void NetworkManager::service() {
       for (auto id : pendingUpdatesUnreliable) {
         deltaIdStream.write<EntityId>(id);
         Entity* ent = entities[id].get();
-        ent->serialize(deltaIdStream);
+        ent->serializeUnreliable(deltaIdStream);
       }
       ENetPacket* packet = deltaIdStream.createPacket(0);
       enet_peer_send(localPeer.peer, 0, packet);

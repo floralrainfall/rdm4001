@@ -12,6 +12,7 @@ class BitStream {
   size_t size;
   size_t c;
 
+  void isSpaceFor(size_t s);
   void makeSpaceFor(size_t s);
 
  public:
@@ -33,6 +34,7 @@ class BitStream {
 
   template <typename T>
   T read() {
+    isSpaceFor(sizeof(T));
     T t;
     memcpy(&t, &data[c], sizeof(T));
     c += sizeof(T);

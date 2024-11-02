@@ -36,7 +36,7 @@ FpsController::FpsController(PhysicsWorld* world,
   {
     std::scoped_lock l(world->mutex);
     world->getWorld()->addRigidBody(rigidBody.get());
-    world->physicsStepping.listen([this] { physicsStep(); });
+    stepJob = world->physicsStepping.listen([this] { physicsStep(); });
   }
 
   cameraPitch = 0.f;
@@ -51,7 +51,9 @@ FpsController::FpsController(PhysicsWorld* world,
                                btCollisionObject::CF_KINEMATIC_OBJECT);
 }
 
-FpsController::~FpsController() {}
+FpsController::~FpsController() {
+  world->physicsStepping.removeListener(stepJob);
+}
 
 void FpsController::updateCamera(gfx::Camera& camera) {
   btTransform transform;

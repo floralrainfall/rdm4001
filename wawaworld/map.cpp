@@ -265,7 +265,7 @@ void BSPFile::parseTreeNode(BSPNode* node, bool brush, bool leafface) {
   //	      node->children[1]);
   BSPLeaf* leafs = (BSPLeaf*)direntData[BSP_LEAFS];
   BSPNode* nodes = (BSPNode*)direntData[BSP_NODES];
-  int leafcount = m_header.dirents[BSP_LEAFS].length;
+  int leafcount = m_header.dirents[BSP_LEAFS].length / sizeof(BSPLeaf);
 
   if (node->children[0] < 0) {
     int leaf = -(node->children[0]);
@@ -363,6 +363,8 @@ void BSPFile::removeFromPhysicsWorld(PhysicsWorld* world) {
 }
 
 void BSPFile::addToPhysicsWorld(PhysicsWorld* world) {
+  std::scoped_lock lock(world->mutex);
+
   int rb_added = 0;
   for (auto brush : m_brushes) {
     b3AlignedObjectArray<b3Vector3> planeeqs;

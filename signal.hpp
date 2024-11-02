@@ -1,7 +1,13 @@
 #pragma once
 #include <functional>
+#include <map>
+#include <stdexcept>
 
 namespace rdm {
+typedef size_t ClosureId;
+
+ClosureId __newClosureId();
+
 /**
  * @brief Signals. These are able to be fired, and will execute signal handlers
  * on the firing thread. These are not related to POSIX signals.
@@ -11,7 +17,7 @@ namespace rdm {
  */
 template <typename... Args>
 class Signal {
-  std::vector<std::function<void(Args...)>> listeners;
+  std::map<ClosureId, std::function<void(Args...)>> listeners;
 
  public:
   /**
@@ -24,7 +30,7 @@ class Signal {
    */
   void fire(Args... a) {
     for (auto listener : listeners) {
-      listener(a...);
+      listener.second(a...);
     }
   };
 
@@ -36,6 +42,18 @@ class Signal {
    *
    * @param a The function to add.
    */
-  void listen(std::function<void(Args...)> a) { listeners.push_back(a); }
+  ClosureId listen(std::function<void(Args...)> a) {
+    ClosureId id = __newClosureId();
+    listeners[id] = a;
+    return id;
+  }
+
+  void removeListener(ClosureId id) {
+    auto it = listeners.find(id);
+    if (it != listeners.end())
+      listeners.erase(it);
+    else
+      throw std::runtime_error("Removing invalid closure id");
+  }
 };
 }  // namespace rdm

@@ -1,6 +1,9 @@
 #include "wplayer.hpp"
 
+#include "LinearMath/btMatrix3x3.h"
+#include "LinearMath/btVector3.h"
 #include "gfx/engine.hpp"
+#include "logging.hpp"
 #include "putil/fpscontroller.hpp"
 #include "world.hpp"
 namespace ww {
@@ -32,16 +35,34 @@ void WPlayer::deserialize(net::BitStream& stream) {
 }
 
 void WPlayer::serializeUnreliable(net::BitStream& stream) {
+  std::scoped_lock lock(getWorld()->getPhysicsWorld()->mutex);
+
   btTransform transform;
   controller->getMotionState()->getWorldTransform(transform);
-  stream.write<btVector3>(transform.getOrigin());
-  stream.write<btMatrix3x3>(transform.getBasis());
+  btVector3FloatData vectorData;
+  transform.getOrigin().serialize(vectorData);
+  stream.write<btVector3FloatData>(vectorData);
+  btMatrix3x3FloatData matrixData;
+  transform.getBasis().serialize(matrixData);
+  stream.write<btMatrix3x3FloatData>(matrixData);
 }
 
 void WPlayer::deserializeUnreliable(net::BitStream& stream) {
+  std::scoped_lock lock(getWorld()->getPhysicsWorld()->mutex);
   btTransform transform;
-  transform.setOrigin(stream.read<btVector3>());
-  transform.setBasis(stream.read<btMatrix3x3>());
+  // transform.setOrigin(stream.read<btVector3>());
+  // transform.setBasis(stream.read<btMatrix3x3>());
+
+  btVector3 origin;
+  origin.deSerialize(stream.read<btVector3FloatData>());
+  transform.setOrigin(origin);
+
+  btMatrix3x3 basis;
+  basis.deSerialize(stream.read<btMatrix3x3FloatData>());
+  transform.setBasis(basis);
+
+  rdm::Log::printf(rdm::LOG_DEBUG, "%f, %f, %f", transform.getOrigin().x(),
+                   transform.getOrigin().y(), transform.getOrigin().z());
 
   if (!getManager()->isBackend()) {
     if (getManager()->getLocalPeer().peerId == remotePeerId.get()) {

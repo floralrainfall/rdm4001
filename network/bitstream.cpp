@@ -4,6 +4,8 @@
 #include <enet/types.h>
 #include <stdlib.h>
 
+#include <stdexcept>
+
 #include "logging.hpp"
 
 namespace rdm::network {
@@ -32,12 +34,19 @@ BitStream::~BitStream() {
 void BitStream::makeSpaceFor(size_t s) {
   if (size) {
     if (s + c > size) {
-      size *= 2;
+      size_t newSize = size * 2;
+      size = std::max(s + c, newSize);
       data = (char*)realloc(data, size);
     }
   } else {
     size = s;
     data = (char*)malloc(size);
+  }
+}
+
+void BitStream::isSpaceFor(size_t s) {
+  if (s + c > size) {
+    throw std::runtime_error("Out of space on BitStream");
   }
 }
 

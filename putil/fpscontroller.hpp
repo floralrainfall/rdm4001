@@ -19,6 +19,8 @@ class FpsController {
   FpsControllerSettings settings;
   bool localPlayer;
 
+  ClosureId stepJob;
+
   float cameraPitch;
   float cameraYaw;
   glm::mat3 cameraView;
