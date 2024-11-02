@@ -42,9 +42,13 @@ FpsController::FpsController(PhysicsWorld* world,
   cameraPitch = 0.f;
   cameraYaw = 0.f;
 
+  localPlayer = false;
+
   moveVel = glm::vec2(0.0);
 
   rigidBody->setAngularFactor(btVector3(0, 0, 1));
+  rigidBody->setCollisionFlags(rigidBody->getCollisionFlags() &
+                               btCollisionObject::CF_KINEMATIC_OBJECT);
 }
 
 FpsController::~FpsController() {}
@@ -56,9 +60,11 @@ void FpsController::updateCamera(gfx::Camera& camera) {
   glm::vec3 origin =
       BulletHelpers::fromVector3(transform.getOrigin()) + glm::vec3(0, 0, 17);
 
-  glm::vec2 mouseDelta = Input::singleton()->getMouseDelta();
-  cameraPitch += mouseDelta.x * (M_PI / 180.0);
-  cameraYaw += mouseDelta.y * (M_PI / 180.0);
+  if (localPlayer) {
+    glm::vec2 mouseDelta = Input::singleton()->getMouseDelta();
+    cameraPitch += mouseDelta.x * (M_PI / 180.0);
+    cameraYaw += mouseDelta.y * (M_PI / 180.0);
+  }
 
   glm::quat yawQuat = glm::angleAxis(cameraYaw, glm::vec3(0.f, -1.f, 0.f));
   glm::quat pitchQuat = glm::angleAxis(cameraPitch, glm::vec3(0.f, 0.f, -1.f));
@@ -71,25 +77,26 @@ void FpsController::updateCamera(gfx::Camera& camera) {
 }
 
 void FpsController::physicsStep() {
-  Input::Axis* fbA = Input::singleton()->getAxis("ForwardBackward");
-  Input::Axis* lrA = Input::singleton()->getAxis("LeftRight");
+  if (localPlayer) {
+    Input::Axis* fbA = Input::singleton()->getAxis("ForwardBackward");
+    Input::Axis* lrA = Input::singleton()->getAxis("LeftRight");
 
-  glm::vec2 wishdir =
-      glm::vec2(moveView * glm::vec3(fbA->value, lrA->value, 0.0));
-  moveVel = glm::mix(moveVel, wishdir, PHYSICS_FRAMERATE);
+    glm::vec2 wishdir =
+        glm::vec2(moveView * glm::vec3(fbA->value, lrA->value, 0.0));
+    glm::vec3 move = glm::vec3();
 
-  glm::vec3 velocity = glm::vec3(0.0, 0.0, rigidBody->getLinearVelocity().z());
-  rigidBody->setLinearVelocity(BulletHelpers::toVector3(
-      (glm::vec3(moveVel, 0.0) * settings.maxSpeed) + velocity));
+    glm::vec3 velocity =
+        glm::vec3(0.0, 0.0, rigidBody->getLinearVelocity().z());
 
-  btTransform transform = rigidBody->getWorldTransform();
-  btVector3 start =
-      transform.getOrigin() + btVector3(0, 0, -settings.capsuleHeight / 2.0);
-  btVector3 end = start + btVector3(0, 0, -10);
-  btDynamicsWorld::ClosestRayResultCallback callback(start, end);
-  world->getWorld()->rayTest(start, end, callback);
+    btTransform transform = rigidBody->getWorldTransform();
+    btVector3 start =
+        transform.getOrigin() + btVector3(0, 0, -settings.capsuleHeight / 2.0);
+    btVector3 end = start + btVector3(0, 0, -10);
+    btDynamicsWorld::ClosestRayResultCallback callback(start, end);
+    world->getWorld()->rayTest(start, end, callback);
 
-  if (callback.m_collisionObject) Log::printf(LOG_DEBUG, "Grounded");
+    if (callback.m_collisionObject) Log::printf(LOG_DEBUG, "Grounded");
+  }
 }
 
 };  // namespace rdm::putil

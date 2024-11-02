@@ -17,6 +17,7 @@ class FpsController {
   std::unique_ptr<btRigidBody> rigidBody;
   std::unique_ptr<btMotionState> motionState;
   FpsControllerSettings settings;
+  bool localPlayer;
 
   float cameraPitch;
   float cameraYaw;
@@ -31,6 +32,7 @@ class FpsController {
                 FpsControllerSettings settings = FpsControllerSettings());
   ~FpsController();
 
+  void setLocalPlayer(bool b) { localPlayer = b; };
   void updateCamera(gfx::Camera& camera);
 
   btRigidBody* getRigidBody() { return rigidBody.get(); };

@@ -141,6 +141,37 @@ void NetworkManager::service() {
                 }
               }
               break;
+            case DeltaIdPacket: {
+              int numEntities = stream.read<int>();
+              for (int i = 0; i < numEntities; i++) {
+                EntityId id = stream.read<EntityId>();
+                Entity* ent = entities[id].get();
+                if (backend) {
+                  bool allowed = false;
+                  if (Player* player = dynamic_cast<Player*>(ent)) {
+                    if (player->remotePeerId.get() == remotePeer->peerId) {
+                      allowed = true;
+                    }
+                  }
+
+                  if (!allowed) {
+                    Log::printf(LOG_ERROR,
+                                "Peer %i attempted to modify %s (%i)",
+                                remotePeer->peerId, ent->getTypeName(),
+                                ent->getEntityId());
+                    throw std::runtime_error(
+                        "Peer not allowed to modify entity");
+                  }
+                }
+                if (event.packet->flags & ENET_PACKET_FLAG_RELIABLE) {
+                  ent->deserialize(stream);
+                  if (backend) addPendingUpdate(id);
+                } else {
+                  ent->deserializeUnreliable(stream);
+                  if (backend) addPendingUpdateUnreliable(id);
+                }
+              }
+            } break;
             case NewPeerPacket:
               if (backend) {
                 throw std::runtime_error("Received NewPeerPacket on backend");
@@ -252,6 +283,10 @@ void NetworkManager::service() {
     }
   }
 
+  for (auto& entity : entities) {
+    entity.second->tick();
+  }
+
   if (backend) {
     for (auto& peer : peers) {
       if (int pendingNewIds = peer.second.pendingNewIds.size()) {
@@ -281,6 +316,39 @@ void NetworkManager::service() {
         peer.second.pendingDelIds.clear();
       }
     }
+
+    if (int _pendingUpdates = pendingUpdates.size()) {
+      BitStream deltaIdStream;
+      deltaIdStream.write<PacketId>(DeltaIdPacket);
+      deltaIdStream.write<int>(_pendingUpdates);
+      for (auto id : pendingUpdates) {
+        deltaIdStream.write<EntityId>(id);
+        Entity* ent = entities[id].get();
+        ent->serialize(deltaIdStream);
+      }
+      ENetPacket* packet =
+          deltaIdStream.createPacket(ENET_PACKET_FLAG_RELIABLE);
+      for (auto& peer : peers) {
+        enet_peer_send(peer.second.peer, NETWORK_STREAM_ENTITY, packet);
+      }
+      pendingUpdates.clear();
+    }
+
+    if (int _pendingUpdatesUnreliable = pendingUpdatesUnreliable.size()) {
+      BitStream deltaIdStream;
+      deltaIdStream.write<PacketId>(DeltaIdPacket);
+      deltaIdStream.write<int>(_pendingUpdatesUnreliable);
+      for (auto id : pendingUpdatesUnreliable) {
+        deltaIdStream.write<EntityId>(id);
+        Entity* ent = entities[id].get();
+        ent->serialize(deltaIdStream);
+      }
+      ENetPacket* packet = deltaIdStream.createPacket(0);
+      for (auto& peer : peers) {
+        enet_peer_send(peer.second.peer, NETWORK_STREAM_ENTITY, packet);
+      }
+      pendingUpdatesUnreliable.clear();
+    }
   } else {
     if (localPeer.playerEntity) {
       if (localPeer.playerEntity->remotePeerId.get() != localPeer.peerId) {
@@ -299,6 +367,35 @@ void NetworkManager::service() {
           }
         }
       }
+    }
+
+    if (int _pendingUpdates = pendingUpdates.size()) {
+      BitStream deltaIdStream;
+      deltaIdStream.write<PacketId>(DeltaIdPacket);
+      deltaIdStream.write<int>(_pendingUpdates);
+      for (auto id : pendingUpdates) {
+        deltaIdStream.write<EntityId>(id);
+        Entity* ent = entities[id].get();
+        ent->serialize(deltaIdStream);
+      }
+      ENetPacket* packet =
+          deltaIdStream.createPacket(ENET_PACKET_FLAG_RELIABLE);
+      enet_peer_send(localPeer.peer, 0, packet);
+      pendingUpdates.clear();
+    }
+
+    if (int _pendingUpdatesUnreliable = pendingUpdatesUnreliable.size()) {
+      BitStream deltaIdStream;
+      deltaIdStream.write<PacketId>(DeltaIdPacket);
+      deltaIdStream.write<int>(_pendingUpdatesUnreliable);
+      for (auto id : pendingUpdatesUnreliable) {
+        deltaIdStream.write<EntityId>(id);
+        Entity* ent = entities[id].get();
+        ent->serialize(deltaIdStream);
+      }
+      ENetPacket* packet = deltaIdStream.createPacket(0);
+      enet_peer_send(localPeer.peer, 0, packet);
+      pendingUpdatesUnreliable.clear();
     }
   }
 

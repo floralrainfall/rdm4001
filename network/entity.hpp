@@ -74,12 +74,19 @@ class Entity {
   virtual ~Entity();
 
   World* getWorld();
+  NetworkManager* getManager() { return manager; }
   gfx::Engine* getGfxEngine();
 
   EntityId getEntityId() { return id; }
 
+  virtual void tick() {};
+
   virtual void serialize(BitStream& stream) {};
   virtual void deserialize(BitStream& stream) {};
+
+  virtual void serializeUnreliable(BitStream& stream) {};
+  virtual void deserializeUnreliable(BitStream& stream) {};
+
   virtual bool dirty() { return false; }
   virtual const char* getTypeName() { return "Entity"; };
 };

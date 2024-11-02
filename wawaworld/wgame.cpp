@@ -10,6 +10,7 @@
 #include "putil/fpscontroller.hpp"
 #include "settings.hpp"
 #include "worldspawn.hpp"
+#include "wplayer.hpp"
 
 namespace ww {
 struct WGamePrivate {
@@ -33,6 +34,8 @@ WGame::~WGame() { delete game; }
 void WGame::addEntityConstructors(network::NetworkManager* manager) {
   manager->registerConstructor(network::EntityConstructor<Worldspawn>,
                                "Worldspawn");
+  manager->registerConstructor(network::EntityConstructor<WPlayer>, "WPlayer");
+  manager->setPlayerType("WPlayer");
 }
 
 void WGame::initializeClient() {
@@ -40,13 +43,10 @@ void WGame::initializeClient() {
   game->worldspawn = 0;
 
   Input::singleton()->setMouseLocked(true);
-  game->controller = new putil::FpsController(world->getPhysicsWorld());
   world->getPhysicsWorld()->getWorld()->setGravity(btVector3(0, 0, -106.67));
 
   std::scoped_lock lock(world->worldLock);
   world->stepped.listen([this] {
-    gfx::Camera& cam = gfxEngine->getCamera();
-    game->controller->updateCamera(cam);
     if (!game->worldspawn)
       game->worldspawn =
           (Worldspawn*)world->getNetworkManager()->findEntityByType(

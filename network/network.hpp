@@ -62,6 +62,9 @@ class NetworkManager {
   std::map<std::string, EntityConstructorFunction> constructors;
   std::map<EntityId, std::unique_ptr<Entity>> entities;
 
+  std::vector<EntityId> pendingUpdates;
+  std::vector<EntityId> pendingUpdatesUnreliable;
+
  public:
   NetworkManager(World* world);
   ~NetworkManager();
@@ -77,6 +80,7 @@ class NetworkManager {
     NewPeerPacket,       // S -> C
     DelPeerPacket,       // S -> C
     PeerInfoPacket,      // S -> C
+    DeltaIdPacket,       // S -> C, C -> S
   };
 
   void service();
@@ -91,6 +95,11 @@ class NetworkManager {
   void registerConstructor(EntityConstructorFunction func,
                            std::string typeName);
   Entity* findEntityByType(std::string typeName);
+
+  void addPendingUpdate(EntityId id) { pendingUpdates.push_back(id); };
+  void addPendingUpdateUnreliable(EntityId id) {
+    pendingUpdatesUnreliable.push_back(id);
+  };
 
   void setGfxEngine(gfx::Engine* engine) { gfxEngine = engine; }
   gfx::Engine* getGfxEngine() { return gfxEngine; }
