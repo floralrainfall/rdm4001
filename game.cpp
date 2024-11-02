@@ -178,7 +178,13 @@ void Game::mainLoop() {
       std::this_thread::yield();
     }
   }
-  if (world) world->getScheduler()->waitToWrapUp();
-  if (worldServer) worldServer->getScheduler()->waitToWrapUp();
+  if (world) {
+    world->getScheduler()->waitToWrapUp();
+    world->getNetworkManager()->handleDisconnect();
+  }
+  if (worldServer) {
+    worldServer->getScheduler()->waitToWrapUp();
+    world->getNetworkManager()->handleDisconnect();
+  }
 }
 }  // namespace rdm
