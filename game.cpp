@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <stdexcept>
 
+#include "gfx/gl_context.hpp"
 #include "input.hpp"
 #include "logging.hpp"
 #ifndef DISABLE_OBZ
@@ -19,6 +20,13 @@
 #ifdef __linux
 #include <signal.h>
 #endif
+
+#ifndef DISABLE_EASY_PROFILER
+#include <easy/profiler.h>
+#endif
+
+#include "gfx/imgui/backends/imgui_impl_sdl2.h"
+#include "gfx/imgui/imgui.h"
 
 namespace rdm {
 Game::Game() {
@@ -75,6 +83,9 @@ void Game::startClient() {
 #endif
 
   gfxEngine.reset(new gfx::Engine(world.get(), (void*)window));
+  ImGui::SetCurrentContext(ImGui::CreateContext());
+  ImGui_ImplSDL2_InitForOpenGL(
+      window, ((gfx::gl::GLContext*)gfxEngine->getContext())->getContext());
   gfxEngine->getContext()->unsetCurrent();
 
   world->getNetworkManager()->setGfxEngine(gfxEngine.get());
@@ -94,6 +105,8 @@ void Game::mainLoop() {
     }
     if (worldServer) {
       initializeServer();
+      worldServer->changingTitle.listen(
+          [](std::string title) { printf("\033]0;%s\007", title.c_str()); });
       worldServer->getScheduler()->startAllJobs();
     }
   } catch (std::exception& e) {
@@ -105,7 +118,12 @@ void Game::mainLoop() {
     SDL_Event event;
     bool ignoreNextMouseMoveEvent = false;
     while (world->getRunning()) {
+#ifndef DISABLE_EASY_PROFILER
+      EASY_BLOCK("SDL_PollEvent");
+#endif
       while (SDL_PollEvent(&event)) {
+        ImGui_ImplSDL2_NewFrame();
+        ImGui_ImplSDL2_ProcessEvent(&event);
         InputObject object;
         switch (event.type) {
           case SDL_KEYUP:

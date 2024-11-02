@@ -11,6 +11,10 @@
 #include <sys/prctl.h>
 #endif
 
+#ifndef DISABLE_EASY_PROFILER
+#include <easy/profiler.h>
+#endif
+
 static size_t schedulerId = 0;
 
 namespace rdm {
@@ -51,6 +55,9 @@ void SchedulerJob::task(SchedulerJob* job) {
   prctl(PR_SET_NAME, jobName.c_str());
 #endif
 #endif
+#ifndef DISABLE_EASY_PROFILER
+  EASY_THREAD_SCOPE(jobName.c_str());
+#endif
   job->stats.time = 0.0;
   bool running = true;
 #ifndef NDEBUG
@@ -58,6 +65,8 @@ void SchedulerJob::task(SchedulerJob* job) {
               job->getStats().schedulerId);
 #endif
   while (running) {
+    EASY_BLOCK("Step");
+
     std::chrono::time_point start = std::chrono::high_resolution_clock::now();
 
     Result r;
@@ -110,6 +119,7 @@ void SchedulerJob::task(SchedulerJob* job) {
     job->stats.deltaTime = std::chrono::duration<double>(execution).count();
     double frameRate = job->getFrameRate();
     if (frameRate != 0.0) {  // run as fast as we can if there is no frame rate
+      EASY_BLOCK("Sleep");
       std::chrono::duration sleep =
           std::chrono::duration<double>(frameRate) - execution;
       if (job->stopOnCancel) {

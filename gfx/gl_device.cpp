@@ -5,10 +5,13 @@
 #include <stdexcept>
 
 #include "gl_types.hpp"
+#include "imgui/backends/imgui_impl_opengl3.h"
+#include "imgui/imgui.h"
 
 namespace rdm::gfx::gl {
 GLDevice::GLDevice(GLContext* context) : BaseDevice(context) {
   currentFrameBuffer = 0;
+  setUpImgui = false;
 }
 
 GLenum dssMapping[] = {GL_NEVER,  GL_ALWAYS,  GL_NEVER,    GL_LESS,  GL_EQUAL,
@@ -53,30 +56,30 @@ void GLDevice::setBlendState(BlendState a, BlendState b) {
 }
 
 void GLDevice::setCullState(CullState s) {
-  switch(s) {
-  case FrontCCW:
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_FRONT);
-    glFrontFace(GL_CCW);
-    break;
-  case FrontCW:
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_FRONT);
-    glFrontFace(GL_CW);
-    break;
-  case BackCCW:
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CCW);
-    break;
-  case BackCW:
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CW);
-    break;
-  case None:
-    glDisable(GL_CULL_FACE);
-    break;
+  switch (s) {
+    case FrontCCW:
+      glEnable(GL_CULL_FACE);
+      glCullFace(GL_FRONT);
+      glFrontFace(GL_CCW);
+      break;
+    case FrontCW:
+      glEnable(GL_CULL_FACE);
+      glCullFace(GL_FRONT);
+      glFrontFace(GL_CW);
+      break;
+    case BackCCW:
+      glEnable(GL_CULL_FACE);
+      glCullFace(GL_BACK);
+      glFrontFace(GL_CCW);
+      break;
+    case BackCW:
+      glEnable(GL_CULL_FACE);
+      glCullFace(GL_BACK);
+      glFrontFace(GL_CW);
+      break;
+    case None:
+      glDisable(GL_CULL_FACE);
+      break;
   }
 }
 
@@ -146,5 +149,21 @@ std::unique_ptr<BaseArrayPointers> GLDevice::createArrayPointers() {
 
 std::unique_ptr<BaseFrameBuffer> GLDevice::createFrameBuffer() {
   return std::unique_ptr<BaseFrameBuffer>(new GLFrameBuffer());
+}
+
+void GLDevice::startImGui() {
+  if (!setUpImgui) {
+    ImGui_ImplOpenGL3_Init();
+    setUpImgui = true;
+  }
+
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui::NewFrame();
+}
+
+void GLDevice::stopImGui() {
+  ImGui::Render();
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+  ImGui::EndFrame();
 }
 }  // namespace rdm::gfx::gl

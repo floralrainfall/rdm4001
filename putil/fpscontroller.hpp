@@ -15,7 +15,7 @@ struct FpsControllerSettings {
 class FpsController {
   PhysicsWorld* world;
   std::unique_ptr<btRigidBody> rigidBody;
-  std::unique_ptr<btMotionState> motionState;
+  btMotionState* motionState;
   FpsControllerSettings settings;
   bool localPlayer;
 
@@ -26,6 +26,8 @@ class FpsController {
   glm::mat3 cameraView;
   glm::mat3 moveView;
   glm::vec2 moveVel;
+  glm::vec2 accel;
+  bool grounded;
 
   void physicsStep();
 
@@ -38,7 +40,7 @@ class FpsController {
   void updateCamera(gfx::Camera& camera);
 
   btRigidBody* getRigidBody() { return rigidBody.get(); };
-  btMotionState* getMotionState() { return motionState.get(); };
+  btMotionState* getMotionState() { return motionState; };
   FpsControllerSettings& getSettings() { return settings; }
 };
 };  // namespace rdm::putil

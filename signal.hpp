@@ -1,7 +1,11 @@
 #pragma once
+#include <cxxabi.h>
+
 #include <functional>
 #include <map>
 #include <stdexcept>
+
+#include "logging.hpp"
 
 namespace rdm {
 typedef size_t ClosureId;
@@ -30,7 +34,15 @@ class Signal {
    */
   void fire(Args... a) {
     for (auto listener : listeners) {
-      listener.second(a...);
+      try {
+        listener.second(a...);
+      } catch (std::exception& e) {
+        int status;
+        Log::printf(LOG_ERROR, "Error calling listener %i for signal %s, '%s'",
+                    listener.first,
+                    abi::__cxa_demangle(typeid(this).name(), 0, 0, &status),
+                    e.what());
+      }
     }
   };
 

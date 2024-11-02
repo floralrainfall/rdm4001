@@ -8,11 +8,26 @@ namespace ww {
 Worldspawn::Worldspawn(net::NetworkManager* manager, net::EntityId id)
     : net::Entity(manager, id) {
   file = NULL;
+  entity = NULL;
+  if (!getManager()->isBackend()) {
+    worldJob = getWorld()->stepped.listen([this] {
+      std::scoped_lock lock(mutex);
+      if (file) file->updatePosition(getGfxEngine()->getCamera().getPosition());
+    });
+  }
+}
+
+Worldspawn::~Worldspawn() {
+  if (!getManager()->isBackend()) {
+    if (entity) getGfxEngine()->deleteEntity(entity);
+    getWorld()->stepped.removeListener(worldJob);
+  }
 }
 
 void Worldspawn::addToEngine(rdm::gfx::Engine* engine) {
+  std::scoped_lock lock(mutex);
   file->initGfx(engine);
-  engine->addEntity<MapEntity>(file.get());
+  entity = engine->addEntity<MapEntity>(file);
   pendingAddToGfx = false;
 }
 
@@ -21,7 +36,8 @@ void Worldspawn::addToWorld(rdm::World* world) {
 }
 
 void Worldspawn::loadFile(const char* _file) {
-  file.reset(new BSPFile(_file));
+  std::scoped_lock lock(mutex);
+  file = new BSPFile(_file);
   mapName.set(_file);
 
   addToWorld(getWorld());
@@ -32,12 +48,13 @@ void Worldspawn::serialize(net::BitStream& stream) {
 }
 
 void Worldspawn::deserialize(net::BitStream& stream) {
+  std::scoped_lock lock(mutex);
   if (file) {
     throw std::runtime_error("Cannot change map if map is already loaded");
   }
 
   mapName.deserialize(stream);
-  file.reset(new BSPFile(mapName.get().c_str()));
+  file = new BSPFile(mapName.get().c_str());
 
   addToWorld(getWorld());
   pendingAddToGfx = true;

@@ -99,6 +99,7 @@ class Engine {
    * @brief Use Engine::addEntity<T>();
    */
   Entity* addEntity(std::unique_ptr<Entity> entity);
+  void deleteEntity(Entity* entity);
   SchedulerJob* getRenderJob() { return renderJob; }
 
   template <typename T, class... Types>

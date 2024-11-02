@@ -62,6 +62,8 @@ class NetworkManager {
   std::map<std::string, EntityConstructorFunction> constructors;
   std::map<EntityId, std::unique_ptr<Entity>> entities;
 
+  void handleDisconnect();
+
   std::vector<EntityId> pendingUpdates;
   std::vector<EntityId> pendingUpdatesUnreliable;
 

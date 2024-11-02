@@ -9,6 +9,10 @@
 #include "scheduler.hpp"
 #include "world.hpp"
 
+#ifndef DISABLE_EASY_PROFILER
+#include <easy/profiler.h>
+#endif
+
 static const char* disconnectReasons[] = {"Disconnect by engine",
                                           "Disconnect by user", "Timeout"};
 
@@ -37,6 +41,7 @@ NetworkManager::NetworkManager(World* world) {
   this->world = world;
   world->getScheduler()->addJob(new NetworkJob(this));
 
+  localPeer.type = Peer::Unconnected;
   lastId = 0;
   lastPeerId = 0;
   ticks = 0;
@@ -61,9 +66,11 @@ NetworkManager::~NetworkManager() {
         enet_peer_disconnect(localPeer.peer, NETWORK_DISCONNECT_FORCED);
         enet_host_service(host, &event,
                           1);  // service to flush disconnect packet
+        handleDisconnect();
       }
     }
     enet_host_destroy(host);
+    host = NULL;
   }
   enet_deinitialize();
 }
@@ -71,8 +78,17 @@ NetworkManager::~NetworkManager() {
 void NetworkManager::service() {
   if (!host) return;
 
+#ifndef DISABLE_EASY_PROFILER
+  EASY_FUNCTION();
+#endif
+
   ENetEvent event;
+
+  EASY_BLOCK("Network Service");
   while (enet_host_service(host, &event, 1) > 0) {
+#ifndef DISABLE_EASY_PROFILER
+    EASY_BLOCK("Handle Service");
+#endif
     switch (event.type) {
       case ENET_EVENT_TYPE_RECEIVE: {
         try {
@@ -209,6 +225,10 @@ void NetworkManager::service() {
                             message.c_str());
                 enet_peer_disconnect_now(localPeer.peer, 0);
                 localPeer.type = Peer::Unconnected;
+                handleDisconnect();
+                enet_host_destroy(host);
+                host = NULL;
+                return;
               }
               break;
             default:
@@ -237,9 +257,10 @@ void NetworkManager::service() {
             enet_host_broadcast(
                 host, 0, peerRemoving.createPacket(ENET_PACKET_FLAG_RELIABLE));
           } else {
-            // IDK
           }
         } else {
+          handleDisconnect();
+          localPeer.type = Peer::Unconnected;
         }
       } break;
       case ENET_EVENT_TYPE_CONNECT: {
@@ -284,12 +305,18 @@ void NetworkManager::service() {
         break;
     }
   }
+  EASY_END_BLOCK;
 
+  EASY_BLOCK("Network Tick");
   for (auto& entity : entities) {
     entity.second->tick();
   }
+  EASY_END_BLOCK;
 
   if (backend) {
+#ifndef DISABLE_EASY_PROFILER
+    EASY_BLOCK("Backend Peer Management");
+#endif
     for (auto& peer : peers) {
       if (int pendingNewIds = peer.second.pendingNewIds.size()) {
         BitStream newIdStream;
@@ -352,6 +379,9 @@ void NetworkManager::service() {
       pendingUpdatesUnreliable.clear();
     }
   } else {
+#ifndef DISABLE_EASY_PROFILER
+    EASY_BLOCK("Frontend Peer Management");
+#endif
     if (localPeer.playerEntity) {
       if (localPeer.playerEntity->remotePeerId.get() != localPeer.peerId) {
         localPeer.playerEntity = nullptr;
@@ -415,6 +445,8 @@ void NetworkManager::start(int port) {
 
   if (host == nullptr)
     throw std::runtime_error("enet_host_create returned NULL");
+
+  Log::printf(LOG_INFO, "Started server on port %i", port);
 }
 
 void NetworkManager::connect(std::string address, int port) {
@@ -433,7 +465,13 @@ void NetworkManager::connect(std::string address, int port) {
   if (localPeer.peer == nullptr)
     throw std::runtime_error("enet_host_connect returned NULL");
 
-  Log::printf(LOG_INFO, "Started server on port %i", port);
+  localPeer.type = Peer::Undifferentiated;
+  Log::printf(LOG_INFO, "Connecting to %s:%i", address.c_str(), port);
+}
+
+void NetworkManager::handleDisconnect() {
+  entities.clear();
+  peers.clear();
 }
 
 void NetworkManager::registerConstructor(EntityConstructorFunction func,

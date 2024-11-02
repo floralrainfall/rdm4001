@@ -193,5 +193,9 @@ class BaseDevice {
    * @return std::unique_ptr<BaseFrameBuffer>
    */
   virtual std::unique_ptr<BaseFrameBuffer> createFrameBuffer() = 0;
+
+  // TODO: port imgui itself to engine system
+  virtual void startImGui() = 0;
+  virtual void stopImGui() = 0;
 };
 };  // namespace rdm::gfx

@@ -12,6 +12,10 @@
 #include "gfx/entity.hpp"
 #include "logging.hpp"
 
+#ifndef DISABLE_EASY_PROFILER
+#include <easy/profiler.h>
+#endif
+
 // taken from matrix
 
 namespace ww {
@@ -308,6 +312,7 @@ void BSPFile::renderFaceModel(BSPFaceModel* model, gfx::BaseProgram* program) {
 
 void BSPFile::draw() {
   if (!m_gfxEnabled) return;
+  EASY_FUNCTION("BSPFile::draw");
 
   engine->getDevice()->setCullState(gfx::BaseDevice::BackCCW);
 

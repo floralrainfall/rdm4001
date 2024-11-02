@@ -3,22 +3,30 @@
 #include "filesystem.hpp"
 #include "gfx/gui/gui.hpp"
 #include "gfx/heightmap.hpp"
+#include "gfx/imgui/imgui.h"
 #include "input.hpp"
 #include "logging.hpp"
 #include "map.hpp"
 #include "network/entity.hpp"
+#include "network/network.hpp"
 #include "putil/fpscontroller.hpp"
 #include "settings.hpp"
 #include "worldspawn.hpp"
 #include "wplayer.hpp"
 
 namespace ww {
+enum UIState {
+  MainMenu,
+  ConnectPanel,
+};
+
 struct WGamePrivate {
   float cameraPitch;
   float cameraYaw;
   putil::FpsController* controller;
 
   Worldspawn* worldspawn;
+  UIState state;
 };
 
 using namespace rdm;
@@ -42,7 +50,6 @@ void WGame::initializeClient() {
   addEntityConstructors(getWorld()->getNetworkManager());
   game->worldspawn = 0;
 
-  Input::singleton()->setMouseLocked(true);
   world->getPhysicsWorld()->getWorld()->setGravity(btVector3(0, 0, -106.67));
 
   std::scoped_lock lock(world->worldLock);
@@ -51,7 +58,6 @@ void WGame::initializeClient() {
       game->worldspawn =
           (Worldspawn*)world->getNetworkManager()->findEntityByType(
               "Worldspawn");
-    // game->file->updatePosition(cam.getPosition());
 
     if (gfxEngine->getGuiManager()) {
       auto& layout = gfxEngine->getGuiManager()->getLayout("Debug");
@@ -70,17 +76,65 @@ void WGame::initializeClient() {
     // gfxEngine->addEntity<MapEntity>(game->file);
   });
 
+  game->state = MainMenu;
   gfxEngine->renderStepped.listen([this] {
-    if (game->worldspawn) {
-      if (game->worldspawn->isPendingAddToGfx()) {
-        game->worldspawn->addToEngine(gfxEngine.get());
+    Input::singleton()->setMouseLocked(false);
+    network::Peer::Type peerType =
+        world->getNetworkManager()->getLocalPeer().type;
+    if (peerType == network::Peer::ConnectedPlayer) {
+      if (game->worldspawn) {
+        if (game->worldspawn->isPendingAddToGfx()) {
+          game->worldspawn->addToEngine(gfxEngine.get());
+        }
+        Input::singleton()->setMouseLocked(true);
+        game->worldspawn->getFile()->updatePosition(
+            gfxEngine->getCamera().getPosition());
+      } else {
+        ImGui::Begin("Connecting to server...");
+        ImGui::Text("Waiting for worldspawn");
+        ImGui::End();
       }
-      game->worldspawn->getFile()->updatePosition(
-          gfxEngine->getCamera().getPosition());
+    } else {
+      if (peerType == network::Peer::Undifferentiated) {
+        ImGui::Begin("Connecting to server...");
+        ImGui::Text("Establishing connection...");
+        ImGui::End();
+      } else {
+        switch (game->state) {
+          case MainMenu:
+            ImGui::Begin("Welcome to RDM");
+            if (ImGui::Button("Connect to Game")) {
+              game->state = ConnectPanel;
+            }
+            if (ImGui::Button("Quit")) {
+              InputObject quitObject;
+              quitObject.type = InputObject::Quit;
+              Input::singleton()->postEvent(quitObject);
+            }
+            ImGui::End();
+            break;
+          case ConnectPanel:
+            ImGui::Begin("Connect to Server");
+            {
+              static char ip[64] = "127.0.0.1";
+              static int port = 7938;
+              ImGui::InputText("IP", ip, sizeof(ip));
+              ImGui::InputInt("Port", &port);
+              if (ImGui::Button("Connect")) {
+                world->getNetworkManager()->connect(ip, port);
+                game->state = MainMenu;
+              }
+              if (ImGui::Button("Cancel")) {
+                game->state = MainMenu;
+              }
+            }
+            ImGui::End();
+          default:
+            break;
+        }
+      }
     }
   });
-
-  world->getNetworkManager()->connect("127.0.0.1");
 }
 
 void WGame::initializeServer() {
@@ -91,7 +145,7 @@ void WGame::initializeServer() {
 
   Worldspawn* wspawn =
       (Worldspawn*)worldServer->getNetworkManager()->instantiate("Worldspawn");
-  wspawn->loadFile("dat5/baseq3/maps/malach.bsp");
+  wspawn->loadFile("dat5/baseq3/maps/chud.bsp");
 }
 
 void WGame::initialize() {

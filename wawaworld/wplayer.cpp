@@ -11,12 +11,25 @@ WPlayer::WPlayer(net::NetworkManager* manager, net::EntityId id)
     : Player(manager, id) {
   controller.reset(
       new rdm::putil::FpsController(manager->getWorld()->getPhysicsWorld()));
+  if (!getManager()->isBackend()) {
+    worldJob = getWorld()->stepped.listen([this] {
+      if (getManager()->getLocalPeer().peerId == remotePeerId.get()) {
+        controller->updateCamera(getGfxEngine()->getCamera());
+      }
+    });
+    rdm::Log::printf(rdm::LOG_DEBUG, "worldJob = %i", worldJob);
+  }
+}
+
+WPlayer::~WPlayer() {
+  if (!getManager()->isBackend()) {
+    getWorld()->stepped.removeListener(worldJob);
+  }
 }
 
 void WPlayer::tick() {
   if (!getManager()->isBackend()) {
     if (getManager()->getLocalPeer().peerId == remotePeerId.get()) {
-      controller->updateCamera(getGfxEngine()->getCamera());
       controller->setLocalPlayer(true);
 
       btTransform transform;
@@ -60,9 +73,6 @@ void WPlayer::deserializeUnreliable(net::BitStream& stream) {
   btMatrix3x3 basis;
   basis.deSerialize(stream.read<btMatrix3x3FloatData>());
   transform.setBasis(basis);
-
-  rdm::Log::printf(rdm::LOG_DEBUG, "%f, %f, %f", transform.getOrigin().x(),
-                   transform.getOrigin().y(), transform.getOrigin().z());
 
   if (!getManager()->isBackend()) {
     if (getManager()->getLocalPeer().peerId == remotePeerId.get()) {

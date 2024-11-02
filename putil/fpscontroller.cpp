@@ -27,11 +27,11 @@ FpsController::FpsController(PhysicsWorld* world,
       new btCapsuleShapeZ(settings.capsuleRadius, settings.capsuleHeight);
   btTransform transform = btTransform::getIdentity();
   transform.setOrigin(btVector3(-30.0, 30.0, 200.0));
-  motionState.reset(new btDefaultMotionState(transform));
+  motionState = new btDefaultMotionState(transform);
   btVector3 inertia;
   shape->calculateLocalInertia(settings.capsuleMass, inertia);
-  btRigidBody::btRigidBodyConstructionInfo rbInfo(
-      settings.capsuleMass, motionState.get(), shape, inertia);
+  btRigidBody::btRigidBodyConstructionInfo rbInfo(settings.capsuleMass,
+                                                  motionState, shape, inertia);
   rigidBody.reset(new btRigidBody(rbInfo));
   {
     std::scoped_lock l(world->mutex);
@@ -47,8 +47,6 @@ FpsController::FpsController(PhysicsWorld* world,
   moveVel = glm::vec2(0.0);
 
   rigidBody->setAngularFactor(btVector3(0, 0, 1));
-  rigidBody->setCollisionFlags(rigidBody->getCollisionFlags() &
-                               btCollisionObject::CF_KINEMATIC_OBJECT);
 }
 
 FpsController::~FpsController() {
@@ -79,6 +77,15 @@ void FpsController::updateCamera(gfx::Camera& camera) {
 }
 
 void FpsController::physicsStep() {
+  btTransform transform = rigidBody->getWorldTransform();
+  btVector3 start =
+      transform.getOrigin() + btVector3(0, 0, -settings.capsuleHeight / 2.0);
+  btVector3 end = start + btVector3(0, 0, -16);
+  btDynamicsWorld::ClosestRayResultCallback callback(start, end);
+  world->getWorld()->rayTest(start, end, callback);
+
+  grounded = (callback.m_collisionObject != NULL);
+
   if (localPlayer) {
     Input::Axis* fbA = Input::singleton()->getAxis("ForwardBackward");
     Input::Axis* lrA = Input::singleton()->getAxis("LeftRight");
@@ -87,17 +94,12 @@ void FpsController::physicsStep() {
         glm::vec2(moveView * glm::vec3(fbA->value, lrA->value, 0.0));
     glm::vec3 move = glm::vec3();
 
-    glm::vec3 velocity =
-        glm::vec3(0.0, 0.0, rigidBody->getLinearVelocity().z());
+    accel = wishdir;
 
-    btTransform transform = rigidBody->getWorldTransform();
-    btVector3 start =
-        transform.getOrigin() + btVector3(0, 0, -settings.capsuleHeight / 2.0);
-    btVector3 end = start + btVector3(0, 0, -10);
-    btDynamicsWorld::ClosestRayResultCallback callback(start, end);
-    world->getWorld()->rayTest(start, end, callback);
-
-    if (callback.m_collisionObject) Log::printf(LOG_DEBUG, "Grounded");
+    btVector3 vel = rigidBody->getLinearVelocity();
+    vel += BulletHelpers::toVector3(glm::vec3(accel, 0.0)) * PHYSICS_FRAMERATE *
+           settings.maxSpeed;
+    rigidBody->setLinearVelocity(vel);
   }
 }
 

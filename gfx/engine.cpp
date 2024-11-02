@@ -10,6 +10,10 @@
 #include "settings.hpp"
 #include "world.hpp"
 
+#ifndef DISABLE_EASY_PROFILER
+#include <easy/profiler.h>
+#endif
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -121,6 +125,9 @@ class RenderJob : public SchedulerJob {
   }
 
   virtual Result step() {
+#ifndef DISABLE_EASY_PROFILER
+    EASY_FUNCTION();
+#endif
     BaseDevice* device = engine->device.get();
 
     try {
@@ -170,6 +177,9 @@ class RenderJob : public SchedulerJob {
       void* _ =
           engine->device->bindFramebuffer(engine->postProcessFrameBuffer.get());
 
+#ifndef DISABLE_EASY_PROFILER
+      EASY_BLOCK("Setup Frame");
+#endif
       device->viewport(0, 0, fbSize.x, fbSize.y);
       device->clear(0.3, 0.3, 0.3, 0.0);
       device->clearDepth();
@@ -177,6 +187,9 @@ class RenderJob : public SchedulerJob {
       device->setCullState(BaseDevice::FrontCCW);
 
       engine->getCamera().updateCamera(glm::vec2(fbSize.x, fbSize.y));
+#ifndef DISABLE_EASY_PROFILER
+      EASY_END_BLOCK;
+#endif
 
       if (!engine->isInitialized) engine->initialize();
 
@@ -189,6 +202,9 @@ class RenderJob : public SchedulerJob {
 
       engine->device->unbindFramebuffer(_);
 
+#ifndef DISABLE_EASY_PROFILER
+      EASY_BLOCK("Render Draw Buffer");
+#endif
       device->setDepthState(BaseDevice::Always);
       device->setCullState(BaseDevice::None);
       engine->renderFullscreenQuad(
@@ -199,6 +215,9 @@ class RenderJob : public SchedulerJob {
                     .texture.slot = 1,
                     .texture.texture = engine->fullscreenTextureBloom.get()});
           });
+#ifndef DISABLE_EASY_PROFILER
+      EASY_END_BLOCK;
+#endif
 
       engine->context->swapBuffers();
 
@@ -290,12 +309,23 @@ void Engine::setFullscreenMaterial(const char* name) {
 void Engine::stepped() {}
 
 void Engine::render() {
+#ifndef DISABLE_EASY_PROFILER
+  EASY_FUNCTION();
+#endif
+
+  device->startImGui();
+
   for (int i = 0; i < entities.size(); i++) {
     Entity* ent = entities[i].get();
-    ent->render(device.get());
+    try {
+      ent->render(device.get());
+    } catch (std::exception& error) {
+      Log::printf(LOG_ERROR, "Error rendering entity %i", i);
+    }
   }
 
   renderStepped.fire();
+  device->stopImGui();
 }
 
 void Engine::initialize() {
@@ -308,5 +338,13 @@ void Engine::initialize() {
 Entity* Engine::addEntity(std::unique_ptr<Entity> entity) {
   entities.push_back(std::move(entity));
   return (entities.back()).get();
+}
+
+void Engine::deleteEntity(Entity* entity) {
+  for (int i = 0; i < entities.size(); i++)
+    if (entities[i].get() == entity) {
+      entities.erase(entities.begin() + i);
+      break;
+    }
 }
 }  // namespace rdm::gfx

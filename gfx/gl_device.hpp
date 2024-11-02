@@ -7,6 +7,7 @@
 namespace rdm::gfx::gl {
 class GLDevice : public BaseDevice {
   BaseFrameBuffer* currentFrameBuffer;
+  bool setUpImgui;
 
  public:
   GLDevice(GLContext* context);
@@ -32,5 +33,8 @@ class GLDevice : public BaseDevice {
   virtual std::unique_ptr<BaseBuffer> createBuffer();
   virtual std::unique_ptr<BaseArrayPointers> createArrayPointers();
   virtual std::unique_ptr<BaseFrameBuffer> createFrameBuffer();
+
+  virtual void startImGui();
+  virtual void stopImGui();
 };
 };  // namespace rdm::gfx::gl

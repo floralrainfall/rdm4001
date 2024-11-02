@@ -12,7 +12,7 @@ glm = dependency('glm')
 openal = dependency('openal')
 assimp = dependency('assimp')
 enet = dependency('libenet')
-# easy_profiler = dependency('easy_profiler')
+easy_profiler = dependency('easy_profiler')
 bullet = dependency('Bullet')
 boost_dep = dependency('boost', modules: ['program_options'])
 
@@ -32,7 +32,7 @@ glad_dep = glad_proj.get_variable('libglad_dep')
 
 assembly_proj = subproject('assembly')
 
-inc = include_directories(['.', '/usr/include/bullet'])
+inc = include_directories(['.', 'gfx/imgui', '/usr/include/bullet'])
 
 gamelib = static_library('game', [
   'game.cpp',
@@ -71,6 +71,19 @@ gamelib = static_library('game', [
   'gfx/gui/layout.cpp',
   'gfx/gui/layout.hpp',
 
+  'gfx/imgui/imconfig.h',
+  'gfx/imgui/imstb_truetype.h',
+  'gfx/imgui/imstb_textedit.h',
+  'gfx/imgui/imstb_rectpack.h',
+  'gfx/imgui/imgui_internal.h',
+  'gfx/imgui/imgui.h',
+  'gfx/imgui/imgui.cpp',
+  'gfx/imgui/imgui_widgets.cpp',
+  'gfx/imgui/imgui_tables.cpp',
+  'gfx/imgui/imgui_draw.cpp',
+  'gfx/imgui/backends/imgui_impl_opengl3.cpp',
+  'gfx/imgui/backends/imgui_impl_sdl2.cpp',
+
   'gfx/camera.cpp',
   'gfx/camera.hpp',
   'gfx/engine.cpp',
@@ -98,7 +111,7 @@ gamelib = static_library('game', [
   'gfx/gl_device.hpp',
   'gfx/gl_types.cpp',
   'gfx/gl_types.hpp',
-], cpp_args: obz_options, include_directories: [inc], dependencies: [sdl_ttf, boost_dep, enet, common_dep, glad_dep, obz_dep, sdl2, glm, openal, assimp, bullet])
+], cpp_args: obz_options, include_directories: [inc], dependencies: [sdl_ttf, boost_dep, enet, common_dep, glad_dep, obz_dep, sdl2, glm, openal, assimp, bullet, easy_profiler])
 
 inc2 = include_directories('wawaworld')
 
@@ -123,4 +136,4 @@ executable('wawaworld', [
   'wawaworld/worldspawn.hpp',
   'wawaworld/wplayer.cpp',
   'wawaworld/wplayer.hpp'
-], include_directories: [inc, inc2], dependencies: [common_dep, sdl2, glm, b3geometry_dep], link_with: gamelib)
+], include_directories: [inc, inc2], dependencies: [common_dep, sdl2, glm, b3geometry_dep, easy_profiler], link_with: gamelib)
