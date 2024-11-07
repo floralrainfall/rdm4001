@@ -11,6 +11,7 @@
 #include "entity.hpp"
 #include "gfx/base_types.hpp"
 #include "gfx/gui/gui.hpp"
+#include "gfx/mesh.hpp"
 #include "scheduler.hpp"
 #include "signal.hpp"
 
@@ -76,6 +77,7 @@ class Engine {
 
   std::unique_ptr<MaterialCache> materialCache;
   std::unique_ptr<TextureCache> textureCache;
+  std::unique_ptr<MeshCache> meshCache;
   World* world;
 
  public:
@@ -115,6 +117,7 @@ class Engine {
   BaseDevice* getDevice() { return device.get(); }
   MaterialCache* getMaterialCache() { return materialCache.get(); }
   TextureCache* getTextureCache() { return textureCache.get(); }
+  MeshCache* getMeshCache() { return meshCache.get(); }
   gui::GuiManager* getGuiManager() { return gui.get(); }
 
   float getTime() { return time; }

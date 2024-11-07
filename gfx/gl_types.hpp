@@ -28,6 +28,10 @@ class GLTexture : public BaseTexture {
   virtual void uploadCubeMap(int width, int height, std::vector<void*> data);
   virtual void destroyAndCreate();
   virtual void bind();
+
+  virtual void setFiltering(Filtering min, Filtering max);
+
+  virtual ImTextureID getImTextureId() { return getId(); }
 };
 
 class GLProgram : public BaseProgram {

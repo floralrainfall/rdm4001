@@ -1,5 +1,7 @@
 #pragma once
 
+#include "gfx/entity.hpp"
+#include "graph.hpp"
 #include "network/bitstream.hpp"
 #include "network/entity.hpp"
 #include "network/player.hpp"
@@ -9,7 +11,11 @@ namespace net = rdm::network;
 namespace ww {
 class WPlayer : public net::Player {
   std::unique_ptr<rdm::putil::FpsController> controller;
+  rdm::gfx::Entity* entity;
+  rdm::Graph::Node* entityNode;
   rdm::ClosureId worldJob;
+  rdm::ClosureId gfxJob;
+  btTransform oldTransform;
 
  public:
   WPlayer(net::NetworkManager* manager, net::EntityId id);

@@ -10,17 +10,47 @@
 #include "base_types.hpp"
 
 namespace rdm::gfx {
+class Engine;
+
+struct MeshVertex {
+  glm::vec3 position;
+  glm::vec3 normal;
+  glm::vec2 uv;
+};
+
+struct Mesh {
+  std::vector<MeshVertex> vertices;
+  std::vector<unsigned int> indices;
+
+  std::unique_ptr<BaseBuffer> vertex;
+  std::unique_ptr<BaseBuffer> element;
+  std::unique_ptr<BaseArrayPointers> arrayPointers;
+
+  void render(BaseDevice* device);
+};
+
 struct Model {
-  std::unique_ptr<const aiScene> scene;
+  std::vector<Mesh> meshes;
+  aiMesh* mesh;
+  const aiScene* scene;
+  std::string directory;
+
+  void process(Engine* engine);
+  void render(BaseDevice* device);
+
+ private:
+  Engine* engine;
+  Mesh processMesh(aiMesh* mesh);
+  void processNode(Engine* engine, aiNode* node);
 };
 
 class MeshCache {
-  Assimp::Importer importer;
   std::map<std::string, std::unique_ptr<Model>> models;
+  Engine* engine;
 
  public:
-  MeshCache(BaseDevice* device);
+  MeshCache(Engine* engine);
 
-  std::optional<Model> get(const char* path);
+  std::optional<Model*> get(const char* path);
 };
 }  // namespace rdm::gfx

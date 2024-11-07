@@ -2,6 +2,8 @@
 
 #include <stdexcept>
 
+#include "gfx/base_types.hpp"
+
 namespace rdm::gfx {
 Entity::Entity(Graph::Node* node) {
   this->node = node;
@@ -12,7 +14,14 @@ void Entity::render(BaseDevice* device) {
   int numTechniques = 1;
   if (material) numTechniques = material->numTechniques();
   for (int i = 0; i < numTechniques; i++) {
-    if (material) material->prepareDevice(device, i);
+    if (material) {
+      BaseProgram* program = material->prepareDevice(device, i);
+      if (node) {
+        program->setParameter(
+            "model", DtMat4,
+            BaseProgram::Parameter{.matrix4x4 = node->worldTransform()});
+      }
+    }
     renderTechnique(device, i);
   }
 }

@@ -11,6 +11,7 @@
 #include <memory>
 #include <mutex>
 
+#include "LinearMath/btMatrix3x3.h"
 #include "signal.hpp"
 
 #define PHYSICS_FRAMERATE (1.0 / 60.0)
@@ -46,6 +47,10 @@ class BulletHelpers {
   static glm::mat3 fromMat3(btMatrix3x3 m) {
     return glm::mat3(fromVector3(m.getColumn(0)), fromVector3(m.getColumn(1)),
                      fromVector3(m.getColumn(2)));
+  }
+
+  static btMatrix3x3 toMat3(glm::mat3 m) {
+    return btMatrix3x3(toVector3(m[0]), toVector3(m[1]), toVector3(m[2]));
   }
 };
 };  // namespace rdm

@@ -157,6 +157,8 @@ void GLDevice::startImGui() {
     setUpImgui = true;
   }
 
+  ImGuiIO& io = ImGui::GetIO();
+
   ImGui_ImplOpenGL3_NewFrame();
   ImGui::NewFrame();
 }

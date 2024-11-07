@@ -19,19 +19,20 @@ struct light {
 uniform sampler2D surface;
 uniform sampler2D lightmap;
 uniform samplerCube skybox;
-uniform float shininess = 0.0;
-uniform vec3 view_position;
+uniform float shininess = 0.02;
+uniform float gamma = 4.0;
+uniform vec3 camera_position;
 
 void main() {
-  vec3 i = normalize(v_fmpos - view_position);
+  vec3 i = normalize(v_fmpos - camera_position);
   vec3 r = reflect(i, normalize(v_fnormal));
 
   vec4 samplet = texture2D(surface, vec2(v_fuv.x, -v_fuv.y));
-  vec4 samplel = texture2D(lightmap, v_flm_uv);
-  vec4 samples = texture(skybox, r) * shininess;
+  vec4 samplel = texture2D(lightmap, v_flm_uv) * gamma;
+  vec4 samples = texture(skybox, vec3(r.x, -r.z, r.y)) * shininess;
 
   float intensity = dot(v_fnormal, normalize(vec3(0.5, 0.5, 0.5)));
-  vec3 result = samplet.xyz * samplel.xyz;
+  vec3 result = samplet.xyz * samplel.xyz + samples.xyz;
   float brightness = dot(result, vec3(0.2126, 0.7152, 0.0722));
   f_color = vec4(result, 1.0);
   if (brightness > 1.0)

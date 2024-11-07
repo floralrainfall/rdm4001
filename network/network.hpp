@@ -109,5 +109,8 @@ class NetworkManager {
   void setPlayerType(std::string type) { playerType = type; };
   Peer& getLocalPeer() { return localPeer; }
   bool isBackend() { return backend; }
+
+  static void initialize();
+  static void deinitialize();
 };
 }  // namespace rdm::network

@@ -27,6 +27,8 @@ class Entity {
   void setMaterial(std::shared_ptr<Material> material) {
     this->material = material;
   };
+
+  Material* getMaterial() { return material.get(); }
 };
 
 class BufferEntity : public Entity {

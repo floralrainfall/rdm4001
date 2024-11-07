@@ -18,15 +18,20 @@ class Game {
 
  public:
   Game();
+  virtual ~Game();
 
   // call before accessing world
   void startClient();
   // call before accessing worldServer
   void startServer();
 
+  void lateInitServer();
+
   virtual void initialize() = 0;
   virtual void initializeClient() {};
   virtual void initializeServer() {};
+
+  void earlyInit();
 
   void mainLoop();
 

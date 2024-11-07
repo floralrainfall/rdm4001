@@ -244,6 +244,10 @@ BSPFaceModel BSPFile::addFaceModel(BSPFace* face) {
         else
           m.m_texture = 0;
       }
+      if (m.m_texture) {
+        m.m_texture->setFiltering(gfx::BaseTexture::Nearest,
+                                  gfx::BaseTexture::Nearest);
+      }
     }
   } catch (std::exception& e) {
     m.m_texture = 0;
@@ -304,6 +308,11 @@ void BSPFile::renderFaceModel(BSPFaceModel* model, gfx::BaseProgram* program) {
       "surface", gfx::DtSampler,
       gfx::BaseProgram::Parameter{.texture.texture = model->m_texture,
                                   .texture.slot = 0});
+
+  program->setParameter(
+      "skybox", gfx::DtSampler,
+      gfx::BaseProgram::Parameter{.texture.texture = m_skybox.get(),
+                                  .texture.slot = 1});
   program->bind();
   engine->getDevice()->draw(model->m_index.get(), gfx::DtUnsignedInt,
                             gfx::BaseDevice::Triangles,

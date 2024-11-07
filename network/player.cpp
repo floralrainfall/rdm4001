@@ -1,6 +1,8 @@
 #include "player.hpp"
 namespace rdm::network {
-Player::Player(NetworkManager* manager, EntityId id) : Entity(manager, id) {}
+Player::Player(NetworkManager* manager, EntityId id) : Entity(manager, id) {
+  remotePeerId.set(-1);
+}
 
 void Player::serialize(BitStream& stream) {
   Entity::serialize(stream);

@@ -11,12 +11,16 @@ class Graph {
   Graph();
 
   struct Node {
+    Node();
+
     Node* parent;
     std::vector<Node*> children;
 
-    glm::mat3 transform;
+    glm::mat3 basis;
+    glm::vec3 origin;
+    glm::vec3 scale;
 
-    glm::mat3 worldTransform();
+    glm::mat4 worldTransform();
 
     /**
      * @brief Sets the parent of the node.

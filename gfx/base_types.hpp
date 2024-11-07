@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "imgui/imgui.h"
+
 namespace rdm::gfx {
 enum DataType {
   DtUnsignedByte,
@@ -52,6 +54,11 @@ class BaseTexture {
     RGBA,
   };
 
+  enum Filtering {
+    Nearest,
+    Linear,
+  };
+
   virtual ~BaseTexture() {};
 
   // virtual void upload1d(int width, DataType type, Format format, void* data,
@@ -64,6 +71,8 @@ class BaseTexture {
                                      int samples = 2) = 0;
   virtual void upload2d(int width, int height, DataType type, Format format,
                         void* data, int mipmapLevels = 0) = 0;
+
+  virtual void setFiltering(Filtering min, Filtering max) = 0;
 
   // data[0] = GL_TEXTURE_CUBE_MAP_POSITIVE_X
   // data[1] = GL_TEXTURE_CUBE_MAP_NEGATIVE_X
@@ -84,6 +93,8 @@ class BaseTexture {
 
   Type getType() { return textureType; }
   InternalFormat getInternalFormat() { return textureFormat; }
+
+  virtual ImTextureID getImTextureId() { return 0; };
 
   bool isReserve() { return reserve; };
 

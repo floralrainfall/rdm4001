@@ -1,6 +1,7 @@
 #include "wgame.hpp"
 
 #include "filesystem.hpp"
+#include "gfx/base_types.hpp"
 #include "gfx/gui/gui.hpp"
 #include "gfx/heightmap.hpp"
 #include "gfx/imgui/imgui.h"
@@ -81,14 +82,21 @@ void WGame::initializeClient() {
     Input::singleton()->setMouseLocked(false);
     network::Peer::Type peerType =
         world->getNetworkManager()->getLocalPeer().type;
+    if (worldServer) {
+      ImGui::Begin("Server");
+      ImGui::Text("Currently hosting");
+      ImGui::End();
+    }
+
     if (peerType == network::Peer::ConnectedPlayer) {
       if (game->worldspawn) {
         if (game->worldspawn->isPendingAddToGfx()) {
           game->worldspawn->addToEngine(gfxEngine.get());
         }
         Input::singleton()->setMouseLocked(true);
-        game->worldspawn->getFile()->updatePosition(
-            gfxEngine->getCamera().getPosition());
+        if (game->worldspawn->getFile())
+          game->worldspawn->getFile()->updatePosition(
+              gfxEngine->getCamera().getPosition());
       } else {
         ImGui::Begin("Connecting to server...");
         ImGui::Text("Waiting for worldspawn");
@@ -101,10 +109,30 @@ void WGame::initializeClient() {
         ImGui::End();
       } else {
         switch (game->state) {
-          case MainMenu:
-            ImGui::Begin("Welcome to RDM");
+          case MainMenu: {
+            glm::ivec2 size = gfxEngine->getContext()->getBufferSize();
+            ImGui::SetNextWindowSize(ImVec2(size.x, size.y));
+            ImGui::SetNextWindowPos(ImVec2(0, 0));
+          }
+            ImGui::Begin(
+                "Welcome to RDM", NULL,
+                ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration);
+
+            {
+              gfx::BaseTexture* logo = gfxEngine->getTextureCache()
+                                           ->getOrLoad2d("dat5/logo.png")
+                                           .value()
+                                           .second;
+              ImGui::Image(logo->getImTextureId(), ImVec2(540, 451), {0, 1},
+                           {1, 0});
+            }
+
             if (ImGui::Button("Connect to Game")) {
               game->state = ConnectPanel;
+            }
+            if (ImGui::Button("Host")) {
+              lateInitServer();
+              world->getNetworkManager()->connect("127.0.0.1", 7938);
             }
             if (ImGui::Button("Quit")) {
               InputObject quitObject;
@@ -145,7 +173,7 @@ void WGame::initializeServer() {
 
   Worldspawn* wspawn =
       (Worldspawn*)worldServer->getNetworkManager()->instantiate("Worldspawn");
-  wspawn->loadFile("dat5/baseq3/maps/chud.bsp");
+  wspawn->loadFile("dat5/baseq3/maps/malach.bsp");
 }
 
 void WGame::initialize() {

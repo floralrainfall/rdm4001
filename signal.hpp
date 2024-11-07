@@ -21,7 +21,9 @@ ClosureId __newClosureId();
  */
 template <typename... Args>
 class Signal {
-  std::map<ClosureId, std::function<void(Args...)>> listeners;
+  typedef std::function<void(Args...)> Function;
+  std::map<ClosureId, Function> listeners;
+  std::vector<Function> pendingClosures;
 
  public:
   /**
@@ -33,6 +35,20 @@ class Signal {
    * @param a The arguments to pass to signal listeners.
    */
   void fire(Args... a) {
+    if (pendingClosures.size() != 0) {
+      for (auto closure : pendingClosures) {
+        try {
+          closure(a...);
+        } catch (std::exception& e) {
+          int status;
+          Log::printf(LOG_ERROR, "Error calling closure for signal %s, '%s'",
+                      abi::__cxa_demangle(typeid(this).name(), 0, 0, &status),
+                      e.what());
+        }
+      }
+      pendingClosures.clear();
+    }
+
     for (auto listener : listeners) {
       try {
         listener.second(a...);
@@ -54,11 +70,13 @@ class Signal {
    *
    * @param a The function to add.
    */
-  ClosureId listen(std::function<void(Args...)> a) {
+  ClosureId listen(Function a) {
     ClosureId id = __newClosureId();
     listeners[id] = a;
     return id;
   }
+
+  void addClosure(Function a) { pendingClosures.push_back(a); }
 
   void removeListener(ClosureId id) {
     auto it = listeners.find(id);

@@ -36,7 +36,6 @@ class NetworkJob : public SchedulerJob {
 };
 
 NetworkManager::NetworkManager(World* world) {
-  enet_initialize();
   host = NULL;
   this->world = world;
   world->getScheduler()->addJob(new NetworkJob(this));
@@ -72,7 +71,6 @@ NetworkManager::~NetworkManager() {
     enet_host_destroy(host);
     host = NULL;
   }
-  enet_deinitialize();
 }
 
 void NetworkManager::service() {
@@ -95,150 +93,169 @@ void NetworkManager::service() {
           Peer* remotePeer = (Peer*)event.peer->data;
           BitStream stream(event.packet->data, event.packet->dataLength);
           PacketId packetId = stream.read<PacketId>();
-          switch (packetId) {
-            case WelcomePacket:
-              if (backend) {
-                throw std::runtime_error("Received WelcomePacket on backend");
-              } else {
-                Log::printf(LOG_INFO, "Received WelcomePacket");
-                localPeer.peerId = stream.read<int>();
-                size_t _ticks = stream.read<size_t>();
-                Log::printf(LOG_DEBUG, "Tick diff %i vs %i (%i)", ticks, _ticks,
-                            _ticks - ticks);
-                ticks = _ticks;
-
-                BitStream authenticateStream;
-                authenticateStream.write<PacketId>(AuthenticatePacket);
-                authenticateStream.writeString("Username");
-                enet_peer_send(
-                    localPeer.peer, NETWORK_STREAM_META,
-                    authenticateStream.createPacket(ENET_PACKET_FLAG_RELIABLE));
-              }
-              break;
-            case AuthenticatePacket:
-              if (backend) {
-                std::string username = stream.readString();
-
-                Log::printf(LOG_INFO, "%s authenticating", username.c_str());
-                remotePeer->type = Peer::ConnectedPlayer;
-                remotePeer->playerEntity = (Player*)instantiate(playerType);
-                remotePeer->playerEntity->remotePeerId.set(remotePeer->peerId);
-                remotePeer->playerEntity->displayName.set(username);
-                for (auto& e : entities)
-                  remotePeer->pendingNewIds.push_back(e.first);
-              } else {
-                throw std::runtime_error(
-                    "Received AuthenticatePacket on frontend");
-              }
-              break;
-            case NewIdPacket:
-              if (backend) {
-                throw std::runtime_error("Received NewIdPacket on backend");
-              } else {
-                int numEntities = stream.read<int>();
-                for (int i = 0; i < numEntities; i++) {
-                  EntityId id = stream.read<EntityId>();
-                  std::string typeName = stream.readString();
-                  Entity* ent = instantiate(typeName, id);
-                  ent->deserialize(stream);
-
-                  Log::printf(LOG_DEBUG, "created %s", typeName.c_str());
-                }
-              }
-              break;
-            case DelIdPacket:
-              if (backend) {
-                throw std::runtime_error("Received DelIdPacket on backend");
-              } else {
-                int numEntities = stream.read<int>();
-                for (int i = 0; i < numEntities; i++) {
-                  EntityId id = stream.read<EntityId>();
-                  deleteEntity(id);
-                }
-              }
-              break;
-            case DeltaIdPacket: {
-              int numEntities = stream.read<int>();
-              for (int i = 0; i < numEntities; i++) {
-                EntityId id = stream.read<EntityId>();
-                Entity* ent = entities[id].get();
-                if (!ent) throw std::runtime_error("ent == NULL");
-
+          try {
+            switch (packetId) {
+              case WelcomePacket:
                 if (backend) {
-                  bool allowed = false;
-                  if (Player* player = dynamic_cast<Player*>(ent)) {
-                    if (player->remotePeerId.get() == remotePeer->peerId) {
-                      allowed = true;
-                    }
-                  }
-
-                  if (!allowed) {
-                    Log::printf(LOG_ERROR,
-                                "Peer %i attempted to modify %s (%i)",
-                                remotePeer->peerId, ent->getTypeName(),
-                                ent->getEntityId());
-                    throw std::runtime_error(
-                        "Peer not allowed to modify entity");
-                  }
-                }
-                if (event.packet->flags & ENET_PACKET_FLAG_RELIABLE) {
-                  ent->deserialize(stream);
-                  if (backend) addPendingUpdate(id);
+                  throw std::runtime_error("Received WelcomePacket on backend");
                 } else {
-                  ent->deserializeUnreliable(stream);
-                  if (backend) addPendingUpdateUnreliable(id);
+                  Log::printf(LOG_INFO, "Received WelcomePacket");
+                  localPeer.peerId = stream.read<int>();
+                  size_t _ticks = stream.read<size_t>();
+                  Log::printf(LOG_DEBUG, "Tick diff %i vs %i (%i)", ticks,
+                              _ticks, _ticks - ticks);
+                  ticks = _ticks;
+
+                  BitStream authenticateStream;
+                  authenticateStream.write<PacketId>(AuthenticatePacket);
+                  authenticateStream.writeString("Username");
+                  enet_peer_send(localPeer.peer, NETWORK_STREAM_META,
+                                 authenticateStream.createPacket(
+                                     ENET_PACKET_FLAG_RELIABLE));
                 }
-              }
-            } break;
-            case NewPeerPacket:
-              if (backend) {
-                throw std::runtime_error("Received NewPeerPacket on backend");
-              } else {
-                int peerId = stream.read<int>();
-                Peer np;
-                np.peer = NULL;
-                np.playerEntity = NULL;
-                np.peerId = peerId;
-                peers[np.peerId] = np;
-              }
-              break;
-            case DelPeerPacket:
-              if (backend) {
-                throw std::runtime_error("Received DelPeerPacket on backend");
-              } else {
-                int peerId = stream.read<int>();
-                auto it = peers.find(peerId);
-                if (it != peers.end()) {
-                  peers.erase(it);
+                break;
+              case AuthenticatePacket:
+                if (backend) {
+                  std::string username = stream.readString();
+
+                  Log::printf(LOG_INFO, "%s authenticating", username.c_str());
+                  remotePeer->type = Peer::ConnectedPlayer;
+                  remotePeer->playerEntity = (Player*)instantiate(playerType);
+                  remotePeer->playerEntity->remotePeerId.set(
+                      remotePeer->peerId);
+                  remotePeer->playerEntity->displayName.set(username);
+                  for (auto& e : entities)
+                    remotePeer->pendingNewIds.push_back(e.first);
                 } else {
                   throw std::runtime_error(
-                      "Attempted to delete non-existent peer");
+                      "Received AuthenticatePacket on frontend");
                 }
-              }
-            case DisconnectPacket:
-              if (backend) {
-                throw std::runtime_error(
-                    "Received DisconnectPacket on backend");
-              } else {
-                std::string message = stream.readString();
-                Log::printf(LOG_INFO, "Disconnected from server (%s)",
-                            message.c_str());
-                enet_peer_disconnect_now(localPeer.peer, 0);
-                localPeer.type = Peer::Unconnected;
-                handleDisconnect();
-                enet_host_destroy(host);
-                host = NULL;
-                return;
-              }
-              break;
-            default:
-              Log::printf(LOG_WARN, "%s: Unknown packet %i",
-                          backend ? "Backend" : "Frontend", packetId);
-              break;
+                break;
+              case NewIdPacket:
+                if (backend) {
+                  throw std::runtime_error("Received NewIdPacket on backend");
+                } else {
+                  int numEntities = stream.read<int>();
+                  for (int i = 0; i < numEntities; i++) {
+                    EntityId id = stream.read<EntityId>();
+                    std::string typeName = stream.readString();
+                    Entity* ent = instantiate(typeName, id);
+                    ent->deserialize(stream);
+
+                    Log::printf(LOG_DEBUG, "created %s", typeName.c_str());
+                  }
+                }
+                break;
+              case DelIdPacket:
+                if (backend) {
+                  throw std::runtime_error("Received DelIdPacket on backend");
+                } else {
+                  int numEntities = stream.read<int>();
+                  for (int i = 0; i < numEntities; i++) {
+                    EntityId id = stream.read<EntityId>();
+                    deleteEntity(id);
+                  }
+                }
+                break;
+              case DeltaIdPacket: {
+                int numEntities = stream.read<int>();
+                int i;
+                try {
+                  for (i = 0; i < numEntities; i++) {
+                    EntityId id = stream.read<EntityId>();
+                    Entity* ent = entities[id].get();
+                    if (!ent) {
+                      Log::printf(LOG_DEBUG, "%i == NULL", id);
+                      throw std::runtime_error("ent == NULL");
+                    }
+
+                    if (backend) {
+                      bool allowed = false;
+                      if (Player* player = dynamic_cast<Player*>(ent)) {
+                        if (player->remotePeerId.get() == remotePeer->peerId) {
+                          allowed = true;
+                        }
+                      }
+
+                      if (!allowed) {
+                        Log::printf(LOG_ERROR,
+                                    "Peer %i attempted to modify %s (%i)",
+                                    remotePeer->peerId, ent->getTypeName(),
+                                    ent->getEntityId());
+                        throw std::runtime_error(
+                            "Peer not allowed to modify entity");
+                      }
+                    }
+
+                    if (event.packet->flags & ENET_PACKET_FLAG_RELIABLE) {
+                      ent->deserialize(stream);
+                      if (backend) addPendingUpdate(id);
+                    } else {
+                      ent->deserializeUnreliable(stream);
+                      if (backend) addPendingUpdateUnreliable(id);
+                    }
+                  }
+                } catch (std::exception& e) {
+                  Log::printf(LOG_ERROR, "Error decoding entity %i: (%s)", i,
+                              e.what());
+                }
+              } break;
+              case NewPeerPacket:
+                if (backend) {
+                  throw std::runtime_error("Received NewPeerPacket on backend");
+                } else {
+                  int peerId = stream.read<int>();
+                  Peer np;
+                  np.peer = NULL;
+                  np.playerEntity = NULL;
+                  np.peerId = peerId;
+                  peers[np.peerId] = np;
+                }
+                break;
+              case DelPeerPacket:
+                if (backend) {
+                  throw std::runtime_error("Received DelPeerPacket on backend");
+                } else {
+                  int peerId = stream.read<int>();
+                  auto it = peers.find(peerId);
+                  if (it != peers.end()) {
+                    peers.erase(it);
+                  } else {
+                    throw std::runtime_error(
+                        "Attempted to delete non-existent peer");
+                  }
+                }
+                break;
+              case DisconnectPacket:
+                if (backend) {
+                  throw std::runtime_error(
+                      "Received DisconnectPacket on backend");
+                } else {
+                  std::string message = stream.readString();
+                  Log::printf(LOG_INFO, "Disconnected from server (%s)",
+                              message.c_str());
+                  enet_peer_disconnect_now(localPeer.peer, 0);
+                  localPeer.type = Peer::Unconnected;
+                  handleDisconnect();
+                  enet_host_destroy(host);
+                  host = NULL;
+                  return;
+                }
+                break;
+              default:
+                Log::printf(LOG_WARN, "%s: Unknown packet %i",
+                            backend ? "Backend" : "Frontend", packetId);
+                break;
+            }
+          } catch (std::exception& e) {
+            Log::printf(
+                LOG_ERROR,
+                "%s: Error in ENET_EVENT_TYPE_RECEIVE: %s (packet id: %i)",
+                backend ? "Backend" : "Frontend", e.what(), packetId);
           }
         } catch (std::exception& e) {
           Log::printf(LOG_ERROR, "%s: Error in ENET_EVENT_TYPE_RECEIVE: %s",
-                      backend ? "Backend" : " Frontend", e.what());
+                      backend ? "Backend" : "Frontend", e.what());
         }
       } break;
       case ENET_EVENT_TYPE_DISCONNECT: {
@@ -358,7 +375,8 @@ void NetworkManager::service() {
       ENetPacket* packet =
           deltaIdStream.createPacket(ENET_PACKET_FLAG_RELIABLE);
       for (auto& peer : peers) {
-        enet_peer_send(peer.second.peer, NETWORK_STREAM_ENTITY, packet);
+        if (peer.second.type == Peer::ConnectedPlayer)
+          enet_peer_send(peer.second.peer, NETWORK_STREAM_ENTITY, packet);
       }
       pendingUpdates.clear();
     }
@@ -374,7 +392,8 @@ void NetworkManager::service() {
       }
       ENetPacket* packet = deltaIdStream.createPacket(0);
       for (auto& peer : peers) {
-        enet_peer_send(peer.second.peer, NETWORK_STREAM_ENTITY, packet);
+        if (peer.second.type == Peer::ConnectedPlayer)
+          enet_peer_send(peer.second.peer, NETWORK_STREAM_ENTITY, packet);
       }
       pendingUpdatesUnreliable.clear();
     }
@@ -443,8 +462,9 @@ void NetworkManager::start(int port) {
 
   backend = true;
 
-  if (host == nullptr)
+  if (host == nullptr) {
     throw std::runtime_error("enet_host_create returned NULL");
+  }
 
   Log::printf(LOG_INFO, "Started server on port %i", port);
 }
@@ -504,7 +524,12 @@ Entity* NetworkManager::instantiate(std::string typeName, int _id) {
     } else {
       id = _id;
     }
-    entities[id].reset(constructors[typeName](this, id));
+    Entity* ent = constructors[typeName](this, id);
+    if (!ent) {
+      Log::printf(LOG_ERROR, "Constructor for %s is NULL", typeName.c_str());
+      throw std::runtime_error("Could not instantiate entity");
+    }
+    entities[id].reset(ent);
     if (backend) {
       for (auto& peer : peers) {
         if (peer.second.playerEntity) peer.second.pendingNewIds.push_back(id);
@@ -524,4 +549,8 @@ Entity* NetworkManager::findEntityByType(std::string typeName) {
   }
   return NULL;
 }
+
+void NetworkManager::initialize() { enet_initialize(); }
+
+void NetworkManager::deinitialize() { enet_deinitialize(); }
 }  // namespace rdm::network

@@ -184,7 +184,7 @@ class RenderJob : public SchedulerJob {
       device->clear(0.3, 0.3, 0.3, 0.0);
       device->clearDepth();
       device->setDepthState(BaseDevice::LEqual);
-      device->setCullState(BaseDevice::FrontCCW);
+      device->setCullState(BaseDevice::FrontCW);
 
       engine->getCamera().updateCamera(glm::vec2(fbSize.x, fbSize.y));
 #ifndef DISABLE_EASY_PROFILER
@@ -234,14 +234,13 @@ class RenderJob : public SchedulerJob {
 
 Engine::Engine(World* world, void* hwnd) {
   fullscreenSamples = 4;
-  context = std::unique_ptr<BaseContext>(new gl::GLContext(hwnd));
+  context.reset(new gl::GLContext(hwnd));
   std::scoped_lock lock(context->getMutex());
-  device = std::unique_ptr<BaseDevice>(
-      new gl::GLDevice(dynamic_cast<gl::GLContext*>(context.get())));
+  device.reset(new gl::GLDevice(dynamic_cast<gl::GLContext*>(context.get())));
   device->engine = this;
-  textureCache = std::unique_ptr<TextureCache>(new TextureCache(device.get()));
-  materialCache =
-      std::unique_ptr<MaterialCache>(new MaterialCache(device.get()));
+  textureCache.reset(new TextureCache(device.get()));
+  materialCache.reset(new MaterialCache(device.get()));
+  meshCache.reset(new MeshCache(this));
 
   fullscreenMaterial =
       materialCache->getOrLoad("PostProcess").value_or(nullptr);
@@ -315,6 +314,7 @@ void Engine::render() {
 
   device->startImGui();
 
+  renderStepped.fire();
   for (int i = 0; i < entities.size(); i++) {
     Entity* ent = entities[i].get();
     try {
@@ -324,7 +324,6 @@ void Engine::render() {
     }
   }
 
-  renderStepped.fire();
   device->stopImGui();
 }
 

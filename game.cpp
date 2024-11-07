@@ -10,6 +10,7 @@
 #include "gfx/gl_context.hpp"
 #include "input.hpp"
 #include "logging.hpp"
+#include "network/network.hpp"
 #ifndef DISABLE_OBZ
 #include "obz.hpp"
 #else
@@ -31,7 +32,10 @@
 namespace rdm {
 Game::Game() {
   Log::singleton()->setLevel(Settings::singleton()->getSetting("LogLevel", 1));
+  network::NetworkManager::initialize();
 }
+
+Game::~Game() { network::NetworkManager::deinitialize(); }
 
 void Game::startClient() {
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0) {
@@ -95,7 +99,14 @@ void Game::startClient() {
 
 void Game::startServer() { worldServer.reset(new World()); }
 
-void Game::mainLoop() {
+void Game::lateInitServer() {
+  Log::printf(LOG_INFO, "Starting built-in server");
+  startServer();
+  initializeServer();
+  worldServer->getScheduler()->startAllJobs();
+}
+
+void Game::earlyInit() {
   try {
     initialize();
 
@@ -105,14 +116,19 @@ void Game::mainLoop() {
     }
     if (worldServer) {
       initializeServer();
-      worldServer->changingTitle.listen(
-          [](std::string title) { printf("\033]0;%s\007", title.c_str()); });
+      worldServer->changingTitle.listen([](std::string title) {
+        fprintf(stderr, "\033]0;%s\007", title.c_str());
+      });
       worldServer->getScheduler()->startAllJobs();
     }
   } catch (std::exception& e) {
     Log::printf(LOG_FATAL, "Error initializing game: %s", e.what());
     exit(EXIT_FAILURE);
   }
+}
+
+void Game::mainLoop() {
+  earlyInit();
 
   if (world) {
     SDL_Event event;
@@ -159,7 +175,7 @@ void Game::mainLoop() {
               SDL_GetWindowSize(window, &w, &h);
               SDL_WarpMouseInWindow(window, w / 2, h / 2);
               object.data.mouse.position[0] = w / 2;
-              object.data.mouse.position[1] = w / 2;
+              object.data.mouse.position[1] = h / 2;
               ignoreNextMouseMoveEvent = true;
             } else {
               object.data.mouse.position[0] = event.motion.x;
@@ -184,7 +200,7 @@ void Game::mainLoop() {
   }
   if (worldServer) {
     worldServer->getScheduler()->waitToWrapUp();
-    world->getNetworkManager()->handleDisconnect();
+    worldServer->getNetworkManager()->handleDisconnect();
   }
 }
 }  // namespace rdm

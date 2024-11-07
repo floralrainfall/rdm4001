@@ -160,6 +160,16 @@ void GLTexture::uploadCubeMap(int width, int height, std::vector<void*> data) {
   glBindTexture(target, 0);
 }
 
+void GLTexture::setFiltering(Filtering min, Filtering max) {
+  GLenum filterTypes[] = {GL_NEAREST, GL_LINEAR};
+
+  GLenum target = texType(textureType);
+  glBindTexture(target, texture);
+  glTexParameteri(target, GL_TEXTURE_MAG_FILTER, filterTypes[min]);
+  glTexParameteri(target, GL_TEXTURE_MAG_FILTER, filterTypes[max]);
+  glBindTexture(target, 0);
+}
+
 void GLTexture::destroyAndCreate() {
   glDeleteTextures(1, &texture);
   glGenTextures(1, &texture);
