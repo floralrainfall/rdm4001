@@ -8,6 +8,7 @@
 
 namespace rdm {
 class World;
+class Game;
 
 namespace gfx {
 class Engine;
@@ -74,6 +75,7 @@ class Entity {
   virtual ~Entity();
 
   World* getWorld();
+  Game* getGame();
   NetworkManager* getManager() { return manager; }
   gfx::Engine* getGfxEngine();
 

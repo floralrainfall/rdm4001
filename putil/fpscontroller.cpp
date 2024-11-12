@@ -2,9 +2,13 @@
 
 #include <algorithm>
 #include <glm/common.hpp>
+#include <glm/geometric.hpp>
 #include <glm/glm.hpp>
 
 #include "BulletCollision/CollisionDispatch/btCollisionObject.h"
+#include "LinearMath/btVector3.h"
+#include "alc.h"
+#include "gfx/imgui/imgui.h"
 #include "input.hpp"
 #include "logging.hpp"
 #include "physics.hpp"
@@ -61,6 +65,38 @@ FpsController::~FpsController() {
   world->physicsStepping.removeListener(stepJob);
 }
 
+void FpsController::moveGround(btVector3& vel, glm::vec2 wishdir) {
+  float speed = vel.length();
+  float control = speed < settings.stopSpeed ? settings.stopSpeed : speed;
+  float newspeed = speed - PHYSICS_FRAMERATE * settings.friction * control;
+
+  if (newspeed >= 0) {
+    newspeed /= speed;
+
+    vel *= newspeed;
+  }
+
+  if (Input::singleton()->isKeyDown(' ')) {
+    vel += btVector3(0, 0, 50);
+  }
+
+  float currentSpeed = vel.dot(btVector3(wishdir.x, wishdir.y, 0.0));
+  float addSpeed =
+      std::clamp(settings.maxSpeed - currentSpeed, 0.f, settings.maxAccel);
+  vel += addSpeed * btVector3(wishdir.x, wishdir.y, 0.0);
+}
+
+void FpsController::moveAir(btVector3& vel, glm::vec2 wishdir) {
+  float wishSpeed = (btVector3(wishdir.x, wishdir.y, 0.0) + vel).norm();
+  if (wishSpeed > 30) wishSpeed = 30;
+  float currentSpeed = vel.dot(btVector3(wishdir.x, wishdir.y, 0.0));
+  float addSpeed = wishSpeed - currentSpeed;
+  if (addSpeed <= 0) return;
+  float accelSpeed = settings.maxAccel * wishSpeed * PHYSICS_FRAMERATE;
+  if (accelSpeed > addSpeed) accelSpeed = addSpeed;
+  vel += accelSpeed * btVector3(wishdir.x, wishdir.y, 0.0);
+}
+
 void FpsController::updateCamera(gfx::Camera& camera) {
   btTransform transform;
   motionState->getWorldTransform(transform);
@@ -90,6 +126,10 @@ void FpsController::physicsStep() {
 #endif
 
   btTransform transform = rigidBody->getWorldTransform();
+  float dist = glm::distance(networkPosition,
+                             BulletHelpers::fromVector3(transform.getOrigin()));
+  Log::printf(LOG_DEBUG, "%f", dist);
+
   btVector3 start =
       transform.getOrigin() + btVector3(0, 0, -settings.capsuleHeight / 2.0);
   btVector3 end = start + btVector3(0, 0, -17);
@@ -114,35 +154,14 @@ void FpsController::physicsStep() {
     accel = wishdir;
 
     btVector3 vel = rigidBody->getLinearVelocity();
-
     // modelled after Quake 1 movement
-    if (grounded) {
-      // apply ground friction
+    grounded ? moveGround(vel, wishdir) : moveAir(vel, wishdir);
 
-      float speed = vel.length();
-      float control = speed < settings.stopSpeed ? settings.stopSpeed : speed;
-      float newspeed = speed - PHYSICS_FRAMERATE * settings.friction * control;
-
-      if (newspeed >= 0) {
-        newspeed /= speed;
-
-        vel *= newspeed;
-      }
-
-      if (Input::singleton()->isKeyDown(' ')) {
-        vel += btVector3(0, 0, settings.maxSpeed);
-      }
-    }
-
-    float currentSpeed = vel.dot(btVector3(wishdir.x, wishdir.y, 0.0));
-    float addSpeed =
-        std::clamp(settings.maxSpeed - currentSpeed, 0.f, settings.maxAccel);
-    vel += addSpeed * btVector3(wishdir.x, wishdir.y, 0.0);
+    if (!vel.fuzzyZero()) rigidBody->activate(true);
 
     rigidBody->setLinearVelocity(vel);
     btTransform& transform = rigidBody->getWorldTransform();
     transform.setBasis(BulletHelpers::toMat3(moveView));
-    rigidBody->setWorldTransform(transform);
   }
 }
 
@@ -155,6 +174,8 @@ void FpsController::serialize(network::BitStream& stream) {
   btMatrix3x3FloatData matrixData;
   transform.getBasis().serialize(matrixData);
   stream.write<btMatrix3x3FloatData>(matrixData);
+  rigidBody->getLinearVelocity().serialize(vectorData);
+  stream.write<btVector3FloatData>(vectorData);
 }
 
 void FpsController::deserialize(network::BitStream& stream) {
@@ -164,11 +185,22 @@ void FpsController::deserialize(network::BitStream& stream) {
   btMatrix3x3 basis;
   basis.deSerialize(stream.read<btMatrix3x3FloatData>());
 
+  btVector3 velocity;
+  velocity.deSerialize(stream.read<btVector3FloatData>());
+
+  networkPosition = BulletHelpers::fromVector3(origin);
   if (!localPlayer) {
     btTransform& bodyTransform = rigidBody->getWorldTransform();
     bodyTransform.setOrigin(origin);
     bodyTransform.setBasis(basis);
+
+    rigidBody->setLinearVelocity(velocity);
+    rigidBody->activate(true);
     rigidBody->setWorldTransform(bodyTransform);
+  } else {
+    btTransform& ourTransform = rigidBody->getWorldTransform();
+    float dist = glm::distance(
+        networkPosition, BulletHelpers::fromVector3(ourTransform.getOrigin()));
   }
 }
 

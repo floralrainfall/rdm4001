@@ -81,9 +81,8 @@ void GLTexture::reserve2d(int width, int height, InternalFormat format,
 
   GLenum target = texType(textureType);
   glBindTexture(target, texture);
-  glTexStorage2D(target, mipmapLevels, texInternalFormat(textureFormat), width,
-                 height);
-  if (mipmapLevels != 1) {
+  glTexStorage2D(target, 0, texInternalFormat(textureFormat), width, height);
+  if (mipmapLevels != 0) {
     glGenerateMipmap(target);
   }
   glBindTexture(target, 0);
@@ -124,9 +123,11 @@ void GLTexture::upload2d(int width, int height, DataType type,
   glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
   glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
   glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
-  glTexImage2D(target, mipmapLevels, texInternalFormat(textureFormat), width,
-               height, 0, texFormat(format), fromDataType(type), data);
-  if (mipmapLevels != 1) {
+  glTexImage2D(target, 0, texInternalFormat(textureFormat), width, height, 0,
+               texFormat(format), fromDataType(type), data);
+  glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  if (mipmapLevels) {
     glGenerateMipmap(target);
   }
   glBindTexture(target, 0);

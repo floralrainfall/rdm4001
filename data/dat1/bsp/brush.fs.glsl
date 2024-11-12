@@ -19,7 +19,7 @@ struct light {
 uniform sampler2D surface;
 uniform sampler2D lightmap;
 uniform samplerCube skybox;
-uniform float shininess = 0.02;
+uniform float shininess = 0.0;
 uniform float gamma = 4.0;
 uniform vec3 camera_position;
 

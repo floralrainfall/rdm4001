@@ -14,6 +14,7 @@ assimp = dependency('assimp')
 enet = dependency('libenet')
 easy_profiler = dependency('easy_profiler')
 bullet = dependency('Bullet')
+libsndfile = dependency('sndfile')
 boost_dep = dependency('boost', modules: ['program_options'])
 
 common_proj = subproject('common')
@@ -26,6 +27,8 @@ if not obz_proj.found()
 else
   obz_dep = obz_proj.get_variable('libobz_dep')
 endif
+
+options = ['-DDISABLE_EASY_PROFILER']
 
 glad_proj = subproject('glad')
 glad_dep = glad_proj.get_variable('libglad_dep')
@@ -49,6 +52,8 @@ gamelib = static_library('game', [
   'signal.hpp',
   'world.cpp',
   'world.hpp',
+  'sound.cpp',
+  'sound.hpp',
   'physics.cpp',
   'physics.hpp',
 
@@ -111,7 +116,7 @@ gamelib = static_library('game', [
   'gfx/gl_device.hpp',
   'gfx/gl_types.cpp',
   'gfx/gl_types.hpp',
-], cpp_args: obz_options, include_directories: [inc], dependencies: [sdl_ttf, boost_dep, enet, common_dep, glad_dep, obz_dep, sdl2, glm, openal, assimp, bullet, easy_profiler])
+], cpp_args: options + obz_options, include_directories: [inc], dependencies: [libsndfile, sdl_ttf, boost_dep, enet, common_dep, glad_dep, obz_dep, sdl2, glm, openal, assimp, bullet, easy_profiler])
 
 inc2 = include_directories('wawaworld')
 
@@ -136,4 +141,4 @@ executable('wawaworld', [
   'wawaworld/worldspawn.hpp',
   'wawaworld/wplayer.cpp',
   'wawaworld/wplayer.hpp'
-], include_directories: [inc, inc2], dependencies: [common_dep, sdl2, glm, b3geometry_dep, easy_profiler], link_with: gamelib)
+], cpp_args: options, include_directories: [inc, inc2], dependencies: [common_dep, sdl2, glm, b3geometry_dep, easy_profiler], link_with: gamelib)

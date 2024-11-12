@@ -37,6 +37,8 @@ Game::Game() {
 
 Game::~Game() { network::NetworkManager::deinitialize(); }
 
+size_t Game::getVersion() { return ENGINE_VERSION; }
+
 void Game::startClient() {
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0) {
     if (!window)
@@ -86,6 +88,8 @@ void Game::startClient() {
   if (obzFsApi) obzFsApi->addToScheduler(world->getScheduler());
 #endif
 
+  soundManager.reset(new SoundManager(world.get()));
+
   gfxEngine.reset(new gfx::Engine(world.get(), (void*)window));
   ImGui::SetCurrentContext(ImGui::CreateContext());
   ImGui_ImplSDL2_InitForOpenGL(
@@ -93,11 +97,15 @@ void Game::startClient() {
   gfxEngine->getContext()->unsetCurrent();
 
   world->getNetworkManager()->setGfxEngine(gfxEngine.get());
+  world->getNetworkManager()->setGame(this);
   world->changingTitle.listen(
       [this](std::string title) { SDL_SetWindowTitle(window, title.c_str()); });
 }
 
-void Game::startServer() { worldServer.reset(new World()); }
+void Game::startServer() {
+  worldServer.reset(new World());
+  worldServer->getNetworkManager()->setGame(this);
+}
 
 void Game::lateInitServer() {
   Log::printf(LOG_INFO, "Starting built-in server");
@@ -159,6 +167,8 @@ void Game::mainLoop() {
               if (!(flags & SDL_WINDOW_INPUT_FOCUS)) {
                 SDL_ShowCursor(true);
                 break;
+              } else {
+                SDL_ShowCursor(false);
               }
             }
 

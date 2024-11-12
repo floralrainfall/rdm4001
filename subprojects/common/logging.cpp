@@ -24,28 +24,34 @@ void Log::addLogMessage(LogMessage m) {
   std::scoped_lock lock(mutex);
   if (m.t >= level) {
     char* clr = "";
+    char* lvl = "";
     switch (m.t) {
       default:
       case LOG_EXTERNAL:
       case LOG_DEBUG:
         clr = HBLK;
+        lvl = "DEBUG";
         break;
       case LOG_INFO:
         clr = WHT;
+        lvl = "INFO";
         break;
       case LOG_WARN:
         clr = YEL;
+        lvl = "WARNING";
         break;
       case LOG_ERROR:
         clr = RED;
+        lvl = "ERROR";
         break;
       case LOG_FATAL:
         clr = BRED;
+        lvl = "FATAL";
         break;
     }
 #ifndef NDEBUG
-    ::printf("%s%s:%i: %s" COLOR_RESET "\n", clr, m.loc.file_name(),
-             m.loc.line(), m.message.c_str());
+    ::printf("%s[%s:%i] %s: %s" COLOR_RESET "\n", clr, m.loc.file_name(),
+             m.loc.line(), lvl, m.message.c_str());
 #else
     ::printf("%s%s" COLOR_RESET "\n", clr, m.message.c_str());
 #endif

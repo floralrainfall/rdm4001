@@ -15,6 +15,7 @@ Worldspawn::Worldspawn(net::NetworkManager* manager, net::EntityId id)
       if (file) file->updatePosition(getGfxEngine()->getCamera().getPosition());
     });
   }
+  mapName.set("");
 }
 
 Worldspawn::~Worldspawn() {
@@ -49,14 +50,12 @@ void Worldspawn::serialize(net::BitStream& stream) {
 
 void Worldspawn::deserialize(net::BitStream& stream) {
   std::scoped_lock lock(mutex);
-  if (file) {
-    throw std::runtime_error("Cannot change map if map is already loaded");
-  }
 
   mapName.deserialize(stream);
-  file = new BSPFile(mapName.get().c_str());
-
-  addToWorld(getWorld());
-  pendingAddToGfx = true;
+  if (!file && mapName.get() != "") {
+    file = new BSPFile(mapName.get().c_str());
+    addToWorld(getWorld());
+    pendingAddToGfx = true;
+  }
 }
 }  // namespace ww

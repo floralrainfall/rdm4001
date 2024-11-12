@@ -125,6 +125,8 @@ class Scheduler {
    */
   SchedulerJob* addJob(SchedulerJob* job);
 
+  void imguiDebug();
+
   void waitToWrapUp();
 
   void startAllJobs();

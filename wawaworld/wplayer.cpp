@@ -3,8 +3,6 @@
 #include <cmath>
 #include <memory>
 
-#include "LinearMath/btMatrix3x3.h"
-#include "LinearMath/btVector3.h"
 #include "gfx/base_types.hpp"
 #include "gfx/engine.hpp"
 #include "gfx/imgui/imgui.h"
@@ -13,6 +11,8 @@
 #include "logging.hpp"
 #include "physics.hpp"
 #include "putil/fpscontroller.hpp"
+#include "sound.hpp"
+#include "wgame.hpp"
 #include "world.hpp"
 #include "worldspawn.hpp"
 
@@ -44,6 +44,16 @@ WPlayer::WPlayer(net::NetworkManager* manager, net::EntityId id)
   entityNode = new rdm::Graph::Node();
   entityNode->scale = glm::vec3(6.f);
   if (!getManager()->isBackend()) {
+    soundEmitter.reset(getGame()->getSoundManager()->newEmitter());
+    soundEmitter->node = entityNode;
+    soundEmitter->play(getGame()
+                           ->getSoundManager()
+                           ->getSoundCache()
+                           ->get("dat5/walking.ogg")
+                           .value());
+    soundEmitter->setPitch(0.f);
+    soundEmitter->setLooping(true);
+
     worldJob = getWorld()->stepped.listen([this] {
       if (getManager()->getLocalPeer().peerId == remotePeerId.get()) {
         controller->updateCamera(getGfxEngine()->getCamera());
@@ -58,6 +68,10 @@ WPlayer::WPlayer(net::NetworkManager* manager, net::EntityId id)
         entityNode->basis = rdm::BulletHelpers::fromMat3(transform.getBasis()) *
                             glm::mat3(glm::rotate(M_PI_2f, glm::vec3(0, 0, 1)));
       }
+
+      // if (getManager()->getLocalPeer().peerId == remotePeerId.get()) return;
+      getGame()->getSoundManager()->listenerNode = entityNode;
+
       std::shared_ptr<gfx::Material> material =
           getGfxEngine()->getMaterialCache()->getOrLoad("Mesh").value();
       gfx::BaseProgram* program =
@@ -69,6 +83,12 @@ WPlayer::WPlayer(net::NetworkManager* manager, net::EntityId id)
                               ->getMeshCache()
                               ->get("dat5/baseq3/models/andi_rig.obj")
                               .value();
+      // model->render(getGfxEngine()->getDevice());
+
+      entityNode->origin = controller->getNetworkPosition();
+      program->setParameter("model", gfx::DtMat4,
+                            gfx::BaseProgram::Parameter{
+                                .matrix4x4 = entityNode->worldTransform()});
       model->render(getGfxEngine()->getDevice());
     });
     /*getGfxEngine()->renderStepped.addClosure([this] {
@@ -93,6 +113,10 @@ void WPlayer::tick() {
   if (!getManager()->isBackend()) {
     btTransform transform = controller->getTransform();
 
+    btVector3 vel = controller->getRigidBody()->getLinearVelocity();
+    soundEmitter->setPitch(
+        controller->isGrounded() ? ((vel.length() < 1) ? 0.0 : 1.f) : 0.f);
+
     if (getManager()->getLocalPeer().peerId == remotePeerId.get()) {
       controller->setLocalPlayer(true);
       btVector3 forward = btVector3(0, 0, 1);
@@ -110,7 +134,7 @@ void WPlayer::tick() {
         getManager()->addPendingUpdateUnreliable(getEntityId());
       }
 
-      getGfxEngine()->renderStepped.addClosure([=] {
+      getGfxEngine()->renderStepped.addClosure([this] {
         ImGui::Begin("Debug");
         Worldspawn* worldspawn = dynamic_cast<Worldspawn*>(
             getManager()->findEntityByType("Worldspawn"));
@@ -120,6 +144,18 @@ void WPlayer::tick() {
                       worldspawn->getFile()->getFacesRendered());
           ImGui::Text("Rendered Leafs: %i",
                       worldspawn->getFile()->getLeafsRendered());
+
+          btVector3 vel = controller->getRigidBody()->getLinearVelocity();
+          ImGui::Text("Velocity: %0.2f, %0.2f, %0.2f", vel.x(), vel.y(),
+                      vel.z());
+          ImGui::Text("Velocity Length: %0.2f", vel.length());
+          glm::vec2 accel = controller->getWishDir();
+          ImGui::Text("Wish Dir: %0.2f, %0.2f", accel.x, accel.y);
+
+          btTransform transform = controller->getTransform();
+          btVector3 origin = transform.getOrigin();
+          ImGui::Text("Position: %0.2f, %0.2f, %0.2f", origin.x(), origin.y(),
+                      origin.z());
         } else {
           ImGui::Text("No worldspawn found");
         }

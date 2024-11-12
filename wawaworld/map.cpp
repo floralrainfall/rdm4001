@@ -321,7 +321,9 @@ void BSPFile::renderFaceModel(BSPFaceModel* model, gfx::BaseProgram* program) {
 
 void BSPFile::draw() {
   if (!m_gfxEnabled) return;
+#ifndef DISABLE_EASY_PROFILER
   EASY_FUNCTION("BSPFile::draw");
+#endif
 
   engine->getDevice()->setCullState(gfx::BaseDevice::BackCCW);
 

@@ -7,6 +7,7 @@
 #include "network/player.hpp"
 #include "putil/fpscontroller.hpp"
 #include "signal.hpp"
+#include "sound.hpp"
 namespace net = rdm::network;
 namespace ww {
 class WPlayer : public net::Player {
@@ -16,6 +17,8 @@ class WPlayer : public net::Player {
   rdm::ClosureId worldJob;
   rdm::ClosureId gfxJob;
   btTransform oldTransform;
+
+  std::unique_ptr<rdm::SoundEmitter> soundEmitter;
 
  public:
   WPlayer(net::NetworkManager* manager, net::EntityId id);

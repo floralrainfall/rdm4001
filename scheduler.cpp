@@ -15,11 +15,25 @@
 #include <easy/profiler.h>
 #endif
 
+#include "gfx/imgui/imgui.h"
+
 static size_t schedulerId = 0;
 
 namespace rdm {
 Scheduler::Scheduler() { this->id = schedulerId++; }
 Scheduler::~Scheduler() { waitToWrapUp(); }
+
+void Scheduler::imguiDebug() {
+  for (auto& job : jobs) {
+    JobStatistics stats = job->getStats();
+    ImGui::Text("Job %s", stats.name);
+    ImGui::Text("S: %i, T: %0.2f", stats.schedulerId, stats.time);
+    ImGui::Text("Total DT: %0.8f", stats.totalDeltaTime);
+    ImGui::Text("DT: %0.8f", stats.deltaTime);
+    ImGui::Text("Expected DT: %0.8f", job->getFrameRate());
+    ImGui::Separator();
+  }
+}
 
 void Scheduler::waitToWrapUp() {
   for (auto& job : jobs) {
@@ -65,8 +79,9 @@ void SchedulerJob::task(SchedulerJob* job) {
               job->getStats().schedulerId);
 #endif
   while (running) {
+#ifndef DISABLE_EASY_PROFILER
     EASY_BLOCK("Step");
-
+#endif
     std::chrono::time_point start = std::chrono::high_resolution_clock::now();
 
     Result r;
@@ -119,7 +134,9 @@ void SchedulerJob::task(SchedulerJob* job) {
     job->stats.deltaTime = std::chrono::duration<double>(execution).count();
     double frameRate = job->getFrameRate();
     if (frameRate != 0.0) {  // run as fast as we can if there is no frame rate
+#ifndef DISABLE_EASY_PROFILER
       EASY_BLOCK("Sleep");
+#endif
       std::chrono::duration sleep =
           std::chrono::duration<double>(frameRate) - execution;
       if (job->stopOnCancel) {

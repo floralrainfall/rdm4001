@@ -18,7 +18,8 @@
 
 namespace rdm {
 class World;
-}
+class Game;
+}  // namespace rdm
 
 namespace rdm::network {
 struct Peer {
@@ -50,6 +51,7 @@ class NetworkManager {
   Peer localPeer;
   std::map<int, Peer> peers;
   World* world;
+  Game* game;
   gfx::Engine* gfxEngine;
   bool backend;
 
@@ -68,6 +70,9 @@ class NetworkManager {
  public:
   NetworkManager(World* world);
   ~NetworkManager();
+
+  void setGame(Game* game) { this->game = game; };
+  Game* getGame() { return game; }
 
   void handleDisconnect();
 

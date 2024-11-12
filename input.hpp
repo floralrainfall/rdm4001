@@ -77,6 +77,9 @@ class Input {
   Signal<InputObject> onEvent;
 
   bool isKeyDown(int c) { return keysDown[c]; };
+
+  std::map<int, Signal<>> keyDownSignals;
+
  private:
   std::map<std::string, Axis> axis;
 };

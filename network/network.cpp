@@ -82,7 +82,9 @@ void NetworkManager::service() {
 
   ENetEvent event;
 
+#ifndef DISABLE_EASY_PROFILER
   EASY_BLOCK("Network Service");
+#endif
   while (enet_host_service(host, &event, 1) > 0) {
 #ifndef DISABLE_EASY_PROFILER
     EASY_BLOCK("Handle Service");
@@ -257,6 +259,7 @@ void NetworkManager::service() {
           Log::printf(LOG_ERROR, "%s: Error in ENET_EVENT_TYPE_RECEIVE: %s",
                       backend ? "Backend" : "Frontend", e.what());
         }
+        enet_packet_destroy(event.packet);
       } break;
       case ENET_EVENT_TYPE_DISCONNECT: {
         if (backend) {
@@ -322,13 +325,19 @@ void NetworkManager::service() {
         break;
     }
   }
+#ifndef DISABLE_EASY_PROFILER
   EASY_END_BLOCK;
+#endif
 
+#ifndef DISABLE_EASY_PROFILER
   EASY_BLOCK("Network Tick");
+#endif
   for (auto& entity : entities) {
     entity.second->tick();
   }
+#ifndef DISABLE_EASY_PROFILER
   EASY_END_BLOCK;
+#endif
 
   if (backend) {
 #ifndef DISABLE_EASY_PROFILER

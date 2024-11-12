@@ -55,6 +55,7 @@ void Input::flushEvents() {
         quitSignal.fire(event);
         break;
       case InputObject::KeyPress:
+        keyDownSignals[event.data.key.key].fire();
       case InputObject::KeyUp:
         keyPressed = event.type == InputObject::KeyPress;
         for (auto [name, _axis] : axis) {

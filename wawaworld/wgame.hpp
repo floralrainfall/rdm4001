@@ -17,5 +17,7 @@ class WGame : public Game {
   virtual void initialize();
   virtual void initializeClient();
   virtual void initializeServer();
+
+  virtual size_t getGameVersion();
 };
 };  // namespace ww

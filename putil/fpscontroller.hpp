@@ -31,9 +31,13 @@ class FpsController {
   glm::mat3 moveView;
   glm::vec2 moveVel;
   glm::vec2 accel;
+  glm::vec3 networkPosition;
   bool grounded;
 
   void physicsStep();
+
+  void moveGround(btVector3& vel, glm::vec2 wishdir);
+  void moveAir(btVector3& vel, glm::vec2 wishdir);
 
  public:
   FpsController(PhysicsWorld* world,
@@ -46,7 +50,11 @@ class FpsController {
   void serialize(network::BitStream& stream);
   void deserialize(network::BitStream& stream);
 
+  glm::vec3 getNetworkPosition() { return networkPosition; }
+  glm::vec2 getWishDir() { return accel; }
+
   btTransform getTransform() { return rigidBody->getWorldTransform(); }
+  bool isGrounded() { return grounded; }
 
   btRigidBody* getRigidBody() { return rigidBody.get(); };
   btMotionState* getMotionState() { return motionState; };
