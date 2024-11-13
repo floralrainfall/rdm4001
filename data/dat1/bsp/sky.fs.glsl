@@ -61,8 +61,5 @@ void main() {
   vec3 worldR = inverse(mat3(viewMatrix)) * i;
   f_color = texture(skybox, vec3(worldR.x, -worldR.z, worldR.y));
   float brightness = dot(f_color.xyz, vec3(0.2126, 0.7152, 0.0722));
-  if (brightness > 0.9)
-    f_bloom = vec4(f_color);
-  else
-    f_bloom = vec4(0.0, 0.0, 0.0, 1.0);
+  f_bloom = f_color;
 }

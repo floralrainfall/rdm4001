@@ -240,6 +240,8 @@ class RenderJob : public SchedulerJob {
       Log::printf(LOG_ERROR, "Error in render: %s", e.what());
     }
 
+    engine->device->stopImGui();
+
     engine->context->swapBuffers();
 
     engine->context->unsetCurrent();
@@ -383,8 +385,6 @@ void Engine::render() {
       Log::printf(LOG_ERROR, "Error rendering entity %i", i);
     }
   }
-
-  device->stopImGui();
 }
 
 void Engine::initialize() {
