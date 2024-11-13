@@ -20,7 +20,7 @@ uniform sampler2D surface;
 uniform sampler2D lightmap;
 uniform samplerCube skybox;
 uniform float shininess = 0.0;
-uniform float gamma = 4.0;
+uniform float gamma = 4;
 uniform vec3 camera_position;
 
 void main() {
@@ -35,7 +35,7 @@ void main() {
   vec3 result = samplet.xyz * samplel.xyz + samples.xyz;
   float brightness = dot(result, vec3(0.2126, 0.7152, 0.0722));
   f_color = vec4(result, 1.0);
-  if (brightness > 1.0)
+  if (brightness > 0.8)
     f_bloom = vec4(f_color);
   else
     f_bloom = vec4(0.0, 0.0, 0.0, 1.0);

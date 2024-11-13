@@ -67,6 +67,10 @@ GLenum GLTexture::texInternalFormat(InternalFormat format) {
       return GL_RGB8;
     case RGBA8:
       return GL_RGBA8;
+    case RGBF32:
+      return GL_RGB32F;
+    case RGBAF32:
+      return GL_RGBA32F;
     case D24S8:
       return GL_DEPTH24_STENCIL8;
     default:

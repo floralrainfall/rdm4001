@@ -4,6 +4,7 @@
 
 #include <stdexcept>
 
+#include "gfx/base_types.hpp"
 #include "gl_types.hpp"
 #include "imgui/backends/imgui_impl_opengl3.h"
 #include "imgui/imgui.h"
@@ -149,6 +150,30 @@ std::unique_ptr<BaseArrayPointers> GLDevice::createArrayPointers() {
 
 std::unique_ptr<BaseFrameBuffer> GLDevice::createFrameBuffer() {
   return std::unique_ptr<BaseFrameBuffer>(new GLFrameBuffer());
+}
+
+void GLDevice::targetAttachments(BaseFrameBuffer::AttachmentPoint* attachments,
+                                 int count) {
+  std::vector<GLenum> _attach;
+  for (int i = 0; i < count; i++) {
+    GLenum atp;
+    switch (attachments[i]) {
+      case BaseFrameBuffer::Depth:
+        atp = GL_DEPTH_ATTACHMENT;
+        break;
+      case BaseFrameBuffer::Stencil:
+        atp = GL_STENCIL_ATTACHMENT;
+        break;
+      case BaseFrameBuffer::DepthStencil:
+        atp = GL_DEPTH_STENCIL_ATTACHMENT;
+        break;
+      default:  // should be colors
+        atp = GL_COLOR_ATTACHMENT0 + attachments[i];
+        break;
+    }
+    _attach.push_back(atp);
+  }
+  glDrawBuffers(count, _attach.data());
 }
 
 void GLDevice::startImGui() {

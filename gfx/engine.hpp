@@ -64,6 +64,10 @@ class Engine {
   std::unique_ptr<BaseArrayPointers> fullScreenArrayPointers;
   std::shared_ptr<Material> fullscreenMaterial;
   std::unique_ptr<BaseFrameBuffer> postProcessFrameBuffer;
+
+  std::unique_ptr<BaseFrameBuffer> pingpongFramebuffer[2];
+  std::unique_ptr<BaseTexture> pingpongTexture[2];
+
   int fullscreenSamples;
 
   float time;
@@ -74,6 +78,8 @@ class Engine {
   void initialize();
   void render();
   void stepped();
+
+  void initializeBuffers(glm::vec2 res, bool reset);
 
   std::unique_ptr<MaterialCache> materialCache;
   std::unique_ptr<TextureCache> textureCache;

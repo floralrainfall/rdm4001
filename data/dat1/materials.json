@@ -54,6 +54,11 @@
 	    "Techniques": [
 		{"ProgramName": "Mesh"}
 	    ]
+	},
+	"GaussianBlur": {
+	    "Techniques": [
+		{"ProgramName": "GaussianBlur"}
+	    ]
 	}
     },
     "Programs": {
@@ -67,6 +72,7 @@
 	"HeightmapTesselated": {"VSName": "dat1/heightmap.vs.glsl", "FSName": "dat1/heightmap.fs.glsl", "GSName": "dat1/heightmap.gs.glsl"},
 	"BspBrush": {"VSName": "dat1/bsp/brush.vs.glsl", "FSName": "dat1/bsp/brush.fs.glsl"},
 	"BspSky": {"VSName": "dat1/bsp/brush.vs.glsl", "FSName": "dat1/bsp/sky.fs.glsl"},
-	"Mesh": {"VSName": "dat1/mesh.vs.glsl", "FSName": "dat1/mesh.fs.glsl"}
+	"Mesh": {"VSName": "dat1/mesh.vs.glsl", "FSName": "dat1/mesh.fs.glsl"},
+	"GaussianBlur": {"VSName": "dat1/post.vs.glsl", "FSName": "dat1/blur.fs.glsl"}
     }
 }

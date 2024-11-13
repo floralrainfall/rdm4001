@@ -194,6 +194,9 @@ class BaseDevice {
    */
   virtual std::unique_ptr<BaseFrameBuffer> createFrameBuffer() = 0;
 
+  virtual void targetAttachments(BaseFrameBuffer::AttachmentPoint* attachments,
+                                 int count) = 0;
+
   // TODO: port imgui itself to engine system
   virtual void startImGui() = 0;
   virtual void stopImGui() = 0;

@@ -407,7 +407,7 @@ void BSPFile::addToPhysicsWorld(PhysicsWorld* world) {
     if (intermediate.size() != 0) {
       btCollisionShape* brushshape = new btConvexHullShape(
           (btScalar*)intermediate.data(), intermediate.size());
-      btRigidBody* brushbody = new btRigidBody(0.f, NULL, brushshape);
+      btRigidBody* brushbody = new btRigidBody(0.0, NULL, brushshape);
       brushbody->setUserPointer(this);
       world->getWorld()->addRigidBody(brushbody);
       m_brushBodies.push_back(brushbody);

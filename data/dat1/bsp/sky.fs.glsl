@@ -1,5 +1,6 @@
 #version 330 core
-out vec4 f_color;
+layout(location = 0) out vec4 f_color;
+layout(location = 1) out vec4 f_bloom;
 
 in vec4 v_fcolor;  // the input variable from the vertex shader (same name and
                    // same type)
@@ -59,4 +60,9 @@ void main() {
   vec3 viewR = reflect(i, normalize(v_fnormal));
   vec3 worldR = inverse(mat3(viewMatrix)) * i;
   f_color = texture(skybox, vec3(worldR.x, -worldR.z, worldR.y));
+  float brightness = dot(f_color.xyz, vec3(0.2126, 0.7152, 0.0722));
+  if (brightness > 0.9)
+    f_bloom = vec4(f_color);
+  else
+    f_bloom = vec4(0.0, 0.0, 0.0, 1.0);
 }

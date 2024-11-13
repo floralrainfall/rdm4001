@@ -141,13 +141,14 @@ void WGame::initializeClient() {
               gfxEngine->getCamera().getPosition());
 
         glm::ivec2 size = gfxEngine->getContext()->getBufferSize();
-        /*ImGui::SetNextWindowSize(ImVec2(size.x, size.y));
+        ImGui::SetNextWindowSize(ImVec2(size.x, size.y));
         ImGui::SetNextWindowPos(ImVec2(0, 0));
-        ImGui::Begin(
-            "HUD", NULL,
-            ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration);
+        ImGui::Begin("HUD", NULL,
+                     ImGuiWindowFlags_NoBackground |
+                         ImGuiWindowFlags_NoDecoration |
+                         ImGuiWindowFlags_NoBringToFrontOnFocus);
 
-            ImGui::End();*/
+        ImGui::End();
       } else {
         ImGui::Begin("Connecting to server...");
         ImGui::Text("Waiting for worldspawn");

@@ -34,6 +34,9 @@ class GLDevice : public BaseDevice {
   virtual std::unique_ptr<BaseArrayPointers> createArrayPointers();
   virtual std::unique_ptr<BaseFrameBuffer> createFrameBuffer();
 
+  virtual void targetAttachments(BaseFrameBuffer::AttachmentPoint* attachments,
+                                 int count);
+
   virtual void startImGui();
   virtual void stopImGui();
 };

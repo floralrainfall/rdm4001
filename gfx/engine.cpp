@@ -140,38 +140,7 @@ class RenderJob : public SchedulerJob {
       glm::ivec2 fbSize = engine->context->getBufferSize();
       if (engine->getCamera().getFramebufferSize() !=
           glm::vec2(fbSize.x, fbSize.y)) {
-        glm::vec2 fbSizeF = fbSize;
-        float s = Settings::singleton()->getSetting("FbScale", 1.0);
-        fbSizeF *= s;
-
-        engine->postProcessFrameBuffer->destroyAndCreate();
-        engine->fullscreenTexture->destroyAndCreate();
-        engine->fullscreenTexture->reserve2dMultisampled(
-            fbSizeF.x, fbSizeF.y, BaseTexture::RGBA8,
-            engine->fullscreenSamples);
-        engine->fullscreenTextureDepth->destroyAndCreate();
-        engine->fullscreenTextureDepth->reserve2dMultisampled(
-            fbSizeF.x, fbSizeF.y, BaseTexture::D24S8,
-            engine->fullscreenSamples);
-        engine->fullscreenTextureBloom->destroyAndCreate();
-        engine->fullscreenTextureBloom->reserve2dMultisampled(
-            fbSizeF.x, fbSizeF.y, BaseTexture::RGBA8,
-            engine->fullscreenSamples);
-        engine->postProcessFrameBuffer->setTarget(
-            engine->fullscreenTexture.get());
-        engine->postProcessFrameBuffer->setTarget(
-            engine->fullscreenTextureBloom.get(), BaseFrameBuffer::Color1);
-        engine->postProcessFrameBuffer->setTarget(
-            engine->fullscreenTextureDepth.get(),
-            BaseFrameBuffer::DepthStencil);
-
-        Log::printf(LOG_DEBUG, "Updating size of framebuffer to (%f,%f)",
-                    fbSizeF.x, fbSizeF.y);
-        if (engine->postProcessFrameBuffer->getStatus() !=
-            BaseFrameBuffer::Complete) {
-          Log::printf(LOG_ERROR, "BaseFrameBuffer::getStatus() = %i",
-                      engine->postProcessFrameBuffer->getStatus());
-        }
+        engine->initializeBuffers(fbSize, true);
       }
 
       void* _ =
@@ -180,6 +149,14 @@ class RenderJob : public SchedulerJob {
 #ifndef DISABLE_EASY_PROFILER
       EASY_BLOCK("Setup Frame");
 #endif
+      {
+        BaseFrameBuffer::AttachmentPoint drawBuffers[] = {
+            BaseFrameBuffer::Color0,
+            BaseFrameBuffer::Color1,
+        };
+        device->targetAttachments(drawBuffers, 2);
+      }
+
       device->viewport(0, 0, fbSize.x, fbSize.y);
       device->clear(0.3, 0.3, 0.3, 0.0);
       device->clearDepth();
@@ -205,28 +182,67 @@ class RenderJob : public SchedulerJob {
 #ifndef DISABLE_EASY_PROFILER
       EASY_BLOCK("Render Draw Buffer");
 #endif
+
       device->setDepthState(BaseDevice::Always);
       device->setCullState(BaseDevice::None);
+
+#ifndef DISABLE_EASY_PROFILER
+      EASY_BLOCK("Bloom");
+#endif
+
+      {
+        bool horizontal = true, firstIteration = true;
+        int amount = 10;
+        std::shared_ptr<gfx::Material> material =
+            engine->getMaterialCache()->getOrLoad("GaussianBlur").value();
+        for (int i = 0; i < amount; i++) {
+          void* framebuffer = engine->getDevice()->bindFramebuffer(
+              engine->pingpongFramebuffer[horizontal].get());
+          engine->renderFullscreenQuad(
+              NULL, material.get(),
+              [this, horizontal, firstIteration](BaseProgram* program) {
+                program->setParameter(
+                    "horizontal", DtInt,
+                    BaseProgram::Parameter{.integer = horizontal});
+                program->setParameter(
+                    "image", DtSampler,
+                    BaseProgram::Parameter{
+                        .texture.slot = 0,
+                        .texture.texture =
+                            firstIteration
+                                ? engine->fullscreenTextureBloom.get()
+                                : engine->pingpongTexture[!horizontal].get()});
+              });
+          horizontal = !horizontal;
+          if (firstIteration) firstIteration = false;
+          engine->getDevice()->unbindFramebuffer(framebuffer);
+        }
+      }
+
+#ifndef DISABLE_EASY_PROFILER
+      EASY_END_BLOCK;
+#endif
+
       engine->renderFullscreenQuad(
           engine->fullscreenTexture.get(), NULL, [this](BaseProgram* p) {
             p->setParameter(
-                "bloomChannel", DtSampler,
+                "texture1", DtSampler,
                 BaseProgram::Parameter{
                     .texture.slot = 1,
-                    .texture.texture = engine->fullscreenTextureBloom.get()});
+                    .texture.texture = engine->pingpongTexture[1].get()});
           });
 #ifndef DISABLE_EASY_PROFILER
       EASY_END_BLOCK;
 #endif
 
-      engine->context->swapBuffers();
-
-      engine->context->unsetCurrent();
     } catch (std::exception& e) {
       std::scoped_lock lock(engine->context->getMutex());
       Log::printf(LOG_ERROR, "Error in render: %s", e.what());
-      engine->context->unsetCurrent();
     }
+
+    engine->context->swapBuffers();
+
+    engine->context->unsetCurrent();
 
     return Stepped;
   }
@@ -245,35 +261,8 @@ Engine::Engine(World* world, void* hwnd) {
   fullscreenMaterial =
       materialCache->getOrLoad("PostProcess").value_or(nullptr);
   if (fullscreenMaterial) {
-    postProcessFrameBuffer = device->createFrameBuffer();
-    fullscreenBuffer = device->createBuffer();
-    fullscreenBuffer->upload(BaseBuffer::Array, BaseBuffer::StaticDraw,
-                             sizeof(float) * 6,
-                             (float[]){0.0, 0.0, 2.0, 0.0, 0.0, 2.0});
-    fullScreenArrayPointers = device->createArrayPointers();
-    fullScreenArrayPointers->addAttrib(BaseArrayPointers::Attrib(
-        DataType::DtVec2, 0, 3, 0, 0, fullscreenBuffer.get()));
-    fullscreenTexture = device->createTexture();
-    fullscreenTextureDepth = device->createTexture();
-    fullscreenTextureBloom = device->createTexture();
+    initializeBuffers(glm::vec2(1.0, 1.0), false);
 
-    fullscreenTexture->reserve2dMultisampled(1, 1, BaseTexture::RGBA8,
-                                             fullscreenSamples);
-    fullscreenTextureBloom->reserve2dMultisampled(1, 1, BaseTexture::RGBA8,
-                                                  fullscreenSamples);
-    fullscreenTextureDepth->reserve2dMultisampled(1, 1, BaseTexture::D24S8,
-                                                  fullscreenSamples);
-
-    postProcessFrameBuffer->setTarget(fullscreenTexture.get());
-    postProcessFrameBuffer->setTarget(fullscreenTexture.get(),
-                                      BaseFrameBuffer::Color1);
-    postProcessFrameBuffer->setTarget(fullscreenTextureDepth.get(),
-                                      BaseFrameBuffer::DepthStencil);
-
-    if (postProcessFrameBuffer->getStatus() != BaseFrameBuffer::Complete) {
-      Log::printf(LOG_ERROR, "BaseFrameBuffer::getStatus() = %i",
-                  postProcessFrameBuffer->getStatus());
-    }
   } else {
     throw std::runtime_error("Could not load PostProcess material!!!");
   }
@@ -303,6 +292,77 @@ void Engine::renderFullscreenQuad(
 
 void Engine::setFullscreenMaterial(const char* name) {
   fullscreenMaterial = materialCache->getOrLoad(name).value_or(nullptr);
+}
+
+void Engine::initializeBuffers(glm::vec2 res, bool reset) {
+  // set up buffers for post processing/hdr
+  if (!reset) {
+    postProcessFrameBuffer = device->createFrameBuffer();
+    fullscreenBuffer = device->createBuffer();
+    fullscreenTexture = device->createTexture();
+    fullscreenTextureDepth = device->createTexture();
+    fullscreenTextureBloom = device->createTexture();
+    fullScreenArrayPointers = device->createArrayPointers();
+    fullScreenArrayPointers->addAttrib(BaseArrayPointers::Attrib(
+        DataType::DtVec2, 0, 3, 0, 0, fullscreenBuffer.get()));
+    fullscreenBuffer->upload(BaseBuffer::Array, BaseBuffer::StaticDraw,
+                             sizeof(float) * 6,
+                             (float[]){0.0, 0.0, 2.0, 0.0, 0.0, 2.0});
+  } else {
+    postProcessFrameBuffer->destroyAndCreate();
+    fullscreenTexture->destroyAndCreate();
+    fullscreenTextureDepth->destroyAndCreate();
+    fullscreenTextureBloom->destroyAndCreate();
+  }
+
+  glm::vec2 fbSizeF = res;
+  float s = Settings::singleton()->getSetting("FbScale", 1.0);
+  fbSizeF *= s;
+
+  // set resolutions of buffers
+  fullscreenTexture->reserve2dMultisampled(
+      fbSizeF.x, fbSizeF.y, BaseTexture::RGBAF32, fullscreenSamples);
+
+  postProcessFrameBuffer->setTarget(fullscreenTexture.get());
+
+  fullscreenTextureDepth->reserve2dMultisampled(
+      fbSizeF.x, fbSizeF.y, BaseTexture::D24S8, fullscreenSamples);
+
+  postProcessFrameBuffer->setTarget(fullscreenTextureDepth.get(),
+                                    BaseFrameBuffer::DepthStencil);
+
+  fullscreenTextureBloom->reserve2dMultisampled(
+      fbSizeF.x, fbSizeF.y, BaseTexture::RGBAF32, fullscreenSamples);
+
+  postProcessFrameBuffer->setTarget(fullscreenTextureBloom.get(),
+                                    BaseFrameBuffer::Color1);
+
+  // set up ping pong buffers for gaussian blur
+  for (int i = 0; i < 2; i++) {
+    if (!reset) {
+      pingpongFramebuffer[i] = device->createFrameBuffer();
+      pingpongTexture[i] = device->createTexture();
+    } else {
+      pingpongFramebuffer[i]->destroyAndCreate();
+      pingpongTexture[i]->destroyAndCreate();
+    }
+
+    pingpongTexture[i]->reserve2dMultisampled(
+        fbSizeF.x, fbSizeF.y, BaseTexture::RGBAF32, fullscreenSamples);
+    pingpongFramebuffer[i]->setTarget(pingpongTexture[i].get());
+  }
+
+  if (postProcessFrameBuffer->getStatus() != BaseFrameBuffer::Complete) {
+    Log::printf(LOG_ERROR, "BaseFrameBuffer::getStatus() = %i",
+                postProcessFrameBuffer->getStatus());
+  }
+
+  Log::printf(LOG_DEBUG, "Updating size of framebuffer to (%f,%f)", fbSizeF.x,
+              fbSizeF.y);
+  if (postProcessFrameBuffer->getStatus() != BaseFrameBuffer::Complete) {
+    Log::printf(LOG_ERROR, "BaseFrameBuffer::getStatus() = %i",
+                postProcessFrameBuffer->getStatus());
+  }
 }
 
 void Engine::stepped() {}

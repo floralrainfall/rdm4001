@@ -45,6 +45,8 @@ class BaseTexture {
   enum InternalFormat {
     RGB8,
     RGBA8,
+    RGBF32,
+    RGBAF32,
     D8,
     D24S8,
   };
@@ -65,7 +67,7 @@ class BaseTexture {
   // int mipmapLevels = 0) = 0;
 
   virtual void reserve2d(int width, int height, InternalFormat format,
-                         int mipmapLevels = 1) = 0;
+                         int mipmapLevels = 0) = 0;
   virtual void reserve2dMultisampled(int width, int height,
                                      InternalFormat format,
                                      int samples = 2) = 0;
@@ -327,7 +329,8 @@ class BaseFrameBuffer {
     Color1,
     Color2,
     Color3,
-    Depth,
+
+    Depth = 0xfff0,
     Stencil,
     DepthStencil
   };
