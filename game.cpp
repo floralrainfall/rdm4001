@@ -4,6 +4,7 @@
 #include <SDL2/SDL_mouse.h>
 #include <SDL2/SDL_video.h>
 
+#include <chrono>
 #include <cstdlib>
 #include <stdexcept>
 
@@ -201,7 +202,7 @@ void Game::mainLoop() {
         SDL_SetRelativeMouseMode(
         Input::singleton()->getMouseLocked() ? SDL_TRUE : SDL_FALSE);
         }*/
-      std::this_thread::yield();
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
   }
   if (world) {
