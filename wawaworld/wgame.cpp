@@ -1,5 +1,7 @@
 #include "wgame.hpp"
 
+#include <format>
+
 #include "SDL_keycode.h"
 #include "filesystem.hpp"
 #include "gfx/base_types.hpp"
@@ -20,8 +22,21 @@
 namespace ww {
 enum UIState {
   MainMenu,
+  HostPanel,
   ConnectPanel,
 };
+
+struct HostParameters {
+  int port;
+  char map[64];
+
+  HostParameters() {
+    port = 7938;
+    strncpy(map, "ffa_naamda", 64);
+  }
+};
+
+static HostParameters hostParams = HostParameters();
 
 struct WGamePrivate {
   float cameraPitch;
@@ -169,8 +184,7 @@ void WGame::initializeClient() {
               game->state = ConnectPanel;
             }
             if (ImGui::Button("Host")) {
-              lateInitServer();
-              world->getNetworkManager()->connect("127.0.0.1", 7938);
+              game->state = HostPanel;
             }
             if (ImGui::Button("Quit")) {
               InputObject quitObject;
@@ -198,6 +212,23 @@ void WGame::initializeClient() {
               }
             }
             ImGui::End();
+          case HostPanel:
+            ImGui::Begin("Host a Server");
+            {
+              ImGui::InputInt("Port", &hostParams.port);
+              ImGui::InputText("Map", hostParams.map, 64);
+              ImGui::Text(
+                  "You can enter dedicated server mode by using the -D "
+                  "(--hintDs) argument");
+              if (ImGui::Button("Start")) {
+                lateInitServer();
+                world->getNetworkManager()->connect("127.0.0.1", 7938);
+              }
+              if (ImGui::Button("Cancel")) {
+                game->state = MainMenu;
+              }
+            }
+            ImGui::End();
           default:
             break;
         }
@@ -208,13 +239,14 @@ void WGame::initializeClient() {
 
 void WGame::initializeServer() {
   addEntityConstructors(worldServer->getNetworkManager());
-  worldServer->getNetworkManager()->start();
+  worldServer->getNetworkManager()->start(hostParams.port);
   worldServer->getPhysicsWorld()->getWorld()->setGravity(
       btVector3(0, 0, -106.67));
 
   Worldspawn* wspawn =
       (Worldspawn*)worldServer->getNetworkManager()->instantiate("Worldspawn");
-  wspawn->loadFile("dat5/baseq3/maps/ffa_naamda.bsp");
+  std::string mapPath = std::format("dat5/baseq3/maps/{}.bsp", hostParams.map);
+  wspawn->loadFile(mapPath.c_str());
 }
 
 void WGame::initialize() {

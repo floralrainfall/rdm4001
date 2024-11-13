@@ -62,7 +62,8 @@ WPlayer::WPlayer(net::NetworkManager* manager, net::EntityId id)
     gfxJob = getGfxEngine()->renderStepped.listen([this] {
       {
         std::scoped_lock lock(getWorld()->getPhysicsWorld()->mutex);
-        btTransform transform = controller->getTransform();
+        btTransform transform;
+        controller->getMotionState()->getWorldTransform(transform);
         entityNode->origin =
             rdm::BulletHelpers::fromVector3(transform.getOrigin());
         entityNode->basis = rdm::BulletHelpers::fromMat3(transform.getBasis()) *
@@ -83,7 +84,7 @@ WPlayer::WPlayer(net::NetworkManager* manager, net::EntityId id)
                               ->getMeshCache()
                               ->get("dat5/baseq3/models/andi_rig.obj")
                               .value();
-      // model->render(getGfxEngine()->getDevice());
+      model->render(getGfxEngine()->getDevice());
 
       entityNode->origin = controller->getNetworkPosition();
       program->setParameter("model", gfx::DtMat4,
