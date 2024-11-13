@@ -212,6 +212,7 @@ void WGame::initializeClient() {
               }
             }
             ImGui::End();
+            break;
           case HostPanel:
             ImGui::Begin("Host a Server");
             {
@@ -229,6 +230,7 @@ void WGame::initializeClient() {
               }
             }
             ImGui::End();
+            break;
           default:
             break;
         }
