@@ -56,6 +56,8 @@ gamelib = static_library('game', [
   'sound.hpp',
   'physics.cpp',
   'physics.hpp',
+  'fun.cpp',
+  'fun.hpp',
 
   'putil/fpscontroller.cpp',
   'putil/fpscontroller.hpp',

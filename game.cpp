@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <stdexcept>
 
+#include "fun.hpp"
 #include "gfx/gl_context.hpp"
 #include "input.hpp"
 #include "logging.hpp"
@@ -32,6 +33,8 @@
 
 namespace rdm {
 Game::Game() {
+  if (!Fun::preFlightChecks()) abort();  // clearly not safe to run
+
   Log::singleton()->setLevel(Settings::singleton()->getSetting("LogLevel", 1));
   network::NetworkManager::initialize();
 }
