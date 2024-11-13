@@ -192,7 +192,7 @@ default
 	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-31 // SURFACE_META V: 18 I: 42 planar
+31 // SURFACE_META V: 5 I: 9 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( 0.000000 0.000000 -1.000000 )
@@ -201,67 +201,67 @@ default
 32 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-33 // SURFACE_META V: 4 I: 6 planar
+33 // SURFACE_META V: 5 I: 9 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-34 // SURFACE_META V: 4 I: 6 planar
+34 // SURFACE_META V: 31 I: 72 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
 35 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-36 // SURFACE_META V: 5 I: 9 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
-}
-
-37 // SURFACE_META V: 5 I: 9 planar
+36 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-38 // SURFACE_META V: 7 I: 15 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
-}
-
-39 // SURFACE_META V: 4 I: 6 planar
+37 // SURFACE_META V: 5 I: 9 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
+38 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+39 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
 40 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 41 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 42 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 43 // SURFACE_META V: 4 I: 6 planar
@@ -273,25 +273,25 @@ default
 44 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-45 // SURFACE_META V: 5 I: 9 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-46 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-47 // SURFACE_META V: 8 I: 18 planar
+45 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+46 // SURFACE_META V: 6 I: 12 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+47 // SURFACE_META V: 5 I: 9 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
 48 // SURFACE_META V: 5 I: 9 planar
@@ -300,70 +300,70 @@ default
 	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-49 // SURFACE_META V: 4 I: 6 planar
+49 // SURFACE_META V: 7 I: 15 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
 50 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
 51 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 52 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-53 // SURFACE_META V: 8 I: 24 planar
+53 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
 54 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-55 // SURFACE_META V: 5 I: 9 planar
+55 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-56 // SURFACE_META V: 4 I: 6 planar
+56 // SURFACE_META V: 5 I: 9 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 57 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-58 // SURFACE_META V: 10 I: 27 planar
+58 // SURFACE_META V: 8 I: 18 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 59 // SURFACE_META V: 5 I: 9 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 60 // SURFACE_META V: 4 I: 6 planar
@@ -372,40 +372,40 @@ default
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-61 // SURFACE_META V: 3 I: 3 planar
+61 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
 62 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
 63 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-64 // SURFACE_META V: 5 I: 9 planar
+64 // SURFACE_META V: 8 I: 24 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
 65 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-66 // SURFACE_META V: 6 I: 12 planar
+66 // SURFACE_META V: 5 I: 9 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
 67 // SURFACE_META V: 4 I: 6 planar
@@ -420,43 +420,43 @@ default
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-69 // SURFACE_META V: 14 I: 39 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
-}
-
-70 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-71 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
-}
-
-72 // SURFACE_META V: 5 I: 9 planar
+69 // SURFACE_META V: 5 I: 9 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-73 // SURFACE_META V: 6 I: 12 planar
+70 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-74 // SURFACE_META V: 4 I: 6 planar
+71 // SURFACE_META V: 7 I: 15 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+}
+
+72 // SURFACE_META V: 3 I: 3 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+73 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-75 // SURFACE_META V: 10 I: 18 planar
+74 // SURFACE_META V: 3 I: 3 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+75 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( 0.000000 0.000000 -1.000000 )
@@ -465,25 +465,25 @@ default
 76 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-77 // SURFACE_META V: 5 I: 9 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-78 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/leaf
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-79 // SURFACE_META V: 7 I: 15 planar
+77 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+78 // SURFACE_META V: 5 I: 9 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+79 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
 80 // SURFACE_META V: 3 I: 3 planar
@@ -492,22 +492,22 @@ default
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-81 // SURFACE_META V: 4 I: 6 planar
+81 // SURFACE_META V: 5 I: 9 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-82 // SURFACE_META V: 7 I: 15 planar
+82 // SURFACE_META V: 6 I: 12 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 83 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
 84 // SURFACE_META V: 4 I: 6 planar
@@ -516,214 +516,214 @@ default
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-85 // SURFACE_META V: 4 I: 6 planar
+85 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 86 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
-87 // SURFACE_META V: 4 I: 6 planar
+87 // SURFACE_META V: 5 I: 9 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-88 // SURFACE_META V: 3 I: 3 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-89 // SURFACE_META V: 3 I: 3 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-90 // SURFACE_META V: 3 I: 3 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-91 // SURFACE_META V: 3 I: 3 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-92 // SURFACE_META V: 6 I: 12 planar
+88 // SURFACE_META V: 5 I: 9 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
-93 // SURFACE_META V: 3 I: 3 planar
+89 // SURFACE_META V: 14 I: 39 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+}
+
+90 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+91 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-94 // SURFACE_META V: 3 I: 3 planar
+92 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+93 // SURFACE_META V: 5 I: 9 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-95 // SURFACE_META V: 3 I: 3 planar
+94 // SURFACE_META V: 6 I: 12 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-96 // SURFACE_META V: 3 I: 3 planar
+95 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-97 // SURFACE_META V: 3 I: 3 planar
+96 // SURFACE_META V: 10 I: 18 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
-98 // SURFACE_META V: 3 I: 3 planar
+97 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+98 // SURFACE_META V: 5 I: 9 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-99 // SURFACE_META V: 3 I: 3 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-100 // SURFACE_META V: 3 I: 3 planar
+99 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+100 // SURFACE_META V: 7 I: 15 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
 101 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-102 // SURFACE_META V: 3 I: 3 planar
+102 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-103 // SURFACE_META V: 3 I: 3 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-104 // SURFACE_META V: 3 I: 3 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-105 // SURFACE_META V: 3 I: 3 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-106 // SURFACE_META V: 3 I: 3 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-107 // SURFACE_META V: 3 I: 3 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-108 // SURFACE_META V: 3 I: 3 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-109 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-110 // SURFACE_META V: 6 I: 12 planar
+103 // SURFACE_META V: 7 I: 15 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+}
+
+104 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+105 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+106 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+107 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+108 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+109 // SURFACE_META V: 3 I: 3 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+110 // SURFACE_META V: 3 I: 3 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
 111 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 112 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-113 // SURFACE_META V: 3 I: 3 planar
-{
-	shader textures/rdm/leaf
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-114 // SURFACE_META V: 3 I: 3 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-115 // SURFACE_META V: 6 I: 12 planar
+113 // SURFACE_META V: 6 I: 12 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
-116 // SURFACE_META V: 3 I: 3 planar
+114 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-117 // SURFACE_META V: 3 I: 3 planar
+115 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+116 // SURFACE_META V: 3 I: 3 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+117 // SURFACE_META V: 3 I: 3 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
 118 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
 119 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 120 // SURFACE_META V: 3 I: 3 planar
@@ -735,25 +735,25 @@ default
 121 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-122 // SURFACE_META V: 7 I: 15 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
-}
-
-123 // SURFACE_META V: 3 I: 3 planar
+122 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
+123 // SURFACE_META V: 3 I: 3 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
 124 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 125 // SURFACE_META V: 3 I: 3 planar
@@ -765,49 +765,49 @@ default
 126 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-127 // SURFACE_META V: 6 I: 12 planar
+127 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 128 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
-}
-
-129 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
-}
-
-130 // SURFACE_META V: 3 I: 3 planar
-{
-	shader textures/rdm/leaf
 	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-131 // SURFACE_META V: 3 I: 3 planar
+129 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+130 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+131 // SURFACE_META V: 6 I: 12 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
 132 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
 133 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
 134 // SURFACE_META V: 3 I: 3 planar
@@ -846,16 +846,16 @@ default
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-140 // SURFACE_META V: 6 I: 12 planar
+140 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
 141 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 142 // SURFACE_META V: 3 I: 3 planar
@@ -864,10 +864,10 @@ default
 	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-143 // SURFACE_META V: 3 I: 3 planar
+143 // SURFACE_META V: 7 I: 15 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
 144 // SURFACE_META V: 3 I: 3 planar
@@ -879,7 +879,7 @@ default
 145 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 146 // SURFACE_META V: 3 I: 3 planar
@@ -891,37 +891,37 @@ default
 147 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-148 // SURFACE_META V: 3 I: 3 planar
+148 // SURFACE_META V: 6 I: 12 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
 149 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-150 // SURFACE_META V: 3 I: 3 planar
+150 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
 151 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 152 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 153 // SURFACE_META V: 3 I: 3 planar
@@ -936,16 +936,16 @@ default
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-155 // SURFACE_META V: 6 I: 12 planar
+155 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 156 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 157 // SURFACE_META V: 6 I: 12 planar
@@ -963,49 +963,49 @@ default
 159 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-160 // SURFACE_META V: 6 I: 12 planar
+160 // SURFACE_META V: 3 I: 3 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+161 // SURFACE_META V: 6 I: 12 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
-161 // SURFACE_META V: 3 I: 3 planar
+162 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-162 // SURFACE_META V: 3 I: 3 planar
+163 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-163 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 164 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 165 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
 166 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
 167 // SURFACE_META V: 3 I: 3 planar
@@ -1023,13 +1023,13 @@ default
 169 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
 170 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 171 // SURFACE_META V: 3 I: 3 planar
@@ -1041,64 +1041,64 @@ default
 172 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 173 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-174 // SURFACE_META V: 6 I: 12 planar
+174 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 175 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-176 // SURFACE_META V: 3 I: 3 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-177 // SURFACE_META V: 6 I: 12 planar
+176 // SURFACE_META V: 6 I: 12 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
-178 // SURFACE_META V: 3 I: 3 planar
+177 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+178 // SURFACE_META V: 6 I: 12 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
 179 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
 180 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-181 // SURFACE_META V: 7 I: 15 planar
+181 // SURFACE_META V: 6 I: 12 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
-182 // SURFACE_META V: 4 I: 6 planar
+182 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
@@ -1107,25 +1107,25 @@ default
 183 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-184 // SURFACE_META V: 3 I: 3 planar
+184 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-185 // SURFACE_META V: 6 I: 12 planar
+185 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
 186 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 187 // SURFACE_META V: 3 I: 3 planar
@@ -1149,229 +1149,229 @@ default
 190 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-191 // SURFACE_META V: 4 I: 6 planar
+191 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-192 // SURFACE_META V: 4 I: 6 planar
+192 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
-}
-
-193 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-194 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/wood_tile
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
-}
-
-195 // SURFACE_META V: 10 I: 24 planar
-{
-	shader textures/rdm/wood_tile
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
-}
-
-196 // SURFACE_META V: 5 I: 9 planar
-{
-	shader textures/rdm/wood_tile
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
-}
-
-197 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/wood
 	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-198 // SURFACE_META V: 5 I: 9 planar
+193 // SURFACE_META V: 3 I: 3 planar
 {
-	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-199 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
-}
-
-200 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/wood
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-201 // SURFACE_META V: 35 I: 111 planar
-{
-	shader textures/rdm/wood
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-202 // SURFACE_META V: 16 I: 51 planar
-{
-	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-203 // SURFACE_META V: 33 I: 105 planar
-{
-	shader textures/rdm/wood
+	shader textures/rdm/leaf
 	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-204 // SURFACE_META V: 4 I: 6 planar
+194 // SURFACE_META V: 3 I: 3 planar
 {
-	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	shader textures/rdm/leaf
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-205 // SURFACE_META V: 4 I: 6 planar
+195 // SURFACE_META V: 6 I: 12 planar
 {
-	shader textures/rdm/wood
+	shader textures/rdm/leaf
 	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+}
+
+196 // SURFACE_META V: 3 I: 3 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+197 // SURFACE_META V: 3 I: 3 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+198 // SURFACE_META V: 6 I: 12 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+}
+
+199 // SURFACE_META V: 3 I: 3 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+200 // SURFACE_META V: 3 I: 3 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+201 // SURFACE_META V: 3 I: 3 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+202 // SURFACE_META V: 7 I: 15 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+}
+
+203 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+204 // SURFACE_META V: 3 I: 3 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+205 // SURFACE_META V: 3 I: 3 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 206 // SURFACE_META V: 6 I: 12 planar
 {
-	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-207 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
-}
-
-208 // SURFACE_META V: 12 I: 30 planar
-{
-	shader textures/rdm/wood
+	shader textures/rdm/leaf
 	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
-209 // SURFACE_META V: 4 I: 6 planar
+207 // SURFACE_META V: 3 I: 3 planar
 {
-	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-210 // SURFACE_META V: 12 I: 30 planar
-{
-	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
-}
-
-211 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/wood
+	shader textures/rdm/leaf
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+208 // SURFACE_META V: 3 I: 3 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+209 // SURFACE_META V: 3 I: 3 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+210 // SURFACE_META V: 3 I: 3 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+211 // SURFACE_META V: 3 I: 3 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 212 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	shader textures/rdm/leaf
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 213 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/wood
+	shader textures/rdm/leaf
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
 214 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/wood
+	shader textures/rdm/leaf
 	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-215 // SURFACE_META V: 23 I: 81 planar
+215 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	shader textures/rdm/wood_tile
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
 216 // SURFACE_META V: 10 I: 24 planar
 {
-	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	shader textures/rdm/wood_tile
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-217 // SURFACE_META V: 22 I: 84 planar
+217 // SURFACE_META V: 5 I: 9 planar
 {
-	shader textures/rdm/wood
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	shader textures/rdm/wood_tile
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-218 // SURFACE_META V: 8 I: 18 planar
-{
-	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-219 // SURFACE_META V: 23 I: 87 planar
+218 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/wood
 	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-220 // SURFACE_META V: 4 I: 6 planar
+219 // SURFACE_META V: 6 I: 12 planar
 {
 	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-221 // SURFACE_META V: 12 I: 30 planar
-{
-	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
-}
-
-222 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-223 // SURFACE_META V: 12 I: 30 planar
+220 // SURFACE_META V: 22 I: 60 planar
 {
 	shader textures/rdm/wood
 	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-224 // SURFACE_META V: 4 I: 6 planar
+221 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/wood
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+222 // SURFACE_META V: 28 I: 63 planar
 {
 	shader textures/rdm/wood
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-225 // SURFACE_META V: 4 I: 6 planar
+223 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/wood
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+224 // SURFACE_META V: 9 I: 21 planar
 {
 	shader textures/rdm/wood
 	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-226 // SURFACE_META V: 4 I: 6 planar
+225 // SURFACE_META V: 8 I: 18 planar
 {
 	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-227 // SURFACE_META V: 4 I: 6 planar
+226 // SURFACE_META V: 9 I: 21 planar
 {
 	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+}
+
+227 // SURFACE_META V: 6 I: 12 planar
+{
+	shader textures/rdm/wood
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 228 // SURFACE_META V: 4 I: 6 planar
@@ -1389,505 +1389,505 @@ default
 230 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 231 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-232 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
-}
-
-233 // SURFACE_META V: 6 I: 12 planar
+232 // SURFACE_META V: 27 I: 60 planar
 {
 	shader textures/rdm/wood
 	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+233 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
 234 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/wood
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 235 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 236 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/wood
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
 237 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
-238 // SURFACE_META V: 4 I: 6 planar
+238 // SURFACE_META V: 6 I: 12 planar
 {
 	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
 239 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-240 // SURFACE_META V: 10 I: 24 planar
+240 // SURFACE_META V: 6 I: 12 planar
 {
 	shader textures/rdm/wood
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
 241 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
 242 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-243 // SURFACE_META V: 6 I: 12 planar
+243 // SURFACE_META V: 5 I: 9 planar
 {
 	shader textures/rdm/wood
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-244 // SURFACE_META V: 9 I: 24 planar
+244 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+245 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/wood
 	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-245 // SURFACE_META V: 7 I: 15 planar
-{
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
 246 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-247 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/tree_bark
+	shader textures/rdm/wood
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-248 // SURFACE_META V: 4 I: 6 planar
+247 // SURFACE_META V: 6 I: 12 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-249 // SURFACE_META V: 7 I: 15 planar
+248 // SURFACE_META V: 6 I: 12 planar
 {
-	shader textures/rdm/tree_bark
+	shader textures/rdm/wood
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-250 // SURFACE_META V: 6 I: 12 planar
+249 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+250 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
 251 // SURFACE_META V: 6 I: 12 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-252 // SURFACE_META V: 6 I: 12 planar
-{
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-253 // SURFACE_META V: 8 I: 18 planar
-{
-	shader textures/rdm/tree_bark
+	shader textures/rdm/wood
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+252 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
+}
+
+253 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/wood
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 254 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
 255 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
+	shader textures/rdm/wood
 	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 256 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
+	shader textures/rdm/wood
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-257 // SURFACE_META V: 4 I: 6 planar
+257 // SURFACE_META V: 5 I: 9 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-258 // SURFACE_META V: 6 I: 12 planar
+258 // SURFACE_META V: 5 I: 9 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
-259 // SURFACE_META V: 6 I: 12 planar
+259 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
+	shader textures/rdm/wood
 	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-260 // SURFACE_META V: 5 I: 9 planar
+260 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-261 // SURFACE_META V: 6 I: 12 planar
+261 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-262 // SURFACE_META V: 6 I: 12 planar
+262 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
+	shader textures/rdm/wood
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-263 // SURFACE_META V: 5 I: 9 planar
+263 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
-264 // SURFACE_META V: 7 I: 15 planar
+264 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 265 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-266 // SURFACE_META V: 7 I: 15 planar
-{
-	shader textures/rdm/tree_bark
+	shader textures/rdm/wood
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-267 // SURFACE_META V: 6 I: 12 planar
+266 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
+	shader textures/rdm/wood
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+267 // SURFACE_META V: 35 I: 111 planar
+{
+	shader textures/rdm/wood
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+268 // SURFACE_META V: 16 I: 51 planar
+{
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+269 // SURFACE_META V: 33 I: 105 planar
+{
+	shader textures/rdm/wood
 	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-268 // SURFACE_META V: 5 I: 9 planar
+270 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
+	shader textures/rdm/wood
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
-}
-
-269 // SURFACE_META V: 5 I: 9 planar
-{
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
-}
-
-270 // SURFACE_META V: 7 I: 15 planar
-{
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
 271 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
-272 // SURFACE_META V: 4 I: 6 planar
+272 // SURFACE_META V: 6 I: 12 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
 273 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-274 // SURFACE_META V: 4 I: 6 planar
+274 // SURFACE_META V: 12 I: 30 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
 275 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-276 // SURFACE_META V: 4 I: 6 planar
+276 // SURFACE_META V: 12 I: 30 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
 277 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
 278 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
 279 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
 280 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-281 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
-}
-
-282 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/tree_bark
+	shader textures/rdm/wood
 	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-283 // SURFACE_META V: 4 I: 6 planar
+281 // SURFACE_META V: 23 I: 81 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-284 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/tree_bark
+	shader textures/rdm/wood
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-285 // SURFACE_META V: 4 I: 6 planar
+282 // SURFACE_META V: 10 I: 24 planar
 {
-	shader textures/rdm/tree_bark
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+283 // SURFACE_META V: 22 I: 84 planar
+{
+	shader textures/rdm/wood
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+284 // SURFACE_META V: 8 I: 18 planar
+{
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+285 // SURFACE_META V: 23 I: 87 planar
+{
+	shader textures/rdm/wood
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 286 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-287 // SURFACE_META V: 4 I: 6 planar
+287 // SURFACE_META V: 12 I: 30 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
 288 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-289 // SURFACE_META V: 4 I: 6 planar
+289 // SURFACE_META V: 12 I: 30 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
 290 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
 291 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
 292 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
+	shader textures/rdm/wood
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
 293 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
 294 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
+	shader textures/rdm/wood
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 295 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
+	shader textures/rdm/wood
 	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
 296 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
 297 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
 298 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
-299 // SURFACE_META V: 4 I: 6 planar
+299 // SURFACE_META V: 6 I: 12 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
 300 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 301 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
 302 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 303 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
 304 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
 305 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
-306 // SURFACE_META V: 4 I: 6 planar
+306 // SURFACE_META V: 10 I: 24 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 307 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
 308 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 0.000000 -1.000000 )
 }
 
-309 // SURFACE_META V: 4 I: 6 planar
+309 // SURFACE_META V: 6 I: 12 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-310 // SURFACE_META V: 4 I: 6 planar
+310 // SURFACE_META V: 9 I: 24 planar
 {
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	shader textures/rdm/wood
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 311 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/tree_bark
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-312 // SURFACE_META V: 4 I: 6 planar
+312 // SURFACE_META V: 9 I: 21 planar
 {
 	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 313 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/tree_bark
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
 }
 
 314 // SURFACE_META V: 4 I: 6 planar
@@ -1896,7 +1896,7 @@ default
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-315 // SURFACE_META V: 4 I: 6 planar
+315 // SURFACE_META V: 7 I: 15 planar
 {
 	shader textures/rdm/tree_bark
 	lightmapAxis ( 0.000000 1.000000 0.000000 )
@@ -1911,13 +1911,13 @@ default
 317 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 318 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 319 // SURFACE_META V: 4 I: 6 planar
@@ -1932,7 +1932,7 @@ default
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-321 // SURFACE_META V: 4 I: 6 planar
+321 // SURFACE_META V: 7 I: 15 planar
 {
 	shader textures/rdm/tree_bark
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
@@ -1944,28 +1944,28 @@ default
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-323 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 1.000000 0.000000 )
-}
-
-324 // SURFACE_META V: 4 I: 6 planar
+323 // SURFACE_META V: 6 I: 12 planar
 {
 	shader textures/rdm/tree_bark
 	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-325 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
-}
-
-326 // SURFACE_META V: 4 I: 6 planar
+324 // SURFACE_META V: 6 I: 12 planar
 {
 	shader textures/rdm/tree_bark
 	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+325 // SURFACE_META V: 6 I: 12 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+326 // SURFACE_META V: 8 I: 18 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
 327 // SURFACE_META V: 4 I: 6 planar
@@ -1977,13 +1977,13 @@ default
 328 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 329 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/tree_bark
-	lightmapAxis ( 1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
 330 // SURFACE_META V: 4 I: 6 planar
@@ -1992,151 +1992,661 @@ default
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-331 // SURFACE_META V: 4 I: 6 planar
+331 // SURFACE_META V: 6 I: 12 planar
 {
 	shader textures/rdm/tree_bark
 	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-332 // SURFACE_META V: 4 I: 6 planar
+332 // SURFACE_META V: 6 I: 12 planar
 {
 	shader textures/rdm/tree_bark
 	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-333 // SURFACE_META V: 4 I: 6 planar
+333 // SURFACE_META V: 6 I: 12 planar
 {
 	shader textures/rdm/tree_bark
 	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-334 // SURFACE_META V: 4 I: 6 planar
+334 // SURFACE_META V: 5 I: 9 planar
 {
 	shader textures/rdm/tree_bark
 	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-335 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/tree_bark
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
-}
-
-336 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/tree_bark
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
-}
-
-337 // SURFACE_META V: 4 I: 6 planar
+335 // SURFACE_META V: 6 I: 12 planar
 {
 	shader textures/rdm/tree_bark
 	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-338 // SURFACE_META V: 64 I: 159 planar
+336 // SURFACE_META V: 5 I: 9 planar
 {
-	shader textures/rdm/grass
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-339 // SURFACE_META V: 10 I: 27 planar
+337 // SURFACE_META V: 7 I: 15 planar
 {
-	shader textures/rdm/grass
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-340 // SURFACE_META V: 3 I: 3 planar
+338 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/grass
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-341 // SURFACE_META V: 4 I: 6 planar
+339 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/grass
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-342 // SURFACE_META V: 3 I: 3 planar
+340 // SURFACE_META V: 7 I: 15 planar
 {
-	shader textures/rdm/grass
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-343 // SURFACE_META V: 4 I: 6 planar
+341 // SURFACE_META V: 6 I: 12 planar
 {
-	shader textures/rdm/grass
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	shader textures/rdm/tree_bark
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+342 // SURFACE_META V: 6 I: 12 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+343 // SURFACE_META V: 6 I: 12 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 344 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/grass
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-345 // SURFACE_META V: 3 I: 3 planar
+345 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/grass
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-346 // SURFACE_META V: 4 I: 6 planar
+346 // SURFACE_META V: 5 I: 9 planar
 {
-	shader textures/rdm/grass
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
-347 // SURFACE_META V: 3 I: 3 planar
+347 // SURFACE_META V: 5 I: 9 planar
 {
-	shader textures/rdm/grass
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
-348 // SURFACE_META V: 5 I: 9 planar
+348 // SURFACE_META V: 7 I: 15 planar
 {
-	shader textures/rdm/grass
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-349 // SURFACE_META V: 9 I: 21 planar
+349 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/dried_mud
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
 350 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/dried_mud
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	shader textures/rdm/tree_bark
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 351 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/rdm/dried_mud
-	lightmapAxis ( 0.000000 0.000000 1.000000 )
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
 }
 
 352 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/skies/skybox
-	sampleSize 0
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
 }
 
-353 // SURFACE_META V: 10 I: 24 planar
+353 // SURFACE_META V: 4 I: 6 planar
 {
-	shader textures/skies/skybox
-	sampleSize 0
+	shader textures/rdm/tree_bark
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 354 // SURFACE_META V: 4 I: 6 planar
 {
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+355 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+356 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+357 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+358 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+359 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+360 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+361 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+362 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+363 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+364 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+365 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+366 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+367 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+368 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+369 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+370 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+371 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+372 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+373 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+374 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+375 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+376 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+377 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+378 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+379 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+380 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+381 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+382 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+383 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+384 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+385 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+386 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+387 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+388 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+389 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+390 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+391 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+392 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+393 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+394 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+395 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+396 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+397 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+398 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+399 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+400 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+401 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+402 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+403 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+404 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+405 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+406 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+407 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+408 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+409 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+410 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+411 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+412 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 1.000000 0.000000 )
+}
+
+413 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+414 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+}
+
+415 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/tree_bark
+	lightmapAxis ( 1.000000 0.000000 0.000000 )
+}
+
+416 // SURFACE_META V: 64 I: 156 planar
+{
+	shader textures/rdm/grass
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+417 // SURFACE_META V: 18 I: 54 planar
+{
+	shader textures/rdm/grass
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+418 // SURFACE_META V: 3 I: 3 planar
+{
+	shader textures/rdm/grass
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+419 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/grass
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+420 // SURFACE_META V: 3 I: 3 planar
+{
+	shader textures/rdm/grass
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+421 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/grass
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+422 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/grass
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+423 // SURFACE_META V: 3 I: 3 planar
+{
+	shader textures/rdm/grass
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+424 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/grass
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+425 // SURFACE_META V: 3 I: 3 planar
+{
+	shader textures/rdm/grass
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+426 // SURFACE_META V: 5 I: 9 planar
+{
+	shader textures/rdm/grass
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+427 // SURFACE_META V: 5 I: 9 planar
+{
+	shader textures/rdm/grass
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+428 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/grass
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+429 // SURFACE_META V: 5 I: 9 planar
+{
+	shader textures/rdm/grass
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+430 // SURFACE_META V: 9 I: 21 planar
+{
+	shader textures/rdm/dried_mud
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+431 // SURFACE_META V: 6 I: 12 planar
+{
+	shader textures/rdm/dried_mud
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+432 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/dried_mud
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+433 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/dried_mud
+	lightmapAxis ( 0.000000 0.000000 1.000000 )
+}
+
+434 // SURFACE_META V: 5 I: 9 planar
+{
 	shader textures/skies/skybox
 	sampleSize 0
 }
 
-355 // SURFACE_META V: 5 I: 9 planar
+435 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/skies/skybox
+	sampleSize 0
+}
+
+436 // SURFACE_META V: 8 I: 18 planar
+{
+	shader textures/skies/skybox
+	sampleSize 0
+}
+
+437 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/skies/skybox
+	sampleSize 0
+}
+
+438 // SURFACE_META V: 5 I: 9 planar
+{
+	shader textures/skies/skybox
+	sampleSize 0
+}
+
+439 // SURFACE_META V: 5 I: 9 planar
+{
+	shader textures/skies/skybox
+	sampleSize 0
+}
+
+440 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/skies/skybox
 	sampleSize 0

@@ -151,9 +151,10 @@ void WGame::initializeClient() {
             ImGui::SetNextWindowSize(ImVec2(size.x, size.y));
             ImGui::SetNextWindowPos(ImVec2(0, 0));
           }
-            ImGui::Begin(
-                "Welcome to RDM", NULL,
-                ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration);
+            ImGui::Begin("Welcome to RDM", NULL,
+                         ImGuiWindowFlags_NoBackground |
+                             ImGuiWindowFlags_NoDecoration |
+                             ImGuiWindowFlags_NoBringToFrontOnFocus);
 
             {
               gfx::BaseTexture* logo = gfxEngine->getTextureCache()
