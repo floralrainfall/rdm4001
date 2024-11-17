@@ -8,8 +8,10 @@
 #include "putil/fpscontroller.hpp"
 #include "signal.hpp"
 #include "sound.hpp"
+
 namespace net = rdm::network;
 namespace ww {
+
 class WPlayer : public net::Player {
   std::unique_ptr<rdm::putil::FpsController> controller;
   rdm::gfx::Entity* entity;

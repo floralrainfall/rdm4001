@@ -53,6 +53,7 @@ class Input {
  public:
   static Input* singleton();
 
+  void beginFrame();
   void postEvent(InputObject object);
   void flushEvents();
 

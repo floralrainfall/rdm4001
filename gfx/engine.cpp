@@ -154,11 +154,17 @@ class RenderJob : public SchedulerJob {
             BaseFrameBuffer::Color0,
             BaseFrameBuffer::Color1,
         };
+
+        // clear buffers
+        device->targetAttachments(&drawBuffers[0], 1);
+        device->clear(0.3, 0.3, 0.3, 0.0);
+        device->targetAttachments(&drawBuffers[1], 1);
+        device->clear(0.0, 0.0, 0.0, 0.0);
+
         device->targetAttachments(drawBuffers, 2);
       }
 
       device->viewport(0, 0, fbSize.x, fbSize.y);
-      device->clear(0.3, 0.3, 0.3, 0.0);
       device->clearDepth();
       device->setDepthState(BaseDevice::LEqual);
       device->setCullState(BaseDevice::FrontCW);

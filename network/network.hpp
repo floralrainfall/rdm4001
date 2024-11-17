@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 
+#include "crc_hash.hpp"
 #include "entity.hpp"
 #include "player.hpp"
 
@@ -88,6 +89,7 @@ class NetworkManager {
     DelPeerPacket,       // S -> C
     PeerInfoPacket,      // S -> C
     DeltaIdPacket,       // S -> C, C -> S
+    SignalPacket,        // S -> C, C -> S
   };
 
   void service();
@@ -107,7 +109,6 @@ class NetworkManager {
   void addPendingUpdateUnreliable(EntityId id) {
     pendingUpdatesUnreliable.push_back(id);
   };
-
   void setGfxEngine(gfx::Engine* engine) { gfxEngine = engine; }
   gfx::Engine* getGfxEngine() { return gfxEngine; }
 

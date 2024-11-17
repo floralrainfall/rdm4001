@@ -128,11 +128,11 @@ void FpsController::physicsStep() {
   btTransform transform = rigidBody->getWorldTransform();
   float dist = glm::distance(networkPosition,
                              BulletHelpers::fromVector3(transform.getOrigin()));
-  Log::printf(LOG_DEBUG, "%f", dist);
+  //  Log::printf(LOG_DEBUG, "%f", dist);
 
   btVector3 start =
       transform.getOrigin() + btVector3(0, 0, -settings.capsuleHeight / 2.0);
-  btVector3 end = start + btVector3(0, 0, -17);
+  btVector3 end = start + btVector3(0, 0, -18);
   btDynamicsWorld::ClosestRayResultCallback callback(start, end);
   world->getWorld()->rayTest(start, end, callback);
 

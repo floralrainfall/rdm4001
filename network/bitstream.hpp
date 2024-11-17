@@ -6,6 +6,7 @@
 
 #include <string>
 #include <typeinfo>
+#include <vector>
 namespace rdm::network {
 class BitStream {
   char* data;
@@ -45,5 +46,6 @@ class BitStream {
   std::string readString();
 
   ENetPacket* createPacket(enet_uint32 flags);
+  std::vector<unsigned char> getDataVec();
 };
 }  // namespace rdm::network

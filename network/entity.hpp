@@ -97,4 +97,5 @@ template <typename T>
 Entity* EntityConstructor(NetworkManager* manager, EntityId id) {
   return new T(manager, id);
 }
+
 };  // namespace rdm::network

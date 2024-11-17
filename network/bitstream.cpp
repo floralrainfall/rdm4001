@@ -6,6 +6,7 @@
 
 #include <stdexcept>
 
+#include "crc_hash.hpp"
 #include "logging.hpp"
 
 namespace rdm::network {
@@ -65,5 +66,12 @@ std::string BitStream::readString() {
 
 ENetPacket* BitStream::createPacket(enet_uint32 flags) {
   return enet_packet_create(data, c, flags);
+}
+
+std::vector<unsigned char> BitStream::getDataVec() {
+  std::vector<unsigned char> data;
+  data.resize(c);
+  memcpy(data.data(), this->data, data.size());
+  return data;
 }
 }  // namespace rdm::network

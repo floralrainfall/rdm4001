@@ -17,15 +17,16 @@ void main() {
   // texel
   vec3 result = texelFetch(image, uv, 0).rgb *
                 weight[0];  // current fragment's contribution
+  int fac = 2;
   if (horizontal) {
     for (int i = 1; i < 5; ++i) {
-      result += texelFetch(image, uv + ivec2(i, 0.0), 0).rgb * weight[i];
-      result += texelFetch(image, uv - ivec2(i, 0.0), 0).rgb * weight[i];
+      result += texelFetch(image, uv + ivec2(i * fac, 0.0), 0).rgb * weight[i];
+      result += texelFetch(image, uv - ivec2(i * fac, 0.0), 0).rgb * weight[i];
     }
   } else {
     for (int i = 1; i < 5; ++i) {
-      result += texelFetch(image, uv + ivec2(0.0, i), 0).rgb * weight[i];
-      result += texelFetch(image, uv - ivec2(0.0, i), 0).rgb * weight[i];
+      result += texelFetch(image, uv + ivec2(0.0, i * fac), 0).rgb * weight[i];
+      result += texelFetch(image, uv - ivec2(0.0, i * fac), 0).rgb * weight[i];
     }
   }
   FragColor = vec4(result, 1.0);

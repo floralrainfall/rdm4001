@@ -161,6 +161,10 @@ void WGame::initializeClient() {
         ImGui::Text("Establishing connection...");
         ImGui::End();
       } else {
+        ImGui::Begin("RDM4001 License");
+        ImGui::Text("%s", copyright());
+        ImGui::End();
+
         switch (game->state) {
           case MainMenu: {
             glm::ivec2 size = gfxEngine->getContext()->getBufferSize();

@@ -9,6 +9,8 @@
 namespace rdm {
 #ifdef __linux
 static void intHandler(int) {
+  Log::printf(LOG_INFO, "Received SIGINT, sending Quit signal");
+
   InputObject quit;
   quit.type = InputObject::Quit;
   Input::singleton()->postEvent(quit);
@@ -35,6 +37,11 @@ rdm::Input* Input::singleton() {
   return _singleton;
 }
 
+void Input::beginFrame() {
+  std::scoped_lock lock(flushing);
+  mouseDelta = glm::vec3(0.0);
+}
+
 void Input::postEvent(InputObject object) {
   std::scoped_lock lock(flushing);
   events.push_back(object);
@@ -46,7 +53,6 @@ void Input::postEvent(InputObject object) {
 
 void Input::flushEvents() {
   std::scoped_lock lock(flushing);
-  mouseDelta = glm::vec3(0.0);
   while (events.size()) {
     InputObject event = events.front();
     bool keyPressed = false;

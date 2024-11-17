@@ -244,6 +244,9 @@ void NetworkManager::service() {
                   return;
                 }
                 break;
+              case SignalPacket:
+
+                break;
               default:
                 Log::printf(LOG_WARN, "%s: Unknown packet %i",
                             backend ? "Backend" : "Frontend", packetId);

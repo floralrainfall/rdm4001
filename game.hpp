@@ -19,6 +19,7 @@ class Game {
 
  private:
   SDL_Window* window;
+  bool ignoreNextMouseMoveEvent;
 
  public:
   Game();
@@ -35,10 +36,13 @@ class Game {
   virtual void initializeClient() {};
   virtual void initializeServer() {};
 
+  const char* copyright();
+
   size_t getVersion();
   virtual size_t getGameVersion() { return 0; };
 
   void earlyInit();
+  void pollEvents();
 
   void mainLoop();
 
