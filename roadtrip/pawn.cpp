@@ -16,6 +16,7 @@ Pawn::Pawn(rdm::network::NetworkManager* manager, rdm::network::EntityId id)
   location = America::SoCal;
   desiredLocation = America::SoCal;
   turnEnded = false;
+  vacationed = false;
   cash = 37;
 
   if (!manager->isBackend()) {
@@ -47,6 +48,13 @@ Pawn::Pawn(rdm::network::NetworkManager* manager, rdm::network::EntityId id)
             glm::vec3(40 * sin(getGfxEngine()->getTime() * t),
                       40 * cos(getGfxEngine()->getTime() * t), 0.0));
         getGfxEngine()->getCamera().setUp(glm::vec3(0.0, 0.0, 1.0));
+
+        if (vacationed) {
+          ImGui::Begin("You Win!");
+          ImGui::Text("You have reached the vacation in Nova Scotia.");
+          ImGui::End();
+          return;
+        }
 
         ImGui::Begin("The Sights");
         if (america->locationInfo[location].logo) {
@@ -126,6 +134,7 @@ void Pawn::serialize(rdm::network::BitStream& stream) {
     stream.write<int>(cash);
     stream.write<bool>(turnEnded);
     stream.write<America::Location>(location);
+    stream.write<bool>(vacationed);
   } else {
     stream.write<bool>(turnEnded);
     stream.write<America::Location>(desiredLocation);
@@ -142,6 +151,7 @@ void Pawn::deserialize(rdm::network::BitStream& stream) {
     cash = stream.read<int>();
     turnEnded = stream.read<bool>();
     location = stream.read<America::Location>();
+    vacationed = stream.read<bool>();
     desiredLocation = location;
   }
 }
@@ -151,22 +161,30 @@ void Pawn::endTurn() {
   America* america =
       dynamic_cast<America*>(getManager()->findEntityByType("America"));
 
-  America::LocationInfo info = america->locationInfo[location];
-  bool pathAllowed = false;
-  America::PathType pathType;
-  for (auto path : info.connectedLocations) {
-    if (path.second == desiredLocation) {
-      pathAllowed = true;
-      pathType = path.first;
-      break;
+  if (desiredLocation != location) {
+    America::LocationInfo info = america->locationInfo[location];
+    bool pathAllowed = false;
+    America::PathType pathType;
+    for (auto path : info.connectedLocations) {
+      if (path.second == desiredLocation) {
+        pathAllowed = true;
+        pathType = path.first;
+        break;
+      }
     }
-  }
 
-  if (pathAllowed) {
-    location = desiredLocation;
-  } else {
-    rdm::Log::printf(rdm::LOG_DEBUG, "%s tried to move to an invalid place",
-                     displayName.get().c_str());
+    if (pathAllowed) {
+      location = desiredLocation;
+    } else {
+      rdm::Log::printf(rdm::LOG_DEBUG, "%s tried to move to an invalid place",
+                       displayName.get().c_str());
+    }
+
+    if (location == America::NovaScotia) {  // won game
+      vacationed = true;
+      rdm::Log::printf(rdm::LOG_INFO, "%s reached the vacation",
+                       displayName.get().c_str());
+    }
   }
 
   turnEnded = false;

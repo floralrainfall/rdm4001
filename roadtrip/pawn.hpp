@@ -12,11 +12,12 @@ class Pawn : public rdm::network::Player {
 
   int cash;
   bool turnEnded;
+  bool vacationed;
 
  public:
   Pawn(rdm::network::NetworkManager* manager, rdm::network::EntityId id);
 
-  bool& isTurnDone() { return turnEnded; }
+  bool isTurnDone() { return turnEnded; }
   void endTurn();
 
   virtual void tick();

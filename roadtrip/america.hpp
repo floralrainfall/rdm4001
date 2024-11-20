@@ -11,6 +11,7 @@
 namespace rt {
 class America : public rdm::network::Entity {
   rdm::ClosureId closure;
+  int turnNumber;
 
  public:
   enum Location {

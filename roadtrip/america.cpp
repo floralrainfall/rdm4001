@@ -16,6 +16,7 @@ America::America(rdm::network::NetworkManager* manager,
                  rdm::network::EntityId id)
     : rdm::network::Entity(manager, id) {
   fillLocationInfo();
+  turnNumber = 0;
   if (!getManager()->isBackend())
     closure = getGfxEngine()->renderStepped.listen([this] {
       getGfxEngine()
@@ -73,6 +74,7 @@ void America::tick() {
         Pawn* pawn = dynamic_cast<Pawn*>(_pawn);
         pawn->endTurn();
       }
+      turnNumber++;
     }
   }
 }
