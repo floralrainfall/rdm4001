@@ -62,6 +62,7 @@ size_t WGame::getGameVersion() { return 0x00000001; }
 WGame::~WGame() { delete game; }
 
 void WGame::addEntityConstructors(network::NetworkManager* manager) {
+  manager->setPassword("RDMEXRDMEXRDMEX");
   manager->registerConstructor(network::EntityConstructor<Worldspawn>,
                                "Worldspawn");
   manager->registerConstructor(network::EntityConstructor<WPlayer>, "WPlayer");

@@ -125,6 +125,8 @@ class Scheduler {
    */
   SchedulerJob* addJob(SchedulerJob* job);
 
+  size_t getId() { return id; }
+
   void imguiDebug();
 
   void waitToWrapUp();

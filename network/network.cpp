@@ -47,6 +47,20 @@ NetworkManager::NetworkManager(World* world) {
 
   registerConstructor(EntityConstructor<Player>, "Player");
   playerType = "Player";
+
+  char* username = getenv("USER");
+  this->username = username;
+
+  password = "RDMRDMRDM";
+  userPassword = "";
+}
+
+void NetworkManager::requestDisconnect() {
+  BitStream disconnectMessage;
+  disconnectMessage.write<PacketId>(DisconnectPacket);
+  disconnectMessage.write<int>(0);
+  enet_peer_send(localPeer.peer, 0,
+                 disconnectMessage.createPacket(ENET_PACKET_FLAG_RELIABLE));
 }
 
 NetworkManager::~NetworkManager() {
@@ -69,8 +83,8 @@ NetworkManager::~NetworkManager() {
       }
     }
     enet_host_destroy(host);
-    host = NULL;
   }
+  host = NULL;
 }
 
 void NetworkManager::service() {
@@ -110,7 +124,9 @@ void NetworkManager::service() {
 
                   BitStream authenticateStream;
                   authenticateStream.write<PacketId>(AuthenticatePacket);
-                  authenticateStream.writeString("Username");
+                  authenticateStream.writeString(this->username);
+                  authenticateStream.writeString(password);
+                  authenticateStream.writeString(userPassword);
                   enet_peer_send(localPeer.peer, NETWORK_STREAM_META,
                                  authenticateStream.createPacket(
                                      ENET_PACKET_FLAG_RELIABLE));
@@ -119,6 +135,23 @@ void NetworkManager::service() {
               case AuthenticatePacket:
                 if (backend) {
                   std::string username = stream.readString();
+                  std::string password = stream.readString();
+                  std::string userPassword = stream.readString();
+                  if (!userPassword.empty())
+                    if (userPassword != this->userPassword) {
+                      Log::printf(LOG_INFO, "%s failed userPassword",
+                                  username.c_str());
+                      break;  // deny user
+                    }
+
+                  if (password != this->password) {
+                    Log::printf(LOG_INFO, "%s failed password",
+                                username.c_str());
+                    break;  // deny user
+                  } else {
+                    Log::printf(LOG_DEBUG, "%s passed password",
+                                username.c_str());
+                  }
 
                   Log::printf(LOG_INFO, "%s authenticating", username.c_str());
                   remotePeer->type = Peer::ConnectedPlayer;
@@ -230,8 +263,11 @@ void NetworkManager::service() {
                 break;
               case DisconnectPacket:
                 if (backend) {
-                  throw std::runtime_error(
-                      "Received DisconnectPacket on backend");
+                  int reason = stream.read<int>();
+                  Log::printf(LOG_INFO,
+                              "Remote requested disconnect for %i (%s)", reason,
+                              disconnectReasons[reason]);
+                  enet_peer_disconnect(remotePeer->peer, reason);
                 } else {
                   std::string message = stream.readString();
                   Log::printf(LOG_INFO, "Disconnected from server (%s)",
@@ -466,7 +502,10 @@ void NetworkManager::service() {
 }
 
 void NetworkManager::start(int port) {
-  if (host) throw std::runtime_error("Already hosting");
+  if (host) {
+    Log::printf(LOG_WARN, "host = %p", host);
+    enet_host_destroy(host);
+  }
   ENetAddress address;
   address.host = ENET_HOST_ANY;
   address.port = port;
@@ -482,7 +521,10 @@ void NetworkManager::start(int port) {
 }
 
 void NetworkManager::connect(std::string address, int port) {
-  if (host) throw std::runtime_error("Already hosting");
+  if (host) {
+    Log::printf(LOG_WARN, "host = %p", host);
+    enet_host_destroy(host);
+  }
   ENetAddress _address;
   enet_address_set_host(&_address, address.c_str());
   _address.port = port;
@@ -560,6 +602,15 @@ Entity* NetworkManager::findEntityByType(std::string typeName) {
     if (entity.second->getTypeName() == typeName) return entity.second.get();
   }
   return NULL;
+}
+
+std::vector<Entity*> NetworkManager::findEntitiesByType(std::string typeName) {
+  std::vector<Entity*> ret;
+  for (auto& entity : entities) {
+    if (entity.second->getTypeName() == typeName)
+      ret.push_back(entity.second.get());
+  }
+  return ret;
 }
 
 void NetworkManager::initialize() { enet_initialize(); }

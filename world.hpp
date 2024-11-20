@@ -25,6 +25,7 @@ class World {
 
  public:
   World();
+  ~World();
 
   Signal<> stepping;
   Signal<> stepped;
@@ -37,6 +38,8 @@ class World {
   Scheduler* getScheduler() { return scheduler.get(); }
   PhysicsWorld* getPhysicsWorld() { return physics.get(); }
   network::NetworkManager* getNetworkManager() { return networkManager.get(); }
+
+  void setRunning(bool running) { this->running = running; }
   bool getRunning() { return running; };
 };
 }  // namespace rdm

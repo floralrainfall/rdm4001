@@ -44,13 +44,35 @@ struct Model {
   void processNode(Engine* engine, aiNode* node);
 };
 
+class Primitive {
+  std::unique_ptr<BaseBuffer> vertex;
+  std::unique_ptr<BaseBuffer> element;
+  std::unique_ptr<BaseArrayPointers> arrayPointers;
+  size_t indicesCount;
+
+ public:
+  enum Type {
+    PlaneZ,
+    Cube,
+    Sphere,
+
+    Count,
+  };
+
+  Primitive(Type type, Engine* engine);
+  void render(BaseDevice* device);
+};
+
 class MeshCache {
   std::map<std::string, std::unique_ptr<Model>> models;
+  std::vector<Primitive> primitives;
+
   Engine* engine;
 
  public:
   MeshCache(Engine* engine);
 
   std::optional<Model*> get(const char* path);
+  Primitive* get(Primitive::Type type);
 };
 }  // namespace rdm::gfx

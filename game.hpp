@@ -31,6 +31,7 @@ class Game {
   void startServer();
 
   void lateInitServer();
+  void stopServer();
 
   virtual void initialize() = 0;
   virtual void initializeClient() {};

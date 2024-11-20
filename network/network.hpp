@@ -61,6 +61,9 @@ class NetworkManager {
   size_t ticks;
 
   std::string playerType;
+  std::string password;
+  std::string userPassword;
+  std::string username;
 
   std::map<std::string, EntityConstructorFunction> constructors;
   std::map<EntityId, std::unique_ptr<Entity>> entities;
@@ -76,6 +79,10 @@ class NetworkManager {
   Game* getGame() { return game; }
 
   void handleDisconnect();
+  void setPassword(std::string password) { this->password = password; };
+  void setUserPassword(std::string userPassword) {
+    this->userPassword = userPassword;
+  }
 
   World* getWorld() { return world; }
 
@@ -104,6 +111,7 @@ class NetworkManager {
   void registerConstructor(EntityConstructorFunction func,
                            std::string typeName);
   Entity* findEntityByType(std::string typeName);
+  std::vector<Entity*> findEntitiesByType(std::string typeName);
 
   void addPendingUpdate(EntityId id) { pendingUpdates.push_back(id); };
   void addPendingUpdateUnreliable(EntityId id) {
@@ -115,6 +123,8 @@ class NetworkManager {
   void setPlayerType(std::string type) { playerType = type; };
   Peer& getLocalPeer() { return localPeer; }
   bool isBackend() { return backend; }
+
+  void setUsername(std::string username) { this->username = username; };
 
   static void initialize();
   static void deinitialize();

@@ -178,6 +178,8 @@ void Game::earlyInit() {
   }
 }
 
+void Game::stopServer() { worldServer.reset(); }
+
 void Game::pollEvents() {
 #ifndef DISABLE_EASY_PROFILER
   EASY_BLOCK("SDL_PollEvent");
@@ -238,6 +240,12 @@ void Game::pollEvents() {
 
 void Game::mainLoop() {
   earlyInit();
+
+  if (!world && !worldServer) {
+    Log::printf(LOG_FATAL,
+                "world or worldServer is not set, please call startClient "
+                "or startServer in your Game::initialize function");
+  }
 
   if (world) {
     while (world->getRunning()) {

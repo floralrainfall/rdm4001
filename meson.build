@@ -144,3 +144,13 @@ executable('wawaworld', [
   'wawaworld/wplayer.cpp',
   'wawaworld/wplayer.hpp'
 ], cpp_args: options, include_directories: [inc, inc2], dependencies: [common_dep, sdl2, glm, b3geometry_dep, easy_profiler], link_with: gamelib)
+
+executable('roadtrip', [
+  'roadtrip/main.cpp',
+  'roadtrip/roadtrip.hpp',
+  'roadtrip/roadtrip.cpp',
+  'roadtrip/america.hpp',
+  'roadtrip/america.cpp',
+  'roadtrip/pawn.hpp',
+  'roadtrip/pawn.cpp',
+], cpp_args: options, include_directories: [inc, inc2], dependencies: [common_dep, sdl2, glm, b3geometry_dep, easy_profiler], link_with: gamelib)

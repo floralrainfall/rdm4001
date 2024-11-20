@@ -55,6 +55,11 @@
 		{"ProgramName": "Mesh"}
 	    ]
 	},
+	"RoadTripMap": {
+	    "Techniques": [
+		{"ProgramName": "RoadTripMap"}
+	    ]
+	},
 	"GaussianBlur": {
 	    "Techniques": [
 		{"ProgramName": "GaussianBlur"}
@@ -73,6 +78,7 @@
 	"BspBrush": {"VSName": "dat1/bsp/brush.vs.glsl", "FSName": "dat1/bsp/brush.fs.glsl"},
 	"BspSky": {"VSName": "dat1/bsp/brush.vs.glsl", "FSName": "dat1/bsp/sky.fs.glsl"},
 	"Mesh": {"VSName": "dat1/mesh.vs.glsl", "FSName": "dat1/mesh.fs.glsl"},
-	"GaussianBlur": {"VSName": "dat1/post.vs.glsl", "FSName": "dat1/blur.fs.glsl"}
+	"GaussianBlur": {"VSName": "dat1/post.vs.glsl", "FSName": "dat1/blur.fs.glsl"},
+	"RoadTripMap": {"VSName": "dat1/mesh.vs.glsl", "FSName": "dat1/rt/map.fs.glsl"}
     }
 }

@@ -76,6 +76,13 @@ World::World() {
   });
 }
 
+World::~World() {
+  Log::printf(LOG_DEBUG, "Dtor on world, running = %s",
+              running ? "true" : "false");
+  setRunning(false);
+  getScheduler()->waitToWrapUp();
+}
+
 void World::tick() {
   stepping.fire();
 
