@@ -18,6 +18,7 @@ class Pawn : public rdm::network::Player {
   Pawn(rdm::network::NetworkManager* manager, rdm::network::EntityId id);
 
   bool isTurnDone() { return turnEnded; }
+  bool isVacationed() { return vacationed; }
   void endTurn();
 
   virtual void tick();

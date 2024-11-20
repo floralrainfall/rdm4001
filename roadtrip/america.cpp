@@ -64,6 +64,8 @@ void America::tick() {
     for (auto _pawn : pawns) {
       Pawn* pawn = dynamic_cast<Pawn*>(_pawn);
       if (!pawn->isTurnDone()) {
+        if (pawn->isVacationed()) continue;
+
         allTurnsDone = false;
         break;
       }
@@ -72,6 +74,7 @@ void America::tick() {
       rdm::Log::printf(rdm::LOG_DEBUG, "TURN DONE");
       for (auto _pawn : pawns) {
         Pawn* pawn = dynamic_cast<Pawn*>(_pawn);
+        if (pawn->isVacationed()) continue;
         pawn->endTurn();
       }
       turnNumber++;
