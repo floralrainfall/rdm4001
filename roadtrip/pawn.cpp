@@ -17,6 +17,7 @@ Pawn::Pawn(rdm::network::NetworkManager* manager, rdm::network::EntityId id)
   desiredLocation = America::SoCal;
   turnEnded = false;
   vacationed = false;
+  inCanada = false;
   cash = 37;
 
   if (!manager->isBackend()) {
@@ -174,6 +175,16 @@ void Pawn::endTurn() {
     }
 
     if (pathAllowed) {
+      if (pathType == America::USCIS) {
+        if (!inCanada) {
+          caPointOfEntry = location;
+          rdm::Log::printf(rdm::LOG_DEBUG, "POE = %i", caPointOfEntry);
+        }
+        rdm::Log::printf(rdm::LOG_DEBUG, "%s %s Canada",
+                         displayName.get().c_str(),
+                         inCanada ? "exited" : "entered");
+        inCanada = !inCanada;
+      }
       location = desiredLocation;
     } else {
       rdm::Log::printf(rdm::LOG_DEBUG, "%s tried to move to an invalid place",

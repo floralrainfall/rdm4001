@@ -5,9 +5,22 @@
 #include "network/player.hpp"
 #include "signal.hpp"
 namespace rt {
+struct PawnAction {
+  enum {
+    Buy,
+    Use,
+  } type;
+  union {
+    struct {
+    } buy;
+  } data;
+};
+
 class Pawn : public rdm::network::Player {
   America::Location location;
   America::Location desiredLocation;
+  America::Location caPointOfEntry;
+  bool inCanada;
   rdm::ClosureId gfxTick;
 
   int cash;
