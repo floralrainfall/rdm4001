@@ -3,6 +3,7 @@
 
 #include "gfx/engine.hpp"
 #include "imgui.h"
+#include "imgui_internal.h"
 #include "network/bitstream.hpp"
 #include "roadtrip/america.hpp"
 
@@ -11,6 +12,28 @@
 #include <glm/gtx/transform.hpp>
 
 namespace rt {
+const char* PawnItem::name(Type t) {
+  const char* names[] = {
+      "Water Bottle",
+      "Food (K-Ration)",
+      "Dog (Golden Retriever)",
+      "Knife",
+      "Gun",
+      "US Passport",
+      "Canadian Passport",
+      "Forged Canadian Passport",
+      "Temporary Worker",
+  };
+  return names[t];
+}
+
+int PawnItem::cost(Type t) {
+  int costs[] = {
+      5, 6, 12, 5, 17, 2, 10, 30, 20,
+  };
+  return costs[t];
+}
+
 Pawn::Pawn(rdm::network::NetworkManager* manager, rdm::network::EntityId id)
     : rdm::network::Player(manager, id) {
   location = America::SoCal;
@@ -45,10 +68,11 @@ Pawn::Pawn(rdm::network::NetworkManager* manager, rdm::network::EntityId id)
         getGfxEngine()->getCamera().setPosition(glm::vec3(point, 0.0));
         float t = 0.1;
         getGfxEngine()->getCamera().setTarget(
-            glm::vec3(point, 70.0) +
-            glm::vec3(40 * sin(getGfxEngine()->getTime() * t),
-                      40 * cos(getGfxEngine()->getTime() * t), 0.0));
+            glm::vec3(point, 500.0) +
+            glm::vec3(80 /*40 * sin(getGfxEngine()->getTime() * t)*/,
+                      80 /*40 * cos(getGfxEngine()->getTime() * t)*/, 0.0));
         getGfxEngine()->getCamera().setUp(glm::vec3(0.0, 0.0, 1.0));
+        getGfxEngine()->getCamera().setFOV(35.f);
 
         if (vacationed) {
           ImGui::Begin("You Win!");
@@ -68,6 +92,23 @@ Pawn::Pawn(rdm::network::NetworkManager* manager, rdm::network::EntityId id)
 
         ImGui::Begin("Stats");
         ImGui::Text("You have %i kroner", cash);
+        if (inCanada) {
+          ImGui::Image(getGfxEngine()
+                           ->getTextureCache()
+                           ->getOrLoad2d("dat6/canada.png")
+                           .value()
+                           .second->getImTextureId(),
+                       ImVec2(106, 53), {0, 1}, {1, 0});
+          ImGui::Text("You are in Canada");
+        } else {
+          ImGui::Image(getGfxEngine()
+                           ->getTextureCache()
+                           ->getOrLoad2d("dat6/usa.png")
+                           .value()
+                           .second->getImTextureId(),
+                       ImVec2(100, 53), {0, 1}, {1, 0});
+          ImGui::Text("You are in the United States of America");
+        }
         ImGui::End();
 
         if (turnEnded) {
@@ -85,30 +126,101 @@ Pawn::Pawn(rdm::network::NetworkManager* manager, rdm::network::EntityId id)
           return;
         }
 
+        static enum { Main, Shop } menuMode;
+
         ImGui::Begin("What to do today");
-        ImGui::Text("Where I am: %s",
-                    america->locationInfo[location].name.c_str());
-        ImGui::Separator();
-        for (int i = 0;
-             i < america->locationInfo[location].connectedLocations.size();
-             i++) {
-          ImGui::PushID(i);
-          auto it = america->locationInfo[location].connectedLocations[i];
-          America::LocationInfo info = america->locationInfo[it.second];
-          ImGui::Text("%s", info.name.c_str());
-          if (it.second == desiredLocation) {
-            ImGui::Text("You are heading here next turn");
-          } else {
-            if (ImGui::Button("Go")) {
-              desiredLocation = it.second;
+        switch (menuMode) {
+          case Shop:
+            static std::map<PawnItem::Type, int> cart;
+
+            for (int i = 0; i < PawnItem::Max; i++) {
+              if (cart[(PawnItem::Type)i]) continue;
+              if (inCanada && i == PawnItem::Gun) {
+                ImGui::Text("Guns are illegal in Canada");
+                ImGui::Separator();
+                continue;
+              }
+              ImGui::PushID(i);
+              ImGui::Text("%s, %ikr", PawnItem::name((PawnItem::Type)i),
+                          PawnItem::cost((PawnItem::Type)i));
+              if (ImGui::Button("Add to Cart")) {
+                cart[(PawnItem::Type)i] = true;
+              }
+              ImGui::Separator();
+              ImGui::PopID();
             }
-          }
-          ImGui::PopID();
-        }
-        ImGui::Separator();
-        if (ImGui::Button("End Turn")) {
-          turnEnded = true;
-          getManager()->addPendingUpdate(getEntityId());  // sync changes
+
+            ImGui::Begin("Cart");
+            {
+              int cost = 0;
+              for (auto t : cart) {
+                if (t.second) {
+                  ImGui::PushID(t.first);
+                  ImGui::Text("%s", PawnItem::name(t.first));
+                  cost += PawnItem::cost(t.first);
+                  if (ImGui::Button("Remove")) {
+                    cart[t.first] = false;
+                  }
+                  ImGui::Separator();
+                  ImGui::PopID();
+                }
+              }
+              if (cost == 0) {
+                ImGui::Text("Please select some items friend");
+              } else {
+                ImGui::Text("Buying will end your turn");
+                if (cost < cash)
+                  if (ImGui::Button("Buy")) {
+                    menuMode = Main;
+                    turnEnded = true;
+                    for (auto t : cart) {
+                      wantedItems.push_back(t.first);
+                    }
+                    cart.clear();
+                    getManager()->addPendingUpdate(getEntityId());
+                  }
+                ImGui::Text("Total cost: %ikr", cost);
+                if (cost > cash) {
+                  ImGui::TextColored(ImVec4(1.0, 0.0, 0.0, 1.0),
+                                     "You do not have enough kroner");
+                }
+              }
+            }
+            ImGui::End();
+
+            if (ImGui::Button("Back")) {
+              cart.clear();
+              menuMode = Main;
+            }
+            break;
+          case Main:
+            ImGui::Text("Where I am: %s",
+                        america->locationInfo[location].name.c_str());
+            ImGui::Separator();
+            for (int i = 0;
+                 i < america->locationInfo[location].connectedLocations.size();
+                 i++) {
+              ImGui::PushID(i);
+              auto it = america->locationInfo[location].connectedLocations[i];
+              America::LocationInfo info = america->locationInfo[it.second];
+              ImGui::Text("%s", info.name.c_str());
+              if (it.second == desiredLocation) {
+                ImGui::Text("You are heading here next turn");
+              } else {
+                if (ImGui::Button("Go")) {
+                  desiredLocation = it.second;
+                }
+              }
+              ImGui::PopID();
+            }
+            ImGui::Separator();
+            if (ImGui::Button("End Turn")) {
+              turnEnded = true;
+              getManager()->addPendingUpdate(getEntityId());  // sync changes
+            }
+            if (ImGui::Button("Shop")) {
+              menuMode = Shop;
+            }
         }
         ImGui::End();
       }
@@ -136,6 +248,15 @@ void Pawn::serialize(rdm::network::BitStream& stream) {
     stream.write<bool>(turnEnded);
     stream.write<America::Location>(location);
     stream.write<bool>(vacationed);
+    stream.write<bool>(inCanada);
+
+    stream.write<int>(events.size());  // write events
+    for (auto& event : events) {
+      stream.write<PawnEvent::Type>(event.type);
+      stream.writeString(event.eventName);
+      stream.writeString(event.eventDesc);
+    }
+    events.clear();
   } else {
     stream.write<bool>(turnEnded);
     stream.write<America::Location>(desiredLocation);
@@ -153,7 +274,18 @@ void Pawn::deserialize(rdm::network::BitStream& stream) {
     turnEnded = stream.read<bool>();
     location = stream.read<America::Location>();
     vacationed = stream.read<bool>();
+    inCanada = stream.read<bool>();
     desiredLocation = location;
+
+    int eventCount = stream.read<int>();
+    events.clear();
+    for (int i = 0; i < eventCount; i++) {
+      PawnEvent event;
+      event.type = stream.read<PawnEvent::Type>();
+      event.eventName = stream.readString();
+      event.eventDesc = stream.readString();
+      events.push_back(event);
+    }
   }
 }
 
@@ -175,16 +307,23 @@ void Pawn::endTurn() {
     }
 
     if (pathAllowed) {
-      if (pathType == America::USCIS) {
-        if (!inCanada) {
-          caPointOfEntry = location;
-          rdm::Log::printf(rdm::LOG_DEBUG, "POE = %i", caPointOfEntry);
-        }
-        rdm::Log::printf(rdm::LOG_DEBUG, "%s %s Canada",
-                         displayName.get().c_str(),
-                         inCanada ? "exited" : "entered");
-        inCanada = !inCanada;
+      switch (pathType) {
+        case America::USCIS:  // BORDER patrol
+          if (!inCanada) {
+            caPointOfEntry = location;
+            rdm::Log::printf(rdm::LOG_DEBUG, "POE = %i", caPointOfEntry);
+          } else {
+          }
+
+          rdm::Log::printf(rdm::LOG_DEBUG, "%s %s Canada",
+                           displayName.get().c_str(),
+                           inCanada ? "exited" : "entered");
+          inCanada = !inCanada;
+          break;
+        default:
+          break;
       }
+
       location = desiredLocation;
     } else {
       rdm::Log::printf(rdm::LOG_DEBUG, "%s tried to move to an invalid place",

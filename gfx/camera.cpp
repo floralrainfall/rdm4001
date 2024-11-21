@@ -1,5 +1,6 @@
 #include "camera.hpp"
 
+#include <cmath>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 namespace rdm::gfx {
@@ -18,10 +19,12 @@ void Camera::updateCamera(glm::vec2 framebufferSize) {
   if (pdirty || fbSize != framebufferSize) {
     switch (p) {
       case Perspective:
-        pmatrix = glm::perspective(fov, framebufferSize.x / framebufferSize.y,
-                                   1.0f, 65535.f);
+        pmatrix = glm::perspective(fov * (M_PIf / 180.f),
+                                   framebufferSize.x / framebufferSize.y, 1.0f,
+                                   65535.f);
         break;
       case Orthographic:
+        pmatrix = glm::ortho(0.f, 1.f, 0.f, 1.f);
         break;
     }
     uipmatrix = glm::ortho(0.f, framebufferSize.x, 0.f, framebufferSize.y);
@@ -29,7 +32,7 @@ void Camera::updateCamera(glm::vec2 framebufferSize) {
     pdirty = false;
   }
   if (vdirty) {
-    if(leftHanded)
+    if (leftHanded)
       vmatrix = glm::lookAtLH(target, eye, up);
     else
       vmatrix = glm::lookAt(target, eye, up);

@@ -198,10 +198,10 @@ void America::fillLocationInfo() {
       .name = "Illinois",
       .connectedLocations = {{Midwest, Missouri}, {Midwest, Michigan}},
       .mapPosition = glm::ivec2(525, 275)};
-  locationInfo[Michigan] = LocationInfo{
-      .name = "Michigan",
-      .connectedLocations = {{Midwest, Illinois}, {Midwest, Ottawa}},
-      .mapPosition = glm::ivec2(571, 236)};
+  locationInfo[Michigan] =
+      LocationInfo{.name = "Michigan",
+                   .connectedLocations = {{Midwest, Illinois}, {USCIS, Ottawa}},
+                   .mapPosition = glm::ivec2(571, 236)};
 
   if (!getManager()->isBackend()) {
     getGfxEngine()->renderStepped.addClosure([this] {

@@ -327,44 +327,47 @@ void Engine::initializeBuffers(glm::vec2 res, bool reset) {
   float s = Settings::singleton()->getSetting("FbScale", 1.0);
   fbSizeF *= s;
 
-  // set resolutions of buffers
-  fullscreenTexture->reserve2dMultisampled(
-      fbSizeF.x, fbSizeF.y, BaseTexture::RGBAF32, fullscreenSamples);
+  try {
+    // set resolutions of buffers
+    fullscreenTexture->reserve2dMultisampled(
+        fbSizeF.x, fbSizeF.y, BaseTexture::RGBAF32, fullscreenSamples);
 
-  postProcessFrameBuffer->setTarget(fullscreenTexture.get());
+    postProcessFrameBuffer->setTarget(fullscreenTexture.get());
 
-  fullscreenTextureDepth->reserve2dMultisampled(
-      fbSizeF.x, fbSizeF.y, BaseTexture::D24S8, fullscreenSamples);
+    fullscreenTextureDepth->reserve2dMultisampled(
+        fbSizeF.x, fbSizeF.y, BaseTexture::D24S8, fullscreenSamples);
 
-  postProcessFrameBuffer->setTarget(fullscreenTextureDepth.get(),
-                                    BaseFrameBuffer::DepthStencil);
+    postProcessFrameBuffer->setTarget(fullscreenTextureDepth.get(),
+                                      BaseFrameBuffer::DepthStencil);
 
-  fullscreenTextureBloom->reserve2dMultisampled(
-      fbSizeF.x, fbSizeF.y, BaseTexture::RGBAF32, fullscreenSamples);
+    fullscreenTextureBloom->reserve2dMultisampled(
+        fbSizeF.x, fbSizeF.y, BaseTexture::RGBAF32, fullscreenSamples);
 
-  postProcessFrameBuffer->setTarget(fullscreenTextureBloom.get(),
-                                    BaseFrameBuffer::Color1);
+    postProcessFrameBuffer->setTarget(fullscreenTextureBloom.get(),
+                                      BaseFrameBuffer::Color1);
 
-  // set up ping pong buffers for gaussian blur
-  for (int i = 0; i < 2; i++) {
-    if (!reset) {
-      pingpongFramebuffer[i] = device->createFrameBuffer();
-      pingpongTexture[i] = device->createTexture();
-    } else {
-      pingpongFramebuffer[i]->destroyAndCreate();
-      pingpongTexture[i]->destroyAndCreate();
+    // set up ping pong buffers for gaussian blur
+    for (int i = 0; i < 2; i++) {
+      if (!reset) {
+        pingpongFramebuffer[i] = device->createFrameBuffer();
+        pingpongTexture[i] = device->createTexture();
+      } else {
+        pingpongFramebuffer[i]->destroyAndCreate();
+        pingpongTexture[i]->destroyAndCreate();
+      }
+
+      pingpongTexture[i]->reserve2dMultisampled(
+          fbSizeF.x, fbSizeF.y, BaseTexture::RGBAF32, fullscreenSamples);
+      pingpongFramebuffer[i]->setTarget(pingpongTexture[i].get());
     }
 
-    pingpongTexture[i]->reserve2dMultisampled(
-        fbSizeF.x, fbSizeF.y, BaseTexture::RGBAF32, fullscreenSamples);
-    pingpongFramebuffer[i]->setTarget(pingpongTexture[i].get());
+    if (postProcessFrameBuffer->getStatus() != BaseFrameBuffer::Complete) {
+      Log::printf(LOG_ERROR, "BaseFrameBuffer::getStatus() = %i",
+                  postProcessFrameBuffer->getStatus());
+    }
+  } catch (std::exception& e) {
+    Log::printf(LOG_ERROR, "Creating post fb: %s", e.what());
   }
-
-  if (postProcessFrameBuffer->getStatus() != BaseFrameBuffer::Complete) {
-    Log::printf(LOG_ERROR, "BaseFrameBuffer::getStatus() = %i",
-                postProcessFrameBuffer->getStatus());
-  }
-
   Log::printf(LOG_DEBUG, "Updating size of framebuffer to (%f,%f)", fbSizeF.x,
               fbSizeF.y);
   if (postProcessFrameBuffer->getStatus() != BaseFrameBuffer::Complete) {

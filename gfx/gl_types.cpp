@@ -1,5 +1,6 @@
 #include "gl_types.hpp"
 
+#include <format>
 #include <glm/gtc/type_ptr.hpp>
 #include <stdexcept>
 #include <vector>
@@ -372,24 +373,33 @@ void GLFrameBuffer::setTarget(BaseTexture* texture, AttachmentPoint point) {
   GLTexture* _gltexture = dynamic_cast<GLTexture*>(texture);
   glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
   GLenum atp;
+  std::string atpnam = "";
   switch (point) {
     case Depth:
       atp = GL_DEPTH_ATTACHMENT;
+      atpnam = "Depth attachment";
       break;
     case Stencil:
       atp = GL_STENCIL_ATTACHMENT;
+      atpnam = "Stencil attachment";
       break;
     case DepthStencil:
       atp = GL_DEPTH_STENCIL_ATTACHMENT;
+      atpnam = "Depth & Stencil attachment";
       break;
     default:  // should be colors
       atp = GL_COLOR_ATTACHMENT0 + point;
+      atpnam = std::format("Color attachment {}", (int)point);
       break;
   }
   glFramebufferTexture(GL_FRAMEBUFFER, atp, _gltexture->getId(), 0);
   GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
   if (status != GL_FRAMEBUFFER_COMPLETE) {
-    Log::printf(LOG_ERROR, "Framebuffer status: %04x", status);
+    const char* msgs[] = {"Missing attachment", "Bad dimensions",
+                          "Bad attachment", "Complete", "Unsupported"};
+
+    Log::printf(LOG_ERROR, "Framebuffer status: %04x (%s, attaching %s)",
+                status, msgs[getStatus()], atpnam.c_str());
     throw std::runtime_error("Incomplete framebuffer");
   }
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
