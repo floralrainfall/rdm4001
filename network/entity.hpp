@@ -81,6 +81,8 @@ class Entity {
 
   EntityId getEntityId() { return id; }
 
+  static void precache();
+
   virtual void tick() {};
 
   virtual void serialize(BitStream& stream) {};
@@ -97,5 +99,4 @@ template <typename T>
 Entity* EntityConstructor(NetworkManager* manager, EntityId id) {
   return new T(manager, id);
 }
-
 };  // namespace rdm::network

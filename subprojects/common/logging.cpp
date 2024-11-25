@@ -12,6 +12,14 @@ Log* Log::singleton() {
   return _singleton;
 }
 
+#ifdef NDEBUG
+void Log::print(LogType t, const char* s) {
+  LogMessage m;
+  m.t = t;
+  m.message = std::string(s);
+  singleton()->addLogMessage(m);
+}
+#else
 void Log::print(LogType t, const char* s, const std::source_location loc) {
   LogMessage m;
   m.t = t;
@@ -19,6 +27,7 @@ void Log::print(LogType t, const char* s, const std::source_location loc) {
   m.loc = loc;
   singleton()->addLogMessage(m);
 }
+#endif
 
 void Log::addLogMessage(LogMessage m) {
   std::scoped_lock lock(mutex);
@@ -58,5 +67,9 @@ void Log::addLogMessage(LogMessage m) {
   }
 
   log.push_front(m);
+
+  if (log.size() > 2000) {
+    log.pop_back();
+  }
 }
 }  // namespace rdm

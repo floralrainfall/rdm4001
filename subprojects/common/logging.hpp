@@ -90,7 +90,9 @@ enum LogType {
 struct LogMessage {
   LogType t;
   std::string message;
+#ifndef NDEBUG
   std::source_location loc;
+#endif
 };
 
 class Log {
@@ -103,6 +105,18 @@ class Log {
  public:
   static Log* singleton();
 
+#ifdef NDEBUG
+  template <typename... Args>
+  static void printf(LogType type, const char* f, Args&&... args) {
+    char buf[4096];
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-security"
+    snprintf(buf, sizeof(buf), f, args...);
+    print(type, buf);
+#pragma GCC diagnostic pop
+  };
+  static void print(LogType type, const char* f);
+#else
   template <typename T, typename S, typename... Args>
   struct printf {
     printf(T t, S s, Args&&... args,
@@ -122,6 +136,7 @@ class Log {
   static void print(
       LogType type, const char* f,
       const std::source_location loc = std::source_location::current());
+#endif
 
   void setLevel(LogType level) { this->level = level; };
   void addLogMessage(LogMessage m);
