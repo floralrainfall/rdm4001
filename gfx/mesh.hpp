@@ -3,6 +3,7 @@
 #include <assimp/scene.h>
 
 #include <assimp/Importer.hpp>
+#include <deque>
 #include <memory>
 #include <optional>
 
@@ -18,8 +19,20 @@ struct MeshVertex {
   glm::vec2 uv;
 };
 
+struct MeshVertexSkinned : public MeshVertex {
+  glm::ivec4 boneIds;
+  glm::vec4 boneWeights;
+};
+
+struct BoneInfo {
+  int id;
+  glm::mat4 offset;
+};
+
 struct Mesh {
-  std::vector<MeshVertex> vertices;
+  bool skinned;
+
+  std::map<std::string, BoneInfo> bones;
   std::vector<unsigned int> indices;
 
   std::unique_ptr<BaseBuffer> vertex;
@@ -30,10 +43,12 @@ struct Mesh {
 };
 
 struct Model {
+  int boneCounter;
   std::vector<Mesh> meshes;
   aiMesh* mesh;
   const aiScene* scene;
   std::string directory;
+  bool precache;
 
   void process(Engine* engine);
   void render(BaseDevice* device);
@@ -53,14 +68,15 @@ class Primitive {
  public:
   enum Type {
     PlaneZ,
-    Cube,
-    Sphere,
 
     Count,
   };
 
   Primitive(Type type, Engine* engine);
   void render(BaseDevice* device);
+
+ private:
+  Type t;
 };
 
 class MeshCache {

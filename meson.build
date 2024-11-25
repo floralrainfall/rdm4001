@@ -29,13 +29,14 @@ else
 endif
 
 options = ['-DDISABLE_EASY_PROFILER']
+#options = []
 
 glad_proj = subproject('glad')
 glad_dep = glad_proj.get_variable('libglad_dep')
 
 assembly_proj = subproject('assembly')
 
-inc = include_directories(['.', 'gfx/imgui', '/usr/include/bullet'])
+inc = include_directories(['.', 'gfx/imgui', '/usr/include/bullet', 'subprojects/common'])
 
 gamelib = static_library('game', [
   'game.cpp',
@@ -119,6 +120,9 @@ gamelib = static_library('game', [
   'gfx/gl_types.cpp',
   'gfx/gl_types.hpp',
 ], cpp_args: options + obz_options, include_directories: [inc], dependencies: [libsndfile, sdl_ttf, boost_dep, enet, common_dep, glad_dep, obz_dep, sdl2, glm, openal, assimp, bullet, easy_profiler])
+
+rdm4001_dep = declare_dependency(include_directories: inc,
+				 link_with: gamelib)
 
 inc2 = include_directories('wawaworld')
 

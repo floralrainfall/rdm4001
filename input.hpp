@@ -10,6 +10,9 @@
 #include "signal.hpp"
 
 namespace rdm {
+/**
+ * @brief This is the object passed around to signal input events
+ */
 struct InputObject {
   enum Type {
     KeyPress,
@@ -57,6 +60,10 @@ class Input {
   void postEvent(InputObject object);
   void flushEvents();
 
+  /**
+   * @brief This is a struct that will automatically be updated every
+   * flushEvents(), which happens on scheduler 0's world tick
+   */
   struct Axis {
     float value;
     SDL_Keycode positive;

@@ -20,6 +20,7 @@ class World {
   std::unique_ptr<Scheduler> scheduler;
   std::string title;
   bool running;
+  double time;
 
   void tick();
 
@@ -38,6 +39,7 @@ class World {
   Scheduler* getScheduler() { return scheduler.get(); }
   PhysicsWorld* getPhysicsWorld() { return physics.get(); }
   network::NetworkManager* getNetworkManager() { return networkManager.get(); }
+  double getTime() { return time; };
 
   void setRunning(bool running) { this->running = running; }
   bool getRunning() { return running; };

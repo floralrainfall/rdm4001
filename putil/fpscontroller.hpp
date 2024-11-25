@@ -22,6 +22,7 @@ class FpsController {
   btMotionState* motionState;
   FpsControllerSettings settings;
   bool localPlayer;
+  bool enable;
 
   ClosureId stepJob;
 
@@ -44,11 +45,17 @@ class FpsController {
                 FpsControllerSettings settings = FpsControllerSettings());
   ~FpsController();
 
+  void setEnable(bool enable) { this->enable = enable; }
+
   void setLocalPlayer(bool b) { localPlayer = b; };
   void updateCamera(gfx::Camera& camera);
 
   void serialize(network::BitStream& stream);
   void deserialize(network::BitStream& stream);
+
+  void imguiDebug();
+
+  void teleport(glm::vec3 p);
 
   glm::vec3 getNetworkPosition() { return networkPosition; }
   glm::vec2 getWishDir() { return accel; }

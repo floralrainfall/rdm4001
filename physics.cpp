@@ -39,8 +39,10 @@ PhysicsWorld::PhysicsWorld(World* world) {
 }
 
 void PhysicsWorld::stepWorld() {
-  std::scoped_lock l(mutex);
-  dynamicsWorld->stepSimulation(PHYSICS_FRAMERATE, 10);
+  {
+    std::scoped_lock l(mutex);
+    dynamicsWorld->stepSimulation(PHYSICS_FRAMERATE, 10);
+  }
   physicsStepping.fire();
 }
 };  // namespace rdm

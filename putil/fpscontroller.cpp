@@ -1,6 +1,7 @@
 #include "fpscontroller.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <glm/common.hpp>
 #include <glm/geometric.hpp>
 #include <glm/glm.hpp>
@@ -54,7 +55,8 @@ FpsController::FpsController(PhysicsWorld* world,
 
   cameraPitch = 0.f;
   cameraYaw = 0.f;
-  localPlayer = false;
+  localPlayer = true;
+  enable = true;
 
   moveVel = glm::vec2(0.0);
 
@@ -63,6 +65,29 @@ FpsController::FpsController(PhysicsWorld* world,
 
 FpsController::~FpsController() {
   world->physicsStepping.removeListener(stepJob);
+}
+
+void FpsController::imguiDebug() {
+  btTransform transform;
+  motionState->getWorldTransform(transform);
+  ImGui::Begin("FPS Controller");
+  ImGui::Text("Pos: %f, %f, %f", transform.getOrigin().x(),
+              transform.getOrigin().y(), transform.getOrigin().z());
+  ImGui::Text("Vel: %f, %f, %f", rigidBody->getLinearVelocity().x(),
+              rigidBody->getLinearVelocity().y(),
+              rigidBody->getLinearVelocity().z());
+  ImGui::Text("Enable: %s", enable ? "true" : "false");
+  ImGui::Text("Local Player: %s", localPlayer ? "true" : "false");
+  ImGui::End();
+}
+
+void FpsController::teleport(glm::vec3 p) {
+  networkPosition = p;
+  btTransform& transform = rigidBody->getWorldTransform();
+  transform.setOrigin(BulletHelpers::toVector3(p));
+  rigidBody->setWorldTransform(transform);
+  rigidBody->setLinearVelocity(btVector3(0.0, 0.0, 0.0));
+  rigidBody->setAngularVelocity(btVector3(0.0, 0.0, 0.0));
 }
 
 void FpsController::moveGround(btVector3& vel, glm::vec2 wishdir) {
@@ -124,6 +149,13 @@ void FpsController::physicsStep() {
 #ifndef DISABLE_EASY_PROFILER
   EASY_FUNCTION("FpsController::physicsStep");
 #endif
+
+  if (!enable) {
+    btTransform& transform = rigidBody->getWorldTransform();
+    transform.setOrigin(btVector3(0.f, 0.f, 0.f));
+    rigidBody->setLinearVelocity(btVector3(0.f, 0.f, 0.f));
+    return;
+  }
 
   btTransform transform = rigidBody->getWorldTransform();
   float dist = glm::distance(networkPosition,
@@ -195,7 +227,7 @@ void FpsController::deserialize(network::BitStream& stream) {
     bodyTransform.setBasis(basis);
 
     rigidBody->setLinearVelocity(velocity);
-    rigidBody->activate(true);
+    if (enable) rigidBody->activate(true);
     rigidBody->setWorldTransform(bodyTransform);
   } else {
     btTransform& ourTransform = rigidBody->getWorldTransform();

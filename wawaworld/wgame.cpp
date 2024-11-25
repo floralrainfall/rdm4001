@@ -73,6 +73,8 @@ void WGame::initializeClient() {
   addEntityConstructors(getWorld()->getNetworkManager());
   game->worldspawn = 0;
 
+  // gfxEngine->setForcedAspect(4.0 / 3.0);
+
   world->getPhysicsWorld()->getWorld()->setGravity(btVector3(0, 0, -206.67));
 
   std::scoped_lock lock(world->worldLock);
@@ -115,7 +117,8 @@ void WGame::initializeClient() {
   gfxEngine->renderStepped.listen([this] {
     network::Peer::Type peerType =
         world->getNetworkManager()->getLocalPeer().type;
-    if (worldServer) {
+
+    /*if (worldServer) {
       ImGui::Begin("Server");
       ImGui::Text("Currently hosting");
       ImGui::End();
@@ -129,14 +132,10 @@ void WGame::initializeClient() {
       ImGui::Text("Server");
       worldServer->getScheduler()->imguiDebug();
     }
-    ImGui::End();
+    ImGui::End();*/
 
     if (peerType == network::Peer::ConnectedPlayer) {
       if (game->worldspawn) {
-        if (game->worldspawn->isPendingAddToGfx()) {
-          game->worldspawn->addToEngine(gfxEngine.get());
-          Input::singleton()->setMouseLocked(true);
-        }
         if (game->worldspawn->getFile())
           game->worldspawn->getFile()->updatePosition(
               gfxEngine->getCamera().getPosition());
@@ -253,8 +252,7 @@ void WGame::initializeServer() {
 
   Worldspawn* wspawn =
       (Worldspawn*)worldServer->getNetworkManager()->instantiate("Worldspawn");
-  std::string mapPath = std::format("dat5/baseq3/maps/{}.bsp", hostParams.map);
-  wspawn->loadFile(mapPath.c_str());
+  wspawn->setNextMap(hostParams.map);
 }
 
 void WGame::initialize() {

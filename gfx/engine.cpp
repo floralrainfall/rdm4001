@@ -111,6 +111,9 @@ BaseTexture* TextureCache::createCacheTexture(const char* path, Info info) {
   }
 }
 
+static CVar r_bloomamount("r_bloomamount", "10", CVARF_SAVE);
+static CVar r_rate("r_rate", "60.0", CVARF_SAVE);
+
 class RenderJob : public SchedulerJob {
   Engine* engine;
 
@@ -118,11 +121,14 @@ class RenderJob : public SchedulerJob {
   RenderJob(Engine* engine) : SchedulerJob("Render"), engine(engine) {}
 
   virtual double getFrameRate() {
-    double renderFr =
-        Settings::singleton()->getSetting("RenderFrameRate", 60.0);
+    double renderFr = r_rate.getFloat();
     if (renderFr == 0.0) return 0.0;
     return 1.0 / renderFr;
   }
+
+  virtual void startup() { engine->context->setCurrent(); }
+
+  virtual void shutdown() { engine->context->unsetCurrent(); }
 
   virtual Result step() {
 #ifndef DISABLE_EASY_PROFILER
@@ -131,24 +137,20 @@ class RenderJob : public SchedulerJob {
     BaseDevice* device = engine->device.get();
 
     try {
-      std::scoped_lock lock(engine->context->getMutex());
-
-      engine->context->setCurrent();
-
       engine->time = getStats().time;
 
-      glm::ivec2 fbSize = engine->context->getBufferSize();
-      if (engine->getCamera().getFramebufferSize() !=
-          glm::vec2(fbSize.x, fbSize.y)) {
-        engine->initializeBuffers(fbSize, true);
+      glm::ivec2 bufSize = engine->getContext()->getBufferSize();
+      if (engine->windowResolution != bufSize) {
+        engine->windowResolution = bufSize;
+        engine->initializeBuffers(bufSize, true);
       }
-
-      void* _ =
-          engine->device->bindFramebuffer(engine->postProcessFrameBuffer.get());
 
 #ifndef DISABLE_EASY_PROFILER
       EASY_BLOCK("Setup Frame");
 #endif
+      void* _ =
+          engine->device->bindFramebuffer(engine->postProcessFrameBuffer.get());
+
       {
         BaseFrameBuffer::AttachmentPoint drawBuffers[] = {
             BaseFrameBuffer::Color0,
@@ -164,12 +166,14 @@ class RenderJob : public SchedulerJob {
         device->targetAttachments(drawBuffers, 2);
       }
 
-      device->viewport(0, 0, fbSize.x, fbSize.y);
+      device->viewport(0, 0, engine->targetResolution.x,
+                       engine->targetResolution.y);
       device->clearDepth();
       device->setDepthState(BaseDevice::LEqual);
       device->setCullState(BaseDevice::FrontCW);
 
-      engine->getCamera().updateCamera(glm::vec2(fbSize.x, fbSize.y));
+      engine->getCamera().updateCamera(
+          glm::vec2(engine->targetResolution.x, engine->targetResolution.y));
 #ifndef DISABLE_EASY_PROFILER
       EASY_END_BLOCK;
 #endif
@@ -198,7 +202,7 @@ class RenderJob : public SchedulerJob {
 
       {
         bool horizontal = true, firstIteration = true;
-        int amount = 10;
+        int amount = r_bloomamount.getInt();
         std::shared_ptr<gfx::Material> material =
             engine->getMaterialCache()->getOrLoad("GaussianBlur").value();
         for (int i = 0; i < amount; i++) {
@@ -229,6 +233,8 @@ class RenderJob : public SchedulerJob {
       EASY_END_BLOCK;
 #endif
 
+      device->viewport(0, 0, engine->windowResolution.x,
+                       engine->windowResolution.y);
       engine->renderFullscreenQuad(
           engine->fullscreenTexture.get(), NULL, [this](BaseProgram* p) {
             p->setParameter(
@@ -236,21 +242,39 @@ class RenderJob : public SchedulerJob {
                 BaseProgram::Parameter{
                     .texture.slot = 1,
                     .texture.texture = engine->pingpongTexture[1].get()});
+            p->setParameter(
+                "target_res", DtVec2,
+                BaseProgram::Parameter{.vec2 = engine->targetResolution});
+            p->setParameter(
+                "window_res", DtVec2,
+                BaseProgram::Parameter{.vec2 = engine->windowResolution});
+            p->setParameter(
+                "forced_aspect", DtFloat,
+                BaseProgram::Parameter{.number = (float)engine->forcedAspect});
           });
 #ifndef DISABLE_EASY_PROFILER
       EASY_END_BLOCK;
 #endif
-
     } catch (std::exception& e) {
       std::scoped_lock lock(engine->context->getMutex());
       Log::printf(LOG_ERROR, "Error in render: %s", e.what());
     }
 
+#ifndef DISABLE_EASY_PROFILER
+    EASY_BLOCK("ImGui");
+#endif
     engine->device->stopImGui();
+#ifndef DISABLE_EASY_PROFILER
+    EASY_END_BLOCK;
+#endif
 
+#ifndef DISABLE_EASY_PROFILER
+    EASY_BLOCK("Swap Buffers");
+#endif
     engine->context->swapBuffers();
-
-    engine->context->unsetCurrent();
+#ifndef DISABLE_EASY_PROFILER
+    EASY_END_BLOCK;
+#endif
 
     return Stepped;
   }
@@ -258,6 +282,8 @@ class RenderJob : public SchedulerJob {
 
 Engine::Engine(World* world, void* hwnd) {
   fullscreenSamples = 4;
+  maxFbScale = 1.0;
+  forcedAspect = 0.0;
   context.reset(new gl::GLContext(hwnd));
   std::scoped_lock lock(context->getMutex());
   device.reset(new gl::GLDevice(dynamic_cast<gl::GLContext*>(context.get())));
@@ -302,7 +328,13 @@ void Engine::setFullscreenMaterial(const char* name) {
   fullscreenMaterial = materialCache->getOrLoad(name).value_or(nullptr);
 }
 
+static CVar r_scale("r_scale", "1.0", CVARF_SAVE);
+
 void Engine::initializeBuffers(glm::vec2 res, bool reset) {
+#ifndef DISABLE_EASY_PROFILER
+  EASY_FUNCTION();
+#endif
+
   // set up buffers for post processing/hdr
   if (!reset) {
     postProcessFrameBuffer = device->createFrameBuffer();
@@ -324,8 +356,13 @@ void Engine::initializeBuffers(glm::vec2 res, bool reset) {
   }
 
   glm::vec2 fbSizeF = res;
-  float s = Settings::singleton()->getSetting("FbScale", 1.0);
+  double s = std::min(maxFbScale, (double)r_scale.getFloat());
   fbSizeF *= s;
+  if (forcedAspect != 0.0) {
+    fbSizeF.x = fbSizeF.y * forcedAspect;
+  }
+  fbSizeF = glm::max(fbSizeF, glm::vec2(1, 1));
+  targetResolution = fbSizeF;
 
   try {
     // set resolutions of buffers

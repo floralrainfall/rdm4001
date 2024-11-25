@@ -24,6 +24,7 @@ enum DataType {
   DtVec4,
 
   DtSampler,  // only useful for programs
+  DtBuffer,
 };
 
 class BaseTexture {
@@ -117,55 +118,6 @@ struct ShaderFile {
 };
 
 /**
- * @brief A program shader.
- *
- * This will compile input shaders, and link them into a program.
- * If you don't know what you are doing, use a Material
- * (MaterialCache::getOrLoad)
- *
- */
-class BaseProgram {
- public:
-  enum Shader { Vertex, Fragment, Geometry };
-
-  union Parameter {
-    unsigned char unsignedByte;
-    char byte;
-    unsigned int unsignedInteger;
-    int integer;
-    float number;
-    struct {
-      int slot;
-      BaseTexture* texture;
-    } texture;
-    glm::mat2 matrix2x2;
-    glm::mat3 matrix3x3;
-    glm::mat4 matrix4x4;
-    glm::vec2 vec2;
-    glm::vec3 vec3;
-    glm::vec4 vec4;
-  };
-
-  struct ParameterInfo {
-    DataType type;
-    bool dirty;
-  };
-
-  virtual ~BaseProgram() {};
-
-  void addShader(ShaderFile file, Shader type) { shaders[type] = file; };
-  void setParameter(std::string param, DataType type, Parameter parameter);
-  void dbgPrintParameters();
-
-  virtual void link() = 0;
-  virtual void bind() = 0;
-
- protected:
-  std::map<Shader, ShaderFile> shaders;
-  std::map<std::string, std::pair<ParameterInfo, Parameter>> parameters;
-};
-
-/**
  * @brief Buffer. Use BaseTexture to store texture data.
  *
  */
@@ -226,6 +178,56 @@ class BaseBuffer {
 
  protected:
   std::mutex lock;
+};
+
+/**
+ * @brief A program shader.
+ *
+ * This will compile input shaders, and link them into a program.
+ * If you don't know what you are doing, use a Material
+ * (MaterialCache::getOrLoad)
+ *
+ */
+class BaseProgram {
+ public:
+  enum Shader { Vertex, Fragment, Geometry };
+
+  union Parameter {
+    unsigned char unsignedByte;
+    char byte;
+    unsigned int unsignedInteger;
+    int integer;
+    float number;
+    struct {
+      int slot;
+      BaseTexture* texture;
+    } texture;
+    BaseBuffer* buffer;
+    glm::mat2 matrix2x2;
+    glm::mat3 matrix3x3;
+    glm::mat4 matrix4x4;
+    glm::vec2 vec2;
+    glm::vec3 vec3;
+    glm::vec4 vec4;
+  };
+
+  struct ParameterInfo {
+    DataType type;
+    bool dirty;
+  };
+
+  virtual ~BaseProgram() {};
+
+  void addShader(ShaderFile file, Shader type) { shaders[type] = file; };
+  void setParameter(std::string param, DataType type, Parameter parameter);
+  void dbgPrintParameters();
+
+  virtual void link() = 0;
+  virtual void bind() = 0;
+
+ protected:
+  std::map<Shader, ShaderFile> shaders;
+  std::map<std::string, std::pair<ParameterInfo, Parameter>> parameters;
 };
 
 /**

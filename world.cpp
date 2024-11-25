@@ -7,6 +7,7 @@
 #include "logging.hpp"
 #include "physics.hpp"
 #include "scheduler.hpp"
+#include "settings.hpp"
 
 namespace rdm {
 class WorldJob : public SchedulerJob {
@@ -19,6 +20,8 @@ class WorldJob : public SchedulerJob {
     using namespace std::chrono_literals;
     if (!world->getRunning()) return Cancel;
 
+    world->time = getStats().time;
+
     if (getStats().schedulerId == 0) Input::singleton()->flushEvents();
     world->tick();
 
@@ -28,30 +31,47 @@ class WorldJob : public SchedulerJob {
   virtual void error(std::exception& e) { world->running = false; }
 };
 
+static CVar cl_showstats("cl_showstats", "0", CVARF_SAVE);
+
 class WorldTitleJob : public SchedulerJob {
   World* world;
+  std::string oldTitle;
 
  public:
-  WorldTitleJob(World* world) : SchedulerJob("WorldTitleJob"), world(world) {}
+  WorldTitleJob(World* world) : SchedulerJob("WorldTitleJob"), world(world) {
+    oldTitle = "";
+  }
 
-  virtual double getFrameRate() { return 1.0; }
+  virtual double getFrameRate() { return 1.0 / 60.0; }
 
   virtual Result step() {
     std::string title = world->title;
-    std::string fpsStatus = "";
-    if (SchedulerJob* worldJob = world->scheduler->getJob("World")) {
-      fpsStatus =
-          std::format("W: {:0.2f}", 1.0 / worldJob->getStats().totalDeltaTime);
+    if (cl_showstats.getBool()) {
+      std::string fpsStatus = "";
+      if (SchedulerJob* worldJob = world->scheduler->getJob("World")) {
+        fpsStatus += std::format("W: {:0.2f}",
+                                 1.0 / worldJob->getStats().getAvgDeltaTime());
+      }
+      if (SchedulerJob* physicsJob = world->scheduler->getJob("Physics")) {
+        fpsStatus += std::format(
+            " P: {:0.2f}", 1.0 / physicsJob->getStats().getAvgDeltaTime());
+      }
+      if (SchedulerJob* renderJob = world->scheduler->getJob("Render")) {
+        fpsStatus += std::format(" R: {:0.2f}",
+                                 1.0 / renderJob->getStats().getAvgDeltaTime());
+      }
+      if (SchedulerJob* networkJob = world->scheduler->getJob("Network")) {
+        fpsStatus += std::format(
+            " N: {:0.2f}", 1.0 / networkJob->getStats().getAvgDeltaTime());
+      }
+      world->changingTitle.fire(std::format("{} ({})", title, fpsStatus));
+
+    } else {
+      if (oldTitle != title) {
+        world->changingTitle.fire(title);
+        oldTitle = title;
+      }
     }
-    if (SchedulerJob* physicsJob = world->scheduler->getJob("Physics")) {
-      fpsStatus += std::format(" P: {:0.2f}",
-                               1.0 / physicsJob->getStats().totalDeltaTime);
-    }
-    if (SchedulerJob* renderJob = world->scheduler->getJob("Render")) {
-      fpsStatus += std::format(" R: {:0.2f}",
-                               1.0 / renderJob->getStats().totalDeltaTime);
-    }
-    world->changingTitle.fire(std::format("{} ({})", title, fpsStatus));
 
     return Stepped;
   }

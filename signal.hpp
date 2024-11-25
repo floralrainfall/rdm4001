@@ -7,6 +7,10 @@
 
 #include "logging.hpp"
 
+#ifndef DISABLE_EASY_PROFILER
+#include <easy/profiler.h>
+#endif
+
 namespace rdm {
 typedef size_t ClosureId;
 
@@ -35,7 +39,13 @@ class Signal {
    * @param a The arguments to pass to signal listeners.
    */
   void fire(Args... a) {
+#ifndef DISABLE_EASY_PROFILER
+    EASY_FUNCTION();
+#endif
     if (pendingClosures.size() != 0) {
+#ifndef DISABLE_EASY_PROFILER
+      EASY_BLOCK("Closures");
+#endif
       for (auto closure : pendingClosures) {
         try {
           closure(a...);
@@ -49,6 +59,9 @@ class Signal {
       pendingClosures.clear();
     }
 
+#ifndef DISABLE_EASY_PROFILER
+    EASY_BLOCK("Listeners");
+#endif
     for (auto listener : listeners) {
       try {
         listener.second(a...);

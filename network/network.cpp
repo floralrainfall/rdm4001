@@ -7,6 +7,7 @@
 #include "logging.hpp"
 #include "network/entity.hpp"
 #include "scheduler.hpp"
+#include "settings.hpp"
 #include "world.hpp"
 
 #ifndef DISABLE_EASY_PROFILER
@@ -22,6 +23,10 @@ Peer::Peer() {
   peer = NULL;
 }
 
+static CVar net_rate("net_rate", "60.0",
+                     CVARF_SAVE | CVARF_NOTIFY | CVARF_REPLICATE);
+static CVar net_service("net_service", "1", CVARF_SAVE);
+
 class NetworkJob : public SchedulerJob {
   NetworkManager* netmanager;
 
@@ -29,7 +34,14 @@ class NetworkJob : public SchedulerJob {
   NetworkJob(NetworkManager* netmanager)
       : SchedulerJob("Network"), netmanager(netmanager) {}
 
+  virtual double getFrameRate() { return 1.0 / net_rate.getFloat(); }
+
   virtual Result step() {
+    if (netmanager->backend) {
+      netmanager->distributedTime = netmanager->getWorld()->getTime();
+    } else {
+      netmanager->distributedTime += getStats().totalDeltaTime;
+    }
     netmanager->service();
     return Stepped;
   }
@@ -44,6 +56,7 @@ NetworkManager::NetworkManager(World* world) {
   lastId = 0;
   lastPeerId = 0;
   ticks = 0;
+  latency = 0.f;
 
   registerConstructor(EntityConstructor<Player>, "Player");
   playerType = "Player";
@@ -99,7 +112,7 @@ void NetworkManager::service() {
 #ifndef DISABLE_EASY_PROFILER
   EASY_BLOCK("Network Service");
 #endif
-  while (enet_host_service(host, &event, 1) > 0) {
+  while (enet_host_service(host, &event, net_service.getInt()) > 0) {
 #ifndef DISABLE_EASY_PROFILER
     EASY_BLOCK("Handle Service");
 #endif
@@ -120,6 +133,7 @@ void NetworkManager::service() {
                   size_t _ticks = stream.read<size_t>();
                   Log::printf(LOG_DEBUG, "Tick diff %i vs %i (%i)", ticks,
                               _ticks, _ticks - ticks);
+                  distributedTime = stream.read<float>();
                   ticks = _ticks;
 
                   BitStream authenticateStream;
@@ -283,6 +297,21 @@ void NetworkManager::service() {
               case SignalPacket:
 
                 break;
+              case DistributedTimePacket:
+                if (backend)
+                  throw std::runtime_error("DistributedTimePacket on backend");
+                else {
+                  float newTime = stream.read<float>();
+                  float diff = newTime - distributedTime;
+                  if (fabsf(diff) > 0.05) {
+                    Log::printf(LOG_WARN,
+                                "Updating distributedTime (diff: %f, new: %f)",
+                                diff, newTime);
+                    distributedTime = newTime;
+                    latency = diff;
+                  }
+                }
+                break;
               default:
                 Log::printf(LOG_WARN, "%s: Unknown packet %i",
                             backend ? "Backend" : "Frontend", packetId);
@@ -352,6 +381,7 @@ void NetworkManager::service() {
           welcomePacketStream.write<PacketId>(WelcomePacket);
           welcomePacketStream.write<int>(np.peerId);
           welcomePacketStream.write<size_t>(ticks);
+          welcomePacketStream.write<float>(distributedTime);
           enet_peer_send(
               event.peer, NETWORK_STREAM_META,
               welcomePacketStream.createPacket(ENET_PACKET_FLAG_RELIABLE));
@@ -445,6 +475,12 @@ void NetworkManager::service() {
       }
       pendingUpdatesUnreliable.clear();
     }
+
+    BitStream timeStream;
+    timeStream.write<PacketId>(DistributedTimePacket);
+    timeStream.write<float>(distributedTime);
+    enet_host_broadcast(host, NETWORK_STREAM_META,
+                        timeStream.createPacket(ENET_PACKET_FLAG_RELIABLE));
   } else {
 #ifndef DISABLE_EASY_PROFILER
     EASY_BLOCK("Frontend Peer Management");
@@ -501,6 +537,10 @@ void NetworkManager::service() {
   ticks++;
 }
 
+static CVar sv_maxpeers("sv_maxpeers", "32", CVARF_SAVE | CVARF_REPLICATE);
+static CVar net_inbandwidth("net_inbandwidth", "0", CVARF_SAVE);
+static CVar net_outbandwidth("net_outbandwidth", "0", CVARF_SAVE);
+
 void NetworkManager::start(int port) {
   if (host) {
     Log::printf(LOG_WARN, "host = %p", host);
@@ -509,7 +549,8 @@ void NetworkManager::start(int port) {
   ENetAddress address;
   address.host = ENET_HOST_ANY;
   address.port = port;
-  host = enet_host_create(&address, 32, 2, 0, 0);
+  host = enet_host_create(&address, sv_maxpeers.getInt(), NETWORK_STREAM_MAX,
+                          net_inbandwidth.getInt(), net_outbandwidth.getInt());
 
   backend = true;
 
@@ -531,7 +572,8 @@ void NetworkManager::connect(std::string address, int port) {
 
   backend = false;
 
-  host = enet_host_create(NULL, 1, 2, 0, 0);
+  host = enet_host_create(NULL, 1, NETWORK_STREAM_MAX, net_inbandwidth.getInt(),
+                          net_outbandwidth.getInt());
   if (host == nullptr)
     throw std::runtime_error("enet_host_create returned NULL");
 

@@ -86,6 +86,12 @@ class Engine {
   std::unique_ptr<MeshCache> meshCache;
   World* world;
 
+  glm::ivec2 windowResolution;
+  glm::vec2 targetResolution;
+
+  double maxFbScale;
+  double forcedAspect;
+
  public:
   Engine(World* world, void* hwnd);
 
@@ -103,6 +109,9 @@ class Engine {
   Signal<> renderStepped;
   Signal<> initialized;
 
+  void setMaxFbScale(double d) { maxFbScale = d; }
+  void setForcedAspect(double d) { forcedAspect = d; }
+
   /**
    * @brief Use Engine::addEntity<T>();
    */
@@ -118,6 +127,8 @@ class Engine {
     t->initialize();
     return t;
   }
+
+  glm::vec2 getTargetResolution() { return targetResolution; }
 
   BaseContext* getContext() { return context.get(); }
   BaseDevice* getDevice() { return device.get(); }

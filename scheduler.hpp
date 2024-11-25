@@ -5,6 +5,8 @@
 #include <thread>
 #include <vector>
 
+#define SCHEDULER_TIME_SAMPLES 64
+
 namespace rdm {
 /**
  * @brief Statistics for a specific job.
@@ -32,6 +34,10 @@ struct JobStatistics {
    */
   double time;
   size_t schedulerId;
+
+  double deltaTimeSamples[SCHEDULER_TIME_SAMPLES];
+  void addDeltaTimeSample(double dt);
+  double getAvgDeltaTime();
 };
 
 class SchedulerJob {
@@ -78,6 +84,9 @@ class SchedulerJob {
    * @return Result The result of the step. See... Result.
    */
   virtual Result step();
+
+  virtual void startup() {};
+  virtual void shutdown() {};
 
   /**
    * @brief Called when your Job throws an exception, and you don't handle it.

@@ -60,6 +60,19 @@ SchedulerJob::SchedulerJob(const char* name, bool stopOnCancel) {
 
 SchedulerJob::~SchedulerJob() { stopBlocking(); }
 
+void JobStatistics::addDeltaTimeSample(double dt) {
+  memcpy(deltaTimeSamples, &deltaTimeSamples[1],
+         sizeof(double) * (SCHEDULER_TIME_SAMPLES - 1));
+  deltaTimeSamples[SCHEDULER_TIME_SAMPLES - 1] = dt;
+}
+
+double JobStatistics::getAvgDeltaTime() {
+  double avg = 0.0;
+  for (int i = 0; i < SCHEDULER_TIME_SAMPLES; i++) avg += deltaTimeSamples[i];
+  avg /= SCHEDULER_TIME_SAMPLES;
+  return avg;
+}
+
 void SchedulerJob::task(SchedulerJob* job) {
 #ifndef NDEBUG
 #ifdef __linux
@@ -73,11 +86,14 @@ void SchedulerJob::task(SchedulerJob* job) {
   EASY_THREAD_SCOPE(jobName.c_str());
 #endif
   job->stats.time = 0.0;
+  for (int i = 0; i < SCHEDULER_TIME_SAMPLES; i++)
+    job->stats.deltaTimeSamples[i] = 0.0;
   bool running = true;
 #ifndef NDEBUG
   Log::printf(LOG_DEBUG, "Starting job %s/%i", job->getStats().name,
               job->getStats().schedulerId);
 #endif
+  job->startup();
   while (running) {
 #ifndef DISABLE_EASY_PROFILER
     EASY_BLOCK("Step");
@@ -129,10 +145,9 @@ void SchedulerJob::task(SchedulerJob* job) {
         break;
     }
 
+    double frameRate = job->getFrameRate();
     std::chrono::time_point end = std::chrono::high_resolution_clock::now();
     std::chrono::duration execution = end - start;
-    job->stats.deltaTime = std::chrono::duration<double>(execution).count();
-    double frameRate = job->getFrameRate();
     if (frameRate != 0.0) {  // run as fast as we can if there is no frame rate
 #ifndef DISABLE_EASY_PROFILER
       EASY_BLOCK("Sleep");
@@ -149,12 +164,15 @@ void SchedulerJob::task(SchedulerJob* job) {
         std::this_thread::sleep_until(end + sleep);
       }
     }
+    job->stats.deltaTime = std::chrono::duration<double>(execution).count();
     end = std::chrono::high_resolution_clock::now();
     execution = end - start;
     job->stats.totalDeltaTime =
         std::chrono::duration<double>(execution).count();
     job->stats.time += std::chrono::duration<double>(execution).count();
+    job->stats.addDeltaTimeSample(job->stats.totalDeltaTime);
   }
+  job->shutdown();
   job->state = Stopped;
 #ifndef NDEBUG
   Log::printf(LOG_DEBUG, "Task %s/%i stopped", job->getStats().name,

@@ -12,7 +12,7 @@ namespace rdm::gfx {
 /**
  * @brief Cache for shader source files (not compiled shader objects).
  *
- * TODO: This should store compiled shared objects.
+ * @todo This should store compiled shared objects.
  *
  */
 class ShaderCache {

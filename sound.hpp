@@ -27,6 +27,7 @@ class SoundEmitter {
   Sound* playingSound;
 
   bool looping;
+  bool playing;
   float pitch;
   float gain;
 
@@ -46,7 +47,9 @@ class SoundEmitter {
   void setPitch(float pitch);
   void setGain(float gain);
 
+  bool isPlaying() { return playing; }
   void play(Sound* sound);
+  void stop();
   void service();
 };
 

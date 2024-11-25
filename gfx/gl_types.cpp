@@ -207,7 +207,7 @@ void GLProgram::link() {
   std::vector<GLuint> _shaders;
   std::string programName;
   for (auto [type, shader] : shaders) {
-    Log::printf(LOG_INFO, "Compiling shader %s", shader.name.c_str());
+    Log::printf(LOG_DEBUG, "Compiling shader %s", shader.name.c_str());
 
     GLuint _shader = glCreateShader(shaderType(type));
     glObjectLabel(GL_SHADER, _shader, shader.name.size(), shader.name.data());
@@ -226,7 +226,9 @@ void GLProgram::link() {
       glGetShaderInfoLog(_shader, logSize, NULL, infoLog);
       Log::printf(LOG_ERROR, "Shader compile %s error\n%s", shader.name.c_str(),
                   infoLog);
+#ifndef NDEBUG
       Log::printf(LOG_DEBUG, "Shader code:\n%s", shader.code.c_str());
+#endif
       free(infoLog);
 
       throw std::runtime_error("Shader compile error");

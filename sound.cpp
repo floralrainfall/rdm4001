@@ -18,6 +18,7 @@ SoundEmitter::SoundEmitter(SoundManager* manager) {
   alGenSources(1, &source);
   buffer = 0;
   playingSound = NULL;
+  playing = false;
   setLooping(false);
   setPitch(1.f);
   node = 0;
@@ -35,11 +36,21 @@ void SoundEmitter::play(Sound* sound) {
     alGenBuffers(10, streamBuffer);
     for (int i = 0; i < 10; i++) sound->uploadData(streamBuffer[i]);
     alSourceQueueBuffers(source, 10, streamBuffer);
+
+    Log::printf(LOG_DEBUG, "Playing stream");
   }
 
   alSourcePlay(source);
 
+  playing = true;
   playingSound = sound;
+}
+
+void SoundEmitter::stop() {
+  alSourceStop(source);
+
+  playing = false;
+  playingSound = NULL;
 }
 
 void SoundEmitter::setLooping(bool looping) {
@@ -58,16 +69,17 @@ void SoundEmitter::setGain(float gain) {
 }
 
 void SoundEmitter::service() {
-  if (playingSound) {
+  if (playingSound && playing) {
     if (playingSound->getLoadType() == Sound::Stream) {
       ALint processedBuffers;
       alGetSourcei(source, AL_BUFFERS_PROCESSED, &processedBuffers);
-      Log::printf(LOG_DEBUG, "%i", processedBuffers);
       while (processedBuffers) {
         ALuint buffer;
         alSourceUnqueueBuffers(source, 1, &buffer);
         if (playingSound->uploadData(buffer, looping)) {
           alSourceQueueBuffers(source, 1, &buffer);
+        } else {
+          playing = false;
         }
         processedBuffers--;
       }

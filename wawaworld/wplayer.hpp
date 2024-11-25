@@ -27,6 +27,7 @@ class WPlayer : public net::Player {
   virtual ~WPlayer();
 
   virtual void tick();
+  rdm::putil::FpsController* getController() { return controller.get(); }
 
   virtual void serialize(net::BitStream& stream);
   virtual void deserialize(net::BitStream& stream);

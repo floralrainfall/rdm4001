@@ -34,18 +34,34 @@ void Model::render(BaseDevice* device) {
   for (auto& mesh : meshes) mesh.render(device);
 }
 
+// https://learnopengl.com/code_viewer_gh.php?code=includes/learnopengl/assimp_glm_helpers.h
+static inline glm::mat4 ConvertMatrixToGLMFormat(const aiMatrix4x4& from) {
+  glm::mat4 to;
+  // the a,b,c,d in assimp is the row ; the 1,2,3,4 is the column
+  to[0][0] = from.a1;
+  to[1][0] = from.a2;
+  to[2][0] = from.a3;
+  to[3][0] = from.a4;
+  to[0][1] = from.b1;
+  to[1][1] = from.b2;
+  to[2][1] = from.b3;
+  to[3][1] = from.b4;
+  to[0][2] = from.c1;
+  to[1][2] = from.c2;
+  to[2][2] = from.c3;
+  to[3][2] = from.c4;
+  to[0][3] = from.d1;
+  to[1][3] = from.d2;
+  to[2][3] = from.d3;
+  to[3][3] = from.d4;
+  return to;
+}
+
 Mesh Model::processMesh(aiMesh* mesh) {
   Mesh m;
-  for (int i = 0; i < mesh->mNumVertices; i++) {
-    MeshVertex vertex;
-    vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y,
-                                mesh->mVertices[i].z);
-    vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y,
-                              mesh->mNormals[i].z);
-    // vertex.uv =
-    //     glm::vec2(mesh->mTextureCoords[i][0].x,
-    //     mesh->mTextureCoords[i][0].y);
-    m.vertices.push_back(vertex);
+
+  if (mesh->HasBones()) {
+    m.skinned = true;
   }
   for (int i = 0; i < mesh->mNumFaces; i++) {
     aiFace face = mesh->mFaces[i];
@@ -58,25 +74,125 @@ Mesh Model::processMesh(aiMesh* mesh) {
   m.vertex = engine->getDevice()->createBuffer();
   m.element = engine->getDevice()->createBuffer();
 
-  m.vertex->upload(BaseBuffer::Array, BaseBuffer::StaticDraw,
-                   m.vertices.size() * sizeof(MeshVertex), m.vertices.data());
   m.element->upload(BaseBuffer::Element, BaseBuffer::StaticDraw,
                     m.indices.size() * sizeof(unsigned int), m.indices.data());
 
   m.arrayPointers = engine->getDevice()->createArrayPointers();
-  m.arrayPointers->addAttrib(BaseArrayPointers::Attrib(
-      DtFloat, 0, 3, sizeof(MeshVertex), (void*)offsetof(MeshVertex, position),
-      m.vertex.get()));
-  m.arrayPointers->addAttrib(BaseArrayPointers::Attrib(
-      DtFloat, 1, 3, sizeof(MeshVertex), (void*)offsetof(MeshVertex, normal),
-      m.vertex.get()));
-  m.arrayPointers->addAttrib(BaseArrayPointers::Attrib(
-      DtFloat, 2, 2, sizeof(MeshVertex), (void*)offsetof(MeshVertex, uv),
-      m.vertex.get()));
-  m.arrayPointers->upload();
+  if (m.skinned) {
+    std::vector<MeshVertexSkinned> vertices;
+    for (int i = 0; i < mesh->mNumVertices; i++) {
+      MeshVertexSkinned vertex;
+      vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y,
+                                  mesh->mVertices[i].z);
+      vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y,
+                                mesh->mNormals[i].z);
+      vertex.uv =
+          glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
+      vertex.boneIds = glm::ivec4(-1);
+      vertex.boneWeights = glm::vec4(0.f);
+      vertices.push_back(vertex);
+    }
 
-  Log::printf(LOG_DEBUG, "Created mesh with %i vertices, %i indices",
-              m.vertices.size(), m.indices.size());
+    // extract bone weights
+    for (int i = 0; i < mesh->mNumBones; ++i) {
+      int boneId = -1;
+      std::string boneName = mesh->mBones[i]->mName.C_Str();
+      auto it = m.bones.find(boneName);
+      if (it != m.bones.end()) {
+        BoneInfo info;
+        info.id = boneCounter;
+        info.offset = ConvertMatrixToGLMFormat(mesh->mBones[i]->mOffsetMatrix);
+        m.bones[boneName] = info;
+        boneId = boneCounter;
+        boneCounter++;
+      } else {
+        boneId = it->second.id;
+      }
+      assert(boneId != -1);
+      auto weights = mesh->mBones[i]->mWeights;
+      int numWeights = mesh->mBones[i]->mNumWeights;
+      for (int j = 0; j < numWeights; ++j) {
+        int vertex = weights[j].mVertexId;
+        float weight = weights[j].mWeight;
+        assert(vertex <= vertices.size());
+        switch (j) {
+          case 0:  // x
+            vertices[vertex].boneIds.x = boneId;
+            vertices[vertex].boneWeights.x = weight;
+            break;
+          case 1:  // y
+            vertices[vertex].boneIds.y = boneId;
+            vertices[vertex].boneWeights.y = weight;
+            break;
+          case 2:  // z
+            vertices[vertex].boneIds.z = boneId;
+            vertices[vertex].boneWeights.z = weight;
+            break;
+          case 3:  // w
+            vertices[vertex].boneIds.w = boneId;
+            vertices[vertex].boneWeights.w = weight;
+            break;
+          default:
+            break;  // do nothing
+        }
+      }
+    }
+
+    m.vertex->upload(BaseBuffer::Array, BaseBuffer::StaticDraw,
+                     vertices.size() * sizeof(MeshVertexSkinned),
+                     vertices.data());
+
+    m.arrayPointers->addAttrib(BaseArrayPointers::Attrib(
+        DtFloat, 0, 3, sizeof(MeshVertexSkinned),
+        (void*)offsetof(MeshVertexSkinned, position), m.vertex.get()));
+    m.arrayPointers->addAttrib(BaseArrayPointers::Attrib(
+        DtFloat, 1, 3, sizeof(MeshVertexSkinned),
+        (void*)offsetof(MeshVertexSkinned, normal), m.vertex.get()));
+    m.arrayPointers->addAttrib(BaseArrayPointers::Attrib(
+        DtFloat, 2, 2, sizeof(MeshVertexSkinned),
+        (void*)offsetof(MeshVertexSkinned, uv), m.vertex.get()));
+    m.arrayPointers->addAttrib(BaseArrayPointers::Attrib(
+        DtInt, 3, 4, sizeof(MeshVertexSkinned),
+        (void*)offsetof(MeshVertexSkinned, boneIds), m.vertex.get()));
+    m.arrayPointers->addAttrib(BaseArrayPointers::Attrib(
+        DtFloat, 4, 4, sizeof(MeshVertexSkinned),
+        (void*)offsetof(MeshVertexSkinned, boneWeights), m.vertex.get()));
+
+    Log::printf(
+        LOG_DEBUG,
+        "created skinned mesh with %i vertices, %i bones and %i elements",
+        vertices.size(), m.bones.size(), m.indices.size());
+  } else {
+    std::vector<MeshVertex> vertices;
+    for (int i = 0; i < mesh->mNumVertices; i++) {
+      MeshVertex vertex;
+      vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y,
+                                  mesh->mVertices[i].z);
+      vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y,
+                                mesh->mNormals[i].z);
+      vertex.uv =
+          glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
+      vertices.push_back(vertex);
+    }
+
+    m.vertex->upload(BaseBuffer::Array, BaseBuffer::StaticDraw,
+                     vertices.size() * sizeof(MeshVertex), vertices.data());
+
+    m.arrayPointers->addAttrib(BaseArrayPointers::Attrib(
+        DtFloat, 0, 3, sizeof(MeshVertex),
+        (void*)offsetof(MeshVertex, position), m.vertex.get()));
+    m.arrayPointers->addAttrib(BaseArrayPointers::Attrib(
+        DtFloat, 1, 3, sizeof(MeshVertex), (void*)offsetof(MeshVertex, normal),
+        m.vertex.get()));
+    m.arrayPointers->addAttrib(BaseArrayPointers::Attrib(
+        DtFloat, 2, 2, sizeof(MeshVertex), (void*)offsetof(MeshVertex, uv),
+        m.vertex.get()));
+
+    Log::printf(LOG_DEBUG,
+                "created unskinned mesh with %i vertices and %i elements",
+                vertices.size(), m.indices.size());
+  }
+  m.arrayPointers->upload();
 
   return m;
 }
@@ -84,6 +200,7 @@ Mesh Model::processMesh(aiMesh* mesh) {
 Primitive::Primitive(Type type, Engine* engine) {
   std::vector<MeshVertex> vertices;
   std::vector<unsigned char> indices;
+  t = type;
   switch (type) {
     case PlaneZ:
       vertices.push_back(MeshVertex{.position = glm::vec3(0.0, 0.0, 0.0),

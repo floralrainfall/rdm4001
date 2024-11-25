@@ -3,15 +3,94 @@
 #include <stdio.h>
 
 #include <boost/program_options.hpp>
+#include <format>
 #include <iostream>
+#include <string>
 
 #include "json.hpp"
 #include "logging.hpp"
 
 namespace rdm {
-Settings::Settings() {
-  settingsPath = "settings.json";
-  load();
+Settings::Settings() { settingsPath = "settings.json"; }
+
+CVar::CVar(const char* name, const char* defaultVar, unsigned long flags) {
+  this->name = name;
+  this->flags = flags;
+  value = defaultVar;
+  Settings::singleton()->addCvar(name, this);
+}
+
+void CVar::setValue(std::string s) {
+  this->value = s;
+  if (flags & CVARF_NOTIFY) Settings::singleton()->cvarChanging.fire(name);
+  changing.fire();
+}
+
+int CVar::getInt() { return std::stoi(value); }
+
+void CVar::setInt(int i) { setValue(std::to_string(i)); }
+
+float CVar::getFloat() { return std::stof(value); }
+
+void CVar::setFloat(float f) { setValue(std::to_string(f)); }
+
+// taken from
+// https://github.com/floralrainfall/matrix/blob/trunk/matrix/src/mcvar.cpp
+
+bool CVar::getBool() { return value[0] != '0'; }
+
+void CVar::setBool(bool b) { setValue(b ? "1" : "0"); }
+
+glm::vec2 CVar::getVec2() {
+  glm::vec4 v = getVec4();
+  return glm::vec2(v.x, v.y);
+}
+
+void CVar::setVec2(glm::vec2 v) { setValue(std::format("{} {}", v.x, v.y)); }
+
+glm::vec3 CVar::getVec3() {
+  glm::vec4 v = getVec4();
+  return glm::vec3(v.x, v.y, v.z);
+}
+
+void CVar::setVec3(glm::vec3 v) {
+  setValue(std::format("{} {} {}", v.x, v.y, v.z));
+}
+
+glm::vec4 CVar::getVec4() {
+  glm::vec4 v(0);
+  size_t pos = 0;
+  std::string s = value;
+  std::string token;
+  enum pos_t {
+    POSITION_X,
+    POSITION_Y,
+    POSITION_Z,
+    POSITION_W
+  }* pos_e = (pos_t*)&pos;
+  while ((pos = s.find(" ")) != std::min(std::string::npos, (size_t)3)) {
+    std::string token = s.substr(0, pos);
+    switch (*pos_e) {
+      case POSITION_X:
+        v.x = std::stof(token);
+        break;
+      case POSITION_Y:
+        v.y = std::stof(token);
+        break;
+      case POSITION_Z:
+        v.z = std::stof(token);
+        break;
+      case POSITION_W:
+        v.w = std::stof(token);
+        break;
+    }
+    s.erase(0, pos + 1);
+  }
+  return v;
+}
+
+void CVar::setVec4(glm::vec4 v) {
+  setValue(std::format("{} {} {} {}", v.x, v.y, v.z, v.w));
 }
 
 static Settings* _singleton = 0;
@@ -26,8 +105,6 @@ void Settings::parseCommandLine(char* argv[], int argc) {
   desc.add_options()("help,h", "produce help message")(
       "loadSettings,L", po::value<std::string>(),
       "load settings from custom location")(
-      "logLevel,l", po::value<int>(),
-      "0 - external, 1 - debug, 2 - info, 3 - warning, 4 - error, 5 - fatal")(
       "game,g", po::value<std::string>(),
       "loaded game library path (only works on supported programs like the "
       "launcher)")(
@@ -48,15 +125,13 @@ void Settings::parseCommandLine(char* argv[], int argc) {
     load();
   }
 
-  if (vm.count("logLevel")) {
-    settings["LogLevel"] = vm["logLevel"].as<int>();
-  }
-
   if (vm.count("game")) {
     gamePath = vm["game"].as<std::string>();
   }
 
   hintDs = vm.count("hintDs");
+
+  load();
 }
 
 void Settings::load() {
@@ -75,6 +150,15 @@ void Settings::load() {
       for (auto& item : j["Settings"].items()) {
         settings[item.key()] = item.value();
       }
+      for (auto& cvar : j["CVars"].items()) {
+        CVar* var = cvars[cvar.key()];
+        if (!var) continue;
+        if (var->getFlags() & CVARF_SAVE) {
+          var->setValue(cvar.value());
+        } else {
+          throw std::runtime_error("Could not set non CVARF_SAVE cvar");
+        }
+      }
     } catch (std::exception& e) {
       Log::printf(LOG_ERROR, "Error parsing settings: %s", e.what());
     }
@@ -92,7 +176,14 @@ void Settings::save() {
       _settings[item.first] = item.second;
     }
     j["Settings"] = _settings;
-    std::string d = j.dump();
+    json _cvars = {};
+    for (auto cvar : cvars) {
+      if (cvar.second->getFlags() & CVARF_SAVE) {
+        _cvars[cvar.first] = cvar.second->getValue();
+      }
+    }
+    j["CVars"] = _cvars;
+    std::string d = j.dump(1);
     fwrite(d.data(), 1, d.size(), sj);
     fclose(sj);
   }

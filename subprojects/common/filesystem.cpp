@@ -93,7 +93,8 @@ size_t DataFileIO::seek(size_t pos, int whence) {
 #ifdef DEBUG_DFIO
   rdm::Log::printf(rdm::LOG_DEBUG, "seek: %i, %i", pos, whence);
 #endif
-  return fseek(file, pos, whence);
+  fseek(file, pos, whence);
+  return tell();
 }
 
 size_t DataFileIO::fileSize() {

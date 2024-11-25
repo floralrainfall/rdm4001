@@ -4,7 +4,13 @@
 
 #include <stdexcept>
 
+#include "SDL_video.h"
 #include "logging.hpp"
+#include "settings.hpp"
+
+#ifndef DISABLE_EASY_PROFILER
+#include <easy/profiler.h>
+#endif
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id,
                                 GLenum severity, GLsizei length,
@@ -19,6 +25,9 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id,
 
 namespace rdm::gfx::gl {
 // we expect SDL's gl context
+static CVar r_gldebug("r_gldebug", "0", CVARF_SAVE);
+static CVar r_glvsync("r_glvsync", "0", CVARF_SAVE);
+
 GLContext::GLContext(void* hwnd) : BaseContext(hwnd) {
   context = SDL_GL_CreateContext((SDL_Window*)hwnd);
   if (!context)
@@ -28,20 +37,32 @@ GLContext::GLContext(void* hwnd) : BaseContext(hwnd) {
   if (!gladLoadGLLoader(SDL_GL_GetProcAddress)) {
     Log::printf(LOG_FATAL, "Unable to initialize GLAD");
   }
-  SDL_GL_SetSwapInterval(0);
+  SDL_GL_SetSwapInterval(r_glvsync.getBool());
+  r_glvsync.changing.listen(
+      [] { SDL_GL_SetSwapInterval(r_glvsync.getBool()); });
 
-  glEnable(GL_DEBUG_OUTPUT);
-  glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-  glDebugMessageCallback(MessageCallback, 0);
+  if (r_gldebug.getBool()) {
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(MessageCallback, 0);
+  }
 
   Log::printf(LOG_INFO, "Vendor:   %s", glGetString(GL_VENDOR));
   Log::printf(LOG_INFO, "Renderer: %s", glGetString(GL_RENDERER));
   Log::printf(LOG_INFO, "Version:  %s", glGetString(GL_VERSION));
 }
 
-void GLContext::swapBuffers() { SDL_GL_SwapWindow((SDL_Window*)getHwnd()); }
+void GLContext::swapBuffers() {
+#ifndef DISABLE_EASY_PROFILER
+  EASY_FUNCTION();
+#endif
+  SDL_GL_SwapWindow((SDL_Window*)getHwnd());
+}
 
 void GLContext::setCurrent() {
+#ifndef DISABLE_EASY_PROFILER
+  EASY_FUNCTION();
+#endif
   if (SDL_GL_MakeCurrent((SDL_Window*)getHwnd(), context)) {
     Log::printf(LOG_FATAL, "Unable to make context current (%s)",
                 SDL_GetError());
@@ -49,6 +70,9 @@ void GLContext::setCurrent() {
 }
 
 void GLContext::unsetCurrent() {
+#ifndef DISABLE_EASY_PROFILER
+  EASY_FUNCTION();
+#endif
   SDL_GL_MakeCurrent((SDL_Window*)getHwnd(), NULL);
 }
 

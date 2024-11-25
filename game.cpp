@@ -33,15 +33,21 @@
 #include "gfx/imgui/imgui.h"
 
 namespace rdm {
+static CVar cl_copyright("cl_copyright", "1", CVARF_SAVE);
+static CVar cl_loglevel("cl_loglevel", "2", CVARF_SAVE);
+
 Game::Game() {
   if (!Fun::preFlightChecks()) abort();  // clearly not safe to run
 
   ignoreNextMouseMoveEvent = false;
 
-  Log::singleton()->setLevel(Settings::singleton()->getSetting("LogLevel", 1));
   network::NetworkManager::initialize();
 
-  Log::printf(LOG_INFO, "%s", copyright());
+  Log::singleton()->setLevel((LogType)cl_loglevel.getInt());
+  cl_loglevel.changing.listen(
+      [] { Log::singleton()->setLevel((LogType)cl_loglevel.getInt()); });
+
+  if (cl_copyright.getBool()) Log::printf(LOG_INFO, "%s", copyright());
 }
 
 Game::~Game() { network::NetworkManager::deinitialize(); }
@@ -141,6 +147,9 @@ void Game::lateInitServer() {
   worldServer->getScheduler()->startAllJobs();
 }
 
+static CVar input_rate("input_rate", "20.0", CVARF_SAVE);
+static CVar sv_ansi("sv_ansi", "1", CVARF_SAVE);
+
 class GameEventJob : public SchedulerJob {
   Game* game;
 
@@ -152,7 +161,7 @@ class GameEventJob : public SchedulerJob {
     return Stepped;
   }
 
-  virtual double getFrameRate() { return 1.0 / 20.0; }
+  virtual double getFrameRate() { return 1.0 / input_rate.getFloat(); }
 };
 
 void Game::earlyInit() {
@@ -167,9 +176,11 @@ void Game::earlyInit() {
     }
     if (worldServer) {
       initializeServer();
-      worldServer->changingTitle.listen([](std::string title) {
-        fprintf(stderr, "\033]0;%s\007", title.c_str());
-      });
+      if (sv_ansi.getBool()) {
+        worldServer->changingTitle.listen([](std::string title) {
+          fprintf(stderr, "\033]0;%s\007", title.c_str());
+        });
+      }
       worldServer->getScheduler()->startAllJobs();
     }
   } catch (std::exception& e) {
@@ -252,6 +263,7 @@ void Game::mainLoop() {
       std::this_thread::yield();
     }
   }
+
   if (world) {
     world->getScheduler()->waitToWrapUp();
     world->getNetworkManager()->handleDisconnect();
@@ -259,6 +271,11 @@ void Game::mainLoop() {
   if (worldServer) {
     worldServer->getScheduler()->waitToWrapUp();
     worldServer->getNetworkManager()->handleDisconnect();
+  }
+
+  Log::printf(LOG_DEBUG, "World no longer running");
+  if (world) {
+    gfxEngine->getContext()->setCurrent();
   }
 }
 }  // namespace rdm

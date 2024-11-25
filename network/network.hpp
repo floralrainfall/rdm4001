@@ -12,6 +12,7 @@
 
 #define NETWORK_STREAM_META 0
 #define NETWORK_STREAM_ENTITY 1
+#define NETWORK_STREAM_MAX 2
 
 #define NETWORK_DISCONNECT_FORCED 0
 #define NETWORK_DISCONNECT_USER 1
@@ -60,6 +61,9 @@ class NetworkManager {
   int lastPeerId;
   size_t ticks;
 
+  float distributedTime;
+  float latency;
+
   std::string playerType;
   std::string password;
   std::string userPassword;
@@ -78,6 +82,9 @@ class NetworkManager {
   void setGame(Game* game) { this->game = game; };
   Game* getGame() { return game; }
 
+  float getDistributedTime() { return distributedTime; };
+  float getLatency() { return latency; }
+
   void handleDisconnect();
   void setPassword(std::string password) { this->password = password; };
   void setUserPassword(std::string userPassword) {
@@ -87,16 +94,17 @@ class NetworkManager {
   World* getWorld() { return world; }
 
   enum PacketId {
-    WelcomePacket,       // S -> C, beginning of handshake
-    AuthenticatePacket,  // C -> S
-    DisconnectPacket,    // S -> C
-    NewIdPacket,         // S -> C
-    DelIdPacket,         // S -> C
-    NewPeerPacket,       // S -> C
-    DelPeerPacket,       // S -> C
-    PeerInfoPacket,      // S -> C
-    DeltaIdPacket,       // S -> C, C -> S
-    SignalPacket,        // S -> C, C -> S
+    WelcomePacket,          // S -> C, beginning of handshake
+    AuthenticatePacket,     // C -> S
+    DisconnectPacket,       // S -> C
+    NewIdPacket,            // S -> C
+    DelIdPacket,            // S -> C
+    NewPeerPacket,          // S -> C
+    DelPeerPacket,          // S -> C
+    PeerInfoPacket,         // S -> C
+    DeltaIdPacket,          // S -> C, C -> S
+    SignalPacket,           // S -> C, C -> S
+    DistributedTimePacket,  // S -> C
   };
 
   void service();

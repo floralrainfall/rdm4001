@@ -10,6 +10,9 @@ uniform float exposure = 1.0;
 uniform float time;
 
 uniform int banding_effect = 0xff3;
+uniform vec2 target_res;
+uniform float forced_aspect;
+uniform vec2 window_res;
 
 vec3 bandize(vec3 col) {
   vec3 out_color_raw = col;
@@ -25,7 +28,26 @@ vec3 bandize(vec3 col) {
 
 void main() {
   const float gamma = 1.0;
-  ivec2 uv = ivec2(gl_FragCoord.x, gl_FragCoord.y);
+  vec2 screen_uv = vec2(gl_FragCoord.x, gl_FragCoord.y);
+
+  float blackbox = 0.0;
+  if (forced_aspect != 0.0) {
+    float aspectX = window_res.x * forced_aspect;
+    blackbox = (window_res.x - aspectX) / 2;
+    if (screen_uv.x < blackbox) {
+      o_color = vec4(0.0);
+      return;
+    }
+    if (screen_uv.x > aspectX + blackbox) {
+      o_color = vec4(0.0);
+      return;
+    }
+  }
+
+  vec2 screen_uv2 = vec2(screen_uv.x - blackbox, screen_uv.y);
+  vec2 _uv = screen_uv2 / vec2(window_res.x - blackbox, window_res.y);
+  ivec2 uv = ivec2(_uv * target_res);
+
   /*vec4 base_color =
       (texelFetch(texture0, uv, 0) + texelFetch(texture0, uv, 1) +
        texelFetch(texture0, uv, 2) + texelFetch(texture0, uv, 3)) /
