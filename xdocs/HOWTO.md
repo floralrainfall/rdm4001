@@ -25,27 +25,38 @@ Then, you can create a project with a `meson.build`. An example `meson.build` wo
 
 Once you have this, you can write your `main.cpp` file.
 
-	#include <game.hpp> /* Include the game header, where the class rdm::Game comes from. This is what you inherit to make a game */
+	#include <game.hpp> /* Include the game header, 
+	where the class rdm::Game comes from. 
+	That is what you inherit to make a game */
 	
 	using namespace rdm;
 	
 	class MyGame : public Game {
 		virtual void initialize() {
-			startClient(); /* If you do not call startClient, the game will instantly shut down after initializing. This tells the game to start up the graphics and sound engine. */
+			startClient(); /* If you do not call startClient, 
+			the game will instantly shut down after initializing. 
+			This tells the game to start up the graphics and sound engine. */
 		}
 		
 		virtual void initializeClient() {
-			/* You can get away with running your initialization code in initialize for the time being, but it is a bad practice when you want to get around to creating dedicated servers for your game. */
+			/* You can get away with running your initialization code in 
+			initialize for the time being, but it is a bad practice when 
+			you want to get around to creating dedicated servers for your game. */
 			
 			/* You are free to do whatever you want using gfxEngine, or anything else here. */
 		}
 	};
 	
 	int main(int argc, char** argv) {
-		rdm::Settings::singleton()->parseCommandLine(argv, argc); /* This parses the command line, and loads the settings from the executing directory/settings.json. If this is not called, then the default settings will not be loaded. */
+		rdm::Settings::singleton()->parseCommandLine(argv, argc); /* This parses 
+		the command line, and loads the settings from 
+		the executing directory/settings.json. If this is not called, 
+		then the default settings will not be loaded. */
+		
 		MyGame mygame;
 		mygame.mainLoop(); /* This will loop until the game stops. */
-		rdm::Settings::singleton()->save(); /* This saves the settings to whatever the settings load path is, usually just the executing directory/settings.json. */
+		rdm::Settings::singleton()->save(); /* This saves the settings to whatever 
+		the settings load path is, usually just the executing directory/settings.json. */
 	}
 
 ## Compiling
@@ -60,6 +71,13 @@ For example, compiling this project would have you do this:
 	ninja
 	
 Then your `mygame` should be in the directory. You have now made your first game.
+
+RDM4001 requires that you have structure similar to its own. Copy over the `data` directory if you have any trouble with it finding certain files. At the time of writing, it requires the following data directories/files:
+
+- dat1/ (material/shader directory)
+- dat3/gui.json
+
+These should be placed in (PROJECT ROOT)/data.
 
 ## Pointers
 
