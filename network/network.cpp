@@ -128,7 +128,7 @@ void NetworkManager::service() {
                 if (backend) {
                   throw std::runtime_error("Received WelcomePacket on backend");
                 } else {
-                  Log::printf(LOG_INFO, "Received WelcomePacket");
+                  Log::printf(LOG_DEBUG, "Received WelcomePacket");
                   localPeer.peerId = stream.read<int>();
                   size_t _ticks = stream.read<size_t>();
                   Log::printf(LOG_DEBUG, "Tick diff %i vs %i (%i)", ticks,
