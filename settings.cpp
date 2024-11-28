@@ -7,6 +7,7 @@
 #include <iostream>
 #include <string>
 
+#include "fun.hpp"
 #include "json.hpp"
 #include "logging.hpp"
 
@@ -109,7 +110,11 @@ void Settings::parseCommandLine(char* argv[], int argc) {
       "loaded game library path (only works on supported programs like the "
       "launcher)")(
       "hintDs,D",
-      "Hint to use dedicated server mode (only works on supported programs)");
+      "Hint to use dedicated server mode (only works on supported programs)")(
+      "hintConnectIp,C", po::value<std::string>(),
+      "Hint to connect to server (only works on supported programs)")(
+      "hintConnectPort,P", po::value<int>(),
+      "Hint to connect to port (only works on supported programs)");
 
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -127,6 +132,18 @@ void Settings::parseCommandLine(char* argv[], int argc) {
 
   if (vm.count("game")) {
     gamePath = vm["game"].as<std::string>();
+  }
+
+  if (vm.count("hintConnectIp")) {
+    hintConnect = vm["hintConnectIp"].as<std::string>();
+  } else {
+    hintConnect = "";
+  }
+
+  if (vm.count("hintConnectPort")) {
+    hintConnectPort = vm["hintConnectPort"].as<int>();
+  } else {
+    hintConnectPort = 7938;
   }
 
   hintDs = vm.count("hintDs");
@@ -147,16 +164,31 @@ void Settings::load() {
 
     try {
       json j = json::parse(sjc);
-      for (auto& item : j["Settings"].items()) {
-        settings[item.key()] = item.value();
+      oldSettings = j;
+      json global = j["Global"];
+      for (auto& cvar : global["CVars"].items()) {
+        auto it = cvars.find(cvar.key());
+        if (it != cvars.end()) {
+          CVar* var = cvars[cvar.key()];
+          if (var->getFlags() & CVARF_SAVE && var->getFlags() & CVARF_GLOBAL) {
+            var->setValue(cvar.value());
+          } else {
+            throw std::runtime_error("");
+          }
+        }
       }
-      for (auto& cvar : j["CVars"].items()) {
-        CVar* var = cvars[cvar.key()];
-        if (!var) continue;
-        if (var->getFlags() & CVARF_SAVE) {
-          var->setValue(cvar.value());
-        } else {
-          throw std::runtime_error("Could not set non CVARF_SAVE cvar");
+      json games = j["Games"];
+      json game = games[Fun::getModuleName()];
+      for (auto& cvar : game["CVars"].items()) {
+        auto it = cvars.find(cvar.key());
+        if (it != cvars.end()) {
+          CVar* var = cvars[cvar.key()];
+          if (var->getFlags() & CVARF_SAVE &&
+              !(var->getFlags() & CVARF_GLOBAL)) {
+            var->setValue(cvar.value());
+          } else {
+            throw std::runtime_error("");
+          }
         }
       }
     } catch (std::exception& e) {
@@ -170,32 +202,22 @@ void Settings::load() {
 void Settings::save() {
   FILE* sj = fopen("settings.json", "w");
   if (sj) {
-    json j;
-    json _settings = {};
-    for (auto item : settings) {
-      _settings[item.first] = item.second;
-    }
-    j["Settings"] = _settings;
+    json j = oldSettings;
     json _cvars = {};
+    json _cvars2 = {};
     for (auto cvar : cvars) {
-      if (cvar.second->getFlags() & CVARF_SAVE) {
+      if (cvar.second->getFlags() & CVARF_SAVE &&
+          cvar.second->getFlags() & CVARF_GLOBAL) {
         _cvars[cvar.first] = cvar.second->getValue();
+      } else if (cvar.second->getFlags() & CVARF_SAVE) {
+        _cvars2[cvar.first] = cvar.second->getValue();
       }
     }
-    j["CVars"] = _cvars;
+    j["Global"]["CVars"] = _cvars;
+    if (!_cvars2.is_null()) j["Games"][Fun::getModuleName()]["CVars"] = _cvars2;
     std::string d = j.dump(1);
     fwrite(d.data(), 1, d.size(), sj);
     fclose(sj);
-  }
-}
-
-json Settings::getSetting(std::string setting, json unset) {
-  auto it = settings.find(setting);
-  if (it == settings.end()) {
-    settings[setting] = unset;
-    return unset;
-  } else {
-    return settings[setting];
   }
 }
 }  // namespace rdm

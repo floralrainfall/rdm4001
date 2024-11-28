@@ -26,11 +26,16 @@ SoundEmitter::SoundEmitter(SoundManager* manager) {
 }
 
 void SoundEmitter::play(Sound* sound) {
-  if (sound->getLoadType() == Sound::Buffer) {
+  if (sound->getLoadType() == Sound::Buffer ||
+      sound->getLoadType() == Sound::Dynamic) {
     if (buffer) alDeleteBuffers(1, &buffer);
     alGenBuffers(1, &buffer);
     sound->uploadData(buffer);
     alSourcei(source, AL_BUFFER, buffer);
+
+    if (sound->getLoadType() == Sound::Dynamic) {
+      setLooping(true);
+    }
   } else if (sound->getLoadType() == Sound::Stream) {
     if (streamBuffer[0]) alDeleteBuffers(10, streamBuffer);
     alGenBuffers(10, streamBuffer);
@@ -84,6 +89,10 @@ void SoundEmitter::service() {
         processedBuffers--;
       }
     }
+    /**
+     * @todo Support for Sound::Dynamic, they will not play properly at the
+     * moment
+     */
 
     if (node) {
       alSource3f(source, AL_POSITION, node->origin.x, node->origin.y,
@@ -300,8 +309,8 @@ void SoundManager::delEmitter(SoundEmitter* emitter) {
 
 SoundEmitter::~SoundEmitter() {
   if (parent)
-    parent->delEmitter(this);  // since we should always come from a newEmitter
-                               // call we should do taht
+    parent->delEmitter(this);  // since we should always come from a
+                               // newEmitter call we should do taht
 }
 
 void SoundManager::service() {

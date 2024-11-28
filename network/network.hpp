@@ -62,6 +62,7 @@ class NetworkManager {
   size_t ticks;
 
   float distributedTime;
+  float nextDtPacket;
   float latency;
 
   std::string playerType;
@@ -92,6 +93,8 @@ class NetworkManager {
   }
 
   World* getWorld() { return world; }
+
+  Signal<std::string> remoteDisconnect;
 
   enum PacketId {
     WelcomePacket,          // S -> C, beginning of handshake

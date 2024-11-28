@@ -61,6 +61,8 @@ FpsController::FpsController(PhysicsWorld* world,
   moveVel = glm::vec2(0.0);
 
   rigidBody->setAngularFactor(btVector3(0, 0, 1));
+  rigidBody->setRestitution(0.0);
+  rigidBody->setFriction(0.1);
 }
 
 FpsController::~FpsController() {
@@ -103,6 +105,7 @@ void FpsController::moveGround(btVector3& vel, glm::vec2 wishdir) {
 
   if (Input::singleton()->isKeyDown(' ')) {
     vel += btVector3(0, 0, 50);
+    jumping = true;
   }
 
   float currentSpeed = vel.dot(btVector3(wishdir.x, wishdir.y, 0.0));
@@ -164,11 +167,24 @@ void FpsController::physicsStep() {
 
   btVector3 start =
       transform.getOrigin() + btVector3(0, 0, -settings.capsuleHeight / 2.0);
-  btVector3 end = start + btVector3(0, 0, -18);
+  btVector3 end = start + btVector3(0, 0, -19);
   btDynamicsWorld::ClosestRayResultCallback callback(start, end);
   world->getWorld()->rayTest(start, end, callback);
 
   grounded = (callback.m_collisionObject != NULL);
+  if (grounded) jumping = false;
+
+  btVector3 vel = rigidBody->getLinearVelocity();
+
+  if (grounded && (vel.length() > 5.0)) {
+    anim = Walk;
+  } else if (grounded) {
+    anim = Idle;
+  } else {
+    anim = Fall;
+  }
+
+  Log::printf(LOG_DEBUG, "%i", anim);
 
   if (localPlayer) {
 #ifndef DISABLE_EASY_PROFILER
@@ -185,7 +201,6 @@ void FpsController::physicsStep() {
         glm::vec2(moveView * glm::vec3(-fbA->value, -lrA->value, 0.0));
     accel = wishdir;
 
-    btVector3 vel = rigidBody->getLinearVelocity();
     // modelled after Quake 1 movement
     grounded ? moveGround(vel, wishdir) : moveAir(vel, wishdir);
 

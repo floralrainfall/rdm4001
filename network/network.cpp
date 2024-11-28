@@ -10,6 +10,11 @@
 #include "settings.hpp"
 #include "world.hpp"
 
+#ifndef DISABLE_OBZ
+#define RDM_COMPILE
+#include "obz.hpp"
+#endif
+
 #ifndef DISABLE_EASY_PROFILER
 #include <easy/profiler.h>
 #endif
@@ -24,8 +29,9 @@ Peer::Peer() {
 }
 
 static CVar net_rate("net_rate", "60.0",
-                     CVARF_SAVE | CVARF_NOTIFY | CVARF_REPLICATE);
-static CVar net_service("net_service", "1", CVARF_SAVE);
+                     CVARF_SAVE | CVARF_NOTIFY | CVARF_REPLICATE |
+                         CVARF_GLOBAL);
+static CVar net_service("net_service", "1", CVARF_SAVE | CVARF_GLOBAL);
 
 class NetworkJob : public SchedulerJob {
   NetworkManager* netmanager;
@@ -63,6 +69,7 @@ NetworkManager::NetworkManager(World* world) {
 
   char* username = getenv("USER");
   this->username = username;
+  nextDtPacket = 0.0;
 
   password = "RDMRDMRDM";
   userPassword = "";
@@ -100,6 +107,8 @@ NetworkManager::~NetworkManager() {
   host = NULL;
 }
 
+static CVar sv_dtrate("sv_dtrate", "0.5", CVARF_SAVE | CVARF_GLOBAL);
+
 void NetworkManager::service() {
   if (!host) return;
 
@@ -134,6 +143,12 @@ void NetworkManager::service() {
                   Log::printf(LOG_DEBUG, "Tick diff %i vs %i (%i)", ticks,
                               _ticks, _ticks - ticks);
                   distributedTime = stream.read<float>();
+
+#ifndef DISABLE_OBZ
+                  // doesn't do anything yet but will verify official servers
+                  obz::ObzCrypt::singleton()->readCryptPacket(stream);
+#endif
+
                   ticks = _ticks;
 
                   BitStream authenticateStream;
@@ -291,6 +306,8 @@ void NetworkManager::service() {
                   handleDisconnect();
                   enet_host_destroy(host);
                   host = NULL;
+
+                  remoteDisconnect.fire(message);
                   return;
                 }
                 break;
@@ -347,6 +364,9 @@ void NetworkManager::service() {
           } else {
           }
         } else {
+          if (localPeer.type != Peer::Unconnected) {
+            remoteDisconnect.fire("ENET_EVENT_TYPE_DISCONNECT");
+          }
           handleDisconnect();
           localPeer.type = Peer::Unconnected;
         }
@@ -382,6 +402,11 @@ void NetworkManager::service() {
           welcomePacketStream.write<int>(np.peerId);
           welcomePacketStream.write<size_t>(ticks);
           welcomePacketStream.write<float>(distributedTime);
+
+#ifndef DISABLE_OBZ
+          obz::ObzCrypt::singleton()->writeCryptPacket(welcomePacketStream);
+#endif
+
           enet_peer_send(
               event.peer, NETWORK_STREAM_META,
               welcomePacketStream.createPacket(ENET_PACKET_FLAG_RELIABLE));
@@ -476,11 +501,15 @@ void NetworkManager::service() {
       pendingUpdatesUnreliable.clear();
     }
 
-    BitStream timeStream;
-    timeStream.write<PacketId>(DistributedTimePacket);
-    timeStream.write<float>(distributedTime);
-    enet_host_broadcast(host, NETWORK_STREAM_META,
-                        timeStream.createPacket(ENET_PACKET_FLAG_RELIABLE));
+    if (distributedTime < nextDtPacket) {
+      nextDtPacket += distributedTime + sv_dtrate.getFloat();
+
+      BitStream timeStream;
+      timeStream.write<PacketId>(DistributedTimePacket);
+      timeStream.write<float>(distributedTime);
+      enet_host_broadcast(host, NETWORK_STREAM_META,
+                          timeStream.createPacket(ENET_PACKET_FLAG_RELIABLE));
+    }
   } else {
 #ifndef DISABLE_EASY_PROFILER
     EASY_BLOCK("Frontend Peer Management");
@@ -537,9 +566,11 @@ void NetworkManager::service() {
   ticks++;
 }
 
-static CVar sv_maxpeers("sv_maxpeers", "32", CVARF_SAVE | CVARF_REPLICATE);
-static CVar net_inbandwidth("net_inbandwidth", "0", CVARF_SAVE);
-static CVar net_outbandwidth("net_outbandwidth", "0", CVARF_SAVE);
+static CVar sv_maxpeers("sv_maxpeers", "32",
+                        CVARF_SAVE | CVARF_REPLICATE | CVARF_GLOBAL);
+static CVar net_inbandwidth("net_inbandwidth", "0", CVARF_SAVE | CVARF_GLOBAL);
+static CVar net_outbandwidth("net_outbandwidth", "0",
+                             CVARF_SAVE | CVARF_GLOBAL);
 
 void NetworkManager::start(int port) {
   if (host) {

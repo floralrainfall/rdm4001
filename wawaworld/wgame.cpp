@@ -2,7 +2,6 @@
 
 #include <format>
 
-#include "SDL_keycode.h"
 #include "filesystem.hpp"
 #include "gfx/base_types.hpp"
 #include "gfx/gui/gui.hpp"
@@ -32,11 +31,13 @@ struct HostParameters {
 
   HostParameters() {
     port = 7938;
-    strncpy(map, "ffa_naamda", 64);
+    strncpy(map,
+            Settings::singleton()->getCvar("sv_nextmap")->getValue().c_str(),
+            64);
   }
 };
 
-static HostParameters hostParams = HostParameters();
+static HostParameters* hostParams;
 
 struct WGamePrivate {
   float cameraPitch;
@@ -221,8 +222,8 @@ void WGame::initializeClient() {
           case HostPanel:
             ImGui::Begin("Host a Server");
             {
-              ImGui::InputInt("Port", &hostParams.port);
-              ImGui::InputText("Map", hostParams.map, 64);
+              ImGui::InputInt("Port", &hostParams->port);
+              ImGui::InputText("Map", hostParams->map, 64);
               ImGui::Text(
                   "You can enter dedicated server mode by using the -D "
                   "(--hintDs) argument");
@@ -242,20 +243,28 @@ void WGame::initializeClient() {
       }
     }
   });
+
+  if (!Settings::singleton()->getHintConnectIP().empty()) {
+    world->getNetworkManager()->connect(
+        Settings::singleton()->getHintConnectIP(),
+        Settings::singleton()->getHintConnectPort());
+  }
 }
 
 void WGame::initializeServer() {
   addEntityConstructors(worldServer->getNetworkManager());
-  worldServer->getNetworkManager()->start(hostParams.port);
+  worldServer->getNetworkManager()->start(hostParams->port);
   worldServer->getPhysicsWorld()->getWorld()->setGravity(
       btVector3(0, 0, -106.67));
 
   Worldspawn* wspawn =
       (Worldspawn*)worldServer->getNetworkManager()->instantiate("Worldspawn");
-  wspawn->setNextMap(hostParams.map);
+  wspawn->setNextMap(hostParams->map);
 }
 
 void WGame::initialize() {
+  hostParams = new HostParameters;
+
   if (rdm::Settings::singleton()->getHintDs()) {
     startServer();
   } else {

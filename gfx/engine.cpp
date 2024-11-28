@@ -111,8 +111,8 @@ BaseTexture* TextureCache::createCacheTexture(const char* path, Info info) {
   }
 }
 
-static CVar r_bloomamount("r_bloomamount", "10", CVARF_SAVE);
-static CVar r_rate("r_rate", "60.0", CVARF_SAVE);
+static CVar r_bloomamount("r_bloomamount", "10", CVARF_SAVE | CVARF_GLOBAL);
+static CVar r_rate("r_rate", "60.0", CVARF_SAVE | CVARF_GLOBAL);
 
 class RenderJob : public SchedulerJob {
   Engine* engine;
@@ -328,7 +328,7 @@ void Engine::setFullscreenMaterial(const char* name) {
   fullscreenMaterial = materialCache->getOrLoad(name).value_or(nullptr);
 }
 
-static CVar r_scale("r_scale", "1.0", CVARF_SAVE);
+static CVar r_scale("r_scale", "1.0", CVARF_SAVE | CVARF_GLOBAL);
 
 void Engine::initializeBuffers(glm::vec2 res, bool reset) {
 #ifndef DISABLE_EASY_PROFILER

@@ -44,6 +44,7 @@ WPlayer::WPlayer(net::NetworkManager* manager, net::EntityId id)
     : Player(manager, id) {
   controller.reset(
       new rdm::putil::FpsController(manager->getWorld()->getPhysicsWorld()));
+  controller->setLocalPlayer(false);
   entityNode = new rdm::Graph::Node();
   entityNode->scale = glm::vec3(6.f);
   if (!getManager()->isBackend()) {

@@ -15,6 +15,12 @@ typedef std::variant<std::string, int, float> Setting;
 #define CVARF_NOTIFY (1 << 1)
 #define CVARF_SAVE (1 << 2)
 
+/**
+ * @brief This is only for CVar's defined by RDM4001. Try not to use this in
+ * your project
+ */
+#define CVARF_GLOBAL (1 << 3)
+
 class CVar {
   friend class Settings;
 
@@ -60,8 +66,11 @@ class Settings {
 
   std::map<std::string, CVar*> cvars;
   std::map<std::string, json> settings;
+  json oldSettings;
   std::string settingsPath;
   std::string gamePath;
+  std::string hintConnect;
+  int hintConnectPort;
 
   void addCvar(const char* name, CVar* cvar) { cvars[name] = cvar; };
 
@@ -79,10 +88,7 @@ class Settings {
   std::string getGamePath() { return gamePath; }
 
   bool getHintDs() { return hintDs; }
-
-  [[deprecated(
-      "It is better to use the CVar system, rather then this. This will "
-      "eventually be phased out if I am not lazy")]]
-  json getSetting(std::string setting, json unset = json());
+  std::string getHintConnectIP() { return hintConnect; }
+  int getHintConnectPort() { return hintConnectPort; }
 };
 }  // namespace rdm

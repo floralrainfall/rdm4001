@@ -3,6 +3,7 @@
 #include <SDL2/SDL_ttf.h>
 
 #include "filesystem.hpp"
+#include "gfx/base_types.hpp"
 #include "gfx/engine.hpp"
 #include "logging.hpp"
 
@@ -66,6 +67,11 @@ GuiManager::GuiManager(gfx::Engine* engine) {
 void GuiManager::render() {
   engine->getDevice()->setBlendState(BaseDevice::SrcAlpha,
                                      BaseDevice::OneMinusSrcAlpha);
+  BaseFrameBuffer::AttachmentPoint attachments[] = {
+      BaseFrameBuffer::Color0,
+      BaseFrameBuffer::Color1,
+  };
+  engine->getDevice()->targetAttachments(attachments, 1);
 
   BaseProgram* _panel = panel->prepareDevice(engine->getDevice(), 0);
   BaseProgram* _image = image->prepareDevice(engine->getDevice(), 0);
@@ -152,7 +158,7 @@ void GuiManager::render() {
                                             DtUnsignedByte, BaseTexture::RGBA,
                                             texSurfConv->pixels);
             if (element.override) {
-	      element.maxScale = glm::vec2(texSurfConv->w, texSurfConv->h);
+              element.maxScale = glm::vec2(texSurfConv->w, texSurfConv->h);
               layout.second.update(
                   layout.second.size);  // requires layout update to take max
                                         // scale into account
@@ -166,7 +172,7 @@ void GuiManager::render() {
 
           bp = _text;
           bp->setParameter(
-	      "texture0", DtSampler,
+              "texture0", DtSampler,
               BaseProgram::Parameter{.texture.slot = 0,
                                      .texture.texture = element.uniqueTexture});
           bp->setParameter("scale", DtVec2,
@@ -180,5 +186,7 @@ void GuiManager::render() {
                                 BaseDevice::Triangles, 6);
     }
   }
+
+  engine->getDevice()->targetAttachments(attachments, 2);
 }
 }  // namespace rdm::gfx::gui

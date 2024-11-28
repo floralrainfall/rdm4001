@@ -33,8 +33,8 @@
 #include "gfx/imgui/imgui.h"
 
 namespace rdm {
-static CVar cl_copyright("cl_copyright", "1", CVARF_SAVE);
-static CVar cl_loglevel("cl_loglevel", "2", CVARF_SAVE);
+static CVar cl_copyright("cl_copyright", "1", CVARF_SAVE | CVARF_GLOBAL);
+static CVar cl_loglevel("cl_loglevel", "2", CVARF_SAVE | CVARF_GLOBAL);
 
 Game::Game() {
   if (!Fun::preFlightChecks()) abort();  // clearly not safe to run
@@ -147,8 +147,8 @@ void Game::lateInitServer() {
   worldServer->getScheduler()->startAllJobs();
 }
 
-static CVar input_rate("input_rate", "20.0", CVARF_SAVE);
-static CVar sv_ansi("sv_ansi", "1", CVARF_SAVE);
+static CVar input_rate("input_rate", "20.0", CVARF_SAVE | CVARF_GLOBAL);
+static CVar sv_ansi("sv_ansi", "1", CVARF_SAVE | CVARF_GLOBAL);
 
 class GameEventJob : public SchedulerJob {
   Game* game;

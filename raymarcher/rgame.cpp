@@ -7,6 +7,7 @@
 #include "LinearMath/btDefaultMotionState.h"
 #include "LinearMath/btMotionState.h"
 #include "LinearMath/btVector3.h"
+#include "gfx/base_device.hpp"
 #include "gfx/base_types.hpp"
 #include "gfx/gui/gui.hpp"
 #include "input.hpp"
@@ -154,6 +155,11 @@ void RGame::initialize() {
   game->createPlane(world->getPhysicsWorld());
 
   gfxEngine->renderStepped.listen([this] {
+    gfxEngine->getDevice()->setDepthState(rdm::gfx::BaseDevice::Disabled);
+    gfxEngine->getDevice()->setStencilState(rdm::gfx::BaseDevice::Disabled);
+    gfxEngine->getDevice()->setCullState(rdm::gfx::BaseDevice::FrontCCW);
+    gfxEngine->getDevice()->setBlendState(rdm::gfx::BaseDevice::DDisabled,
+                                          rdm::gfx::BaseDevice::DDisabled);
     gfxEngine->renderFullscreenQuad(
         NULL, game->rayMarchMaterial.get(), [this](gfx::BaseProgram* program) {
           std::scoped_lock lock(game->entitiesMutex);

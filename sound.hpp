@@ -4,7 +4,6 @@
 
 #include <optional>
 
-#include "filesystem.hpp"
 #include "world.hpp"
 
 namespace rdm {
@@ -13,6 +12,7 @@ struct Sound {
   enum LoadType {
     Buffer,
     Stream,
+    Dynamic,
   };
 
   // loopingEnabled only useful on SoundStream

@@ -34,6 +34,7 @@ class FpsController {
   glm::vec2 accel;
   glm::vec3 networkPosition;
   bool grounded;
+  bool jumping;
 
   void physicsStep();
 
@@ -41,6 +42,8 @@ class FpsController {
   void moveAir(btVector3& vel, glm::vec2 wishdir);
 
  public:
+  enum Animation { Idle, Walk, Run, Jump, Fall };
+
   FpsController(PhysicsWorld* world,
                 FpsControllerSettings settings = FpsControllerSettings());
   ~FpsController();
@@ -66,5 +69,10 @@ class FpsController {
   btRigidBody* getRigidBody() { return rigidBody.get(); };
   btMotionState* getMotionState() { return motionState; };
   FpsControllerSettings& getSettings() { return settings; }
+
+  Animation getAnimation() { return anim; }
+
+ private:
+  Animation anim;
 };
 };  // namespace rdm::putil

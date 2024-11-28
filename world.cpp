@@ -31,7 +31,7 @@ class WorldJob : public SchedulerJob {
   virtual void error(std::exception& e) { world->running = false; }
 };
 
-static CVar cl_showstats("cl_showstats", "0", CVARF_SAVE);
+static CVar cl_showstats("cl_showstats", "0", CVARF_SAVE | CVARF_GLOBAL);
 
 class WorldTitleJob : public SchedulerJob {
   World* world;

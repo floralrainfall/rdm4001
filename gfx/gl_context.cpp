@@ -25,8 +25,8 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id,
 
 namespace rdm::gfx::gl {
 // we expect SDL's gl context
-static CVar r_gldebug("r_gldebug", "0", CVARF_SAVE);
-static CVar r_glvsync("r_glvsync", "0", CVARF_SAVE);
+static CVar r_gldebug("r_gldebug", "0", CVARF_SAVE | CVARF_GLOBAL);
+static CVar r_glvsync("r_glvsync", "0", CVARF_SAVE | CVARF_GLOBAL);
 
 GLContext::GLContext(void* hwnd) : BaseContext(hwnd) {
   context = SDL_GL_CreateContext((SDL_Window*)hwnd);
