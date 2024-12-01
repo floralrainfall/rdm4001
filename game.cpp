@@ -14,6 +14,7 @@
 #include "logging.hpp"
 #include "network/network.hpp"
 #include "scheduler.hpp"
+#include "script/script.hpp"
 #ifndef DISABLE_OBZ
 #include "obz.hpp"
 #else
@@ -41,6 +42,7 @@ Game::Game() {
 
   ignoreNextMouseMoveEvent = false;
 
+  script::Script::initialize();
   network::NetworkManager::initialize();
 
   Log::singleton()->setLevel((LogType)cl_loglevel.getInt());
@@ -50,7 +52,10 @@ Game::Game() {
   if (cl_copyright.getBool()) Log::printf(LOG_INFO, "%s", copyright());
 }
 
-Game::~Game() { network::NetworkManager::deinitialize(); }
+Game::~Game() {
+  network::NetworkManager::deinitialize();
+  script::Script::deinitialize();
+}
 
 size_t Game::getVersion() { return ENGINE_VERSION; }
 

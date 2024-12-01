@@ -261,6 +261,14 @@ class RenderJob : public SchedulerJob {
     }
 
 #ifndef DISABLE_EASY_PROFILER
+    EASY_BLOCK("Gui");
+#endif
+    engine->gui->render();
+#ifndef DISABLE_EASY_PROFILER
+    EASY_END_BLOCK;
+#endif
+
+#ifndef DISABLE_EASY_PROFILER
     EASY_BLOCK("ImGui");
 #endif
     engine->device->stopImGui();

@@ -84,17 +84,6 @@ void WGame::initializeClient() {
       game->worldspawn =
           (Worldspawn*)world->getNetworkManager()->findEntityByType(
               "Worldspawn");
-
-    if (gfxEngine->getGuiManager()) {
-      auto& layout = gfxEngine->getGuiManager()->getLayout("Debug");
-      char buf[100];
-      SchedulerJob* worldJob = world->getScheduler()->getJob("World");
-      SchedulerJob* renderJob = world->getScheduler()->getJob("Render");
-      snprintf(buf, 100, "World FPS: %0.2f, Render FPS: %0.2f",
-               1.0 / worldJob->getStats().totalDeltaTime,
-               1.0 / renderJob->getStats().totalDeltaTime);
-      layout.getElements()[0].setText(buf);
-    }
   });
 
   Input::singleton()->keyDownSignals[SDLK_TAB].listen([] {

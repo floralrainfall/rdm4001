@@ -2,6 +2,9 @@
 
 #include <stdio.h>
 
+#include "json.hpp"
+using json = nlohmann::json;
+
 #include <boost/program_options.hpp>
 #include <format>
 #include <iostream>
@@ -12,7 +15,15 @@
 #include "logging.hpp"
 
 namespace rdm {
-Settings::Settings() { settingsPath = "settings.json"; }
+struct SettingsPrivate {
+ public:
+  json oldSettings;
+};
+
+Settings::Settings() {
+  settingsPath = "settings.json";
+  p = new SettingsPrivate;
+}
 
 CVar::CVar(const char* name, const char* defaultVar, unsigned long flags) {
   this->name = name;
@@ -164,7 +175,7 @@ void Settings::load() {
 
     try {
       json j = json::parse(sjc);
-      oldSettings = j;
+      p->oldSettings = j;
       json global = j["Global"];
       for (auto& cvar : global["CVars"].items()) {
         auto it = cvars.find(cvar.key());
@@ -202,7 +213,7 @@ void Settings::load() {
 void Settings::save() {
   FILE* sj = fopen("settings.json", "w");
   if (sj) {
-    json j = oldSettings;
+    json j = p->oldSettings;
     json _cvars = {};
     json _cvars2 = {};
     for (auto cvar : cvars) {

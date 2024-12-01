@@ -4,9 +4,7 @@
 #include <string>
 #include <variant>
 
-#include "json.hpp"
 #include "signal.hpp"
-using json = nlohmann::json;
 
 namespace rdm {
 typedef std::variant<std::string, int, float> Setting;
@@ -57,6 +55,8 @@ class CVar {
   void setBool(bool b);
 };
 
+struct SettingsPrivate;
+
 class Settings {
   friend class CVar;
 
@@ -64,9 +64,8 @@ class Settings {
 
   bool hintDs;
 
+  SettingsPrivate* p;
   std::map<std::string, CVar*> cvars;
-  std::map<std::string, json> settings;
-  json oldSettings;
   std::string settingsPath;
   std::string gamePath;
   std::string hintConnect;

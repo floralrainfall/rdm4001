@@ -1,4 +1,4 @@
-project('rdm4001', 'cpp', default_options: ['cpp_std=c++20'])
+project('rdm4001', 'c', 'cpp', default_options: ['cpp_std=c++20'])
 
 if get_option('vcpkg').enabled()
   vcpkg = find_program('vcpkg', required : true)
@@ -7,7 +7,6 @@ if get_option('vcpkg').enabled()
 endif
 
 sdl2 = dependency('sdl2')
-sdl_ttf = dependency('SDL2_ttf')
 glm = dependency('glm')
 openal = dependency('openal')
 assimp = dependency('assimp')
@@ -34,8 +33,6 @@ options = ['-DDISABLE_EASY_PROFILER']
 glad_proj = subproject('glad')
 glad_dep = glad_proj.get_variable('libglad_dep')
 
-assembly_proj = subproject('assembly')
-
 inc = include_directories(['.', 'gfx/imgui', '/usr/include/bullet', 'subprojects/common'])
 
 gamelib = static_library('game', [
@@ -59,6 +56,11 @@ gamelib = static_library('game', [
   'physics.hpp',
   'fun.cpp',
   'fun.hpp',
+
+  'script/my_basic.h',
+  'script/my_basic.c',
+  'script/script.hpp',
+  'script/script.cpp',
 
   'putil/fpscontroller.cpp',
   'putil/fpscontroller.hpp',
@@ -119,7 +121,7 @@ gamelib = static_library('game', [
   'gfx/gl_device.hpp',
   'gfx/gl_types.cpp',
   'gfx/gl_types.hpp',
-], cpp_args: options + obz_options, include_directories: [inc], dependencies: [libsndfile, sdl_ttf, boost_dep, enet, common_dep, glad_dep, obz_dep, sdl2, glm, openal, assimp, bullet, easy_profiler])
+], cpp_args: options + obz_options, include_directories: [inc], dependencies: [libsndfile, boost_dep, enet, common_dep, glad_dep, obz_dep, sdl2, glm, openal, assimp, bullet, easy_profiler])
 
 rdm4001_dep = declare_dependency(include_directories: inc,
 				 link_with: gamelib)
