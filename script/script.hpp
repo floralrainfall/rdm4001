@@ -14,6 +14,8 @@ class Script {
 
   void load(std::string s);
 
+  struct mb_interpreter_t* getInterpreter() { return bas; }
+
   static void initialize();
   static void deinitialize();
 };

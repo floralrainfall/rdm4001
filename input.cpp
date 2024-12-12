@@ -1,6 +1,9 @@
 #include "input.hpp"
 
+#include "SDL.h"
+#include "SDL_keyboard.h"
 #include "logging.hpp"
+#include "settings.hpp"
 
 #ifdef __linux
 #include <signal.h>
@@ -21,6 +24,7 @@ Input::Input() {
   mouseLocked = false;
   mouseSensitivity = 2.0;
   mouseDelta = glm::vec3(0);
+  mousePosition = glm::vec3(0);
 
   memset(keysDown, 0, sizeof(keysDown));
 
@@ -36,6 +40,15 @@ rdm::Input* Input::singleton() {
   }
   return _singleton;
 }
+
+void Input::startEditingText(bool clear) {
+  if (clear) text.clear();
+  SDL_StartTextInput();
+}
+
+void Input::stopEditingText() { SDL_StopTextInput(); }
+
+std::string& Input::getEditedText() { return text; }
 
 void Input::beginFrame() {
   std::scoped_lock lock(flushing);
@@ -84,7 +97,15 @@ void Input::flushEvents() {
           keysDown[event.data.key.key] = keyPressed;
         }
         break;
+      case InputObject::MousePress:
+        mousePressed.fire();
+      case InputObject::MouseUp:
+        keyPressed = event.type == InputObject::MousePress;
+        mouseButtonsDown[event.data.mouse.button] = keyPressed;
+        break;
       case InputObject::MouseMove:
+        mousePosition.x = event.data.mouse.position[0];
+        mousePosition.y = event.data.mouse.position[1];
         mouseDelta.x = ((float)event.data.mouse.delta[0]) / mouseSensitivity;
         mouseDelta.y = ((float)event.data.mouse.delta[1]) / mouseSensitivity;
         break;

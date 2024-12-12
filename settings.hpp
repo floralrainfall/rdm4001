@@ -48,7 +48,7 @@ class CVar {
   glm::vec3 getVec3();
   void setVec3(glm::vec3 v);
 
-  glm::vec4 getVec4();
+  glm::vec4 getVec4(int ms = 4);
   void setVec4(glm::vec4 v);
 
   bool getBool();

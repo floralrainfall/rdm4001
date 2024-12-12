@@ -54,14 +54,14 @@ bool CVar::getBool() { return value[0] != '0'; }
 void CVar::setBool(bool b) { setValue(b ? "1" : "0"); }
 
 glm::vec2 CVar::getVec2() {
-  glm::vec4 v = getVec4();
+  glm::vec4 v = getVec4(2);
   return glm::vec2(v.x, v.y);
 }
 
 void CVar::setVec2(glm::vec2 v) { setValue(std::format("{} {}", v.x, v.y)); }
 
 glm::vec3 CVar::getVec3() {
-  glm::vec4 v = getVec4();
+  glm::vec4 v = getVec4(3);
   return glm::vec3(v.x, v.y, v.z);
 }
 
@@ -69,7 +69,7 @@ void CVar::setVec3(glm::vec3 v) {
   setValue(std::format("{} {} {}", v.x, v.y, v.z));
 }
 
-glm::vec4 CVar::getVec4() {
+glm::vec4 CVar::getVec4(int ms) {
   glm::vec4 v(0);
   size_t pos = 0;
   std::string s = value;
@@ -80,9 +80,10 @@ glm::vec4 CVar::getVec4() {
     POSITION_Z,
     POSITION_W
   }* pos_e = (pos_t*)&pos;
-  while ((pos = s.find(" ")) != std::min(std::string::npos, (size_t)3)) {
+  int c = 0;
+  while ((pos = s.find(" ")) != std::min(std::string::npos, (size_t)4)) {
     std::string token = s.substr(0, pos);
-    switch (*pos_e) {
+    switch ((pos_t)c) {
       case POSITION_X:
         v.x = std::stof(token);
         break;
@@ -97,6 +98,8 @@ glm::vec4 CVar::getVec4() {
         break;
     }
     s.erase(0, pos + 1);
+    c++;
+    if (c == 4) break;
   }
   return v;
 }
@@ -205,6 +208,8 @@ void Settings::load() {
     } catch (std::exception& e) {
       Log::printf(LOG_ERROR, "Error parsing settings: %s", e.what());
     }
+
+    free(sjc);
   } else {
     Log::printf(LOG_ERROR, "Couldn't open %s", settingsPath.c_str());
   }

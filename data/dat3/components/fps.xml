@@ -5,8 +5,6 @@
     <v name="physicsFps" type="float">0.0</v>
     <v name="networkFps" type="float">0.0</v>
   </in_vars>
-  <script>
-    print("hello world")
-  </script>
+  <script src="dat3/fps_controller.bas"></script>
   <label id="fpsText"></label>
 </gui>

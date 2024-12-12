@@ -5,6 +5,7 @@
 
 #include "gfx/engine.hpp"
 #include "sound.hpp"
+#include "state.hpp"
 #include "world.hpp"
 
 #define ENGINE_VERSION 0x1000
@@ -16,14 +17,23 @@ class Game {
   std::unique_ptr<World> world;
   std::unique_ptr<gfx::Engine> gfxEngine;
   std::unique_ptr<SoundManager> soundManager;
+  std::unique_ptr<GameState> gameState;
 
  private:
   SDL_Window* window;
   bool ignoreNextMouseMoveEvent;
+  WorldConstructorSettings worldSettings;
 
  public:
   Game();
   virtual ~Game();
+
+  // start the game state mode
+  void startGameState(GameStateConstructorFunction f);
+
+  WorldConstructorSettings& getWorldConstructorSettings() {
+    return worldSettings;
+  }
 
   // call before accessing world
   void startClient();
@@ -51,5 +61,6 @@ class Game {
   World* getServerWorld() { return worldServer.get(); }
 
   SoundManager* getSoundManager() { return soundManager.get(); }
+  gfx::Engine* getGfxEngine() { return gfxEngine.get(); }
 };
 }  // namespace rdm

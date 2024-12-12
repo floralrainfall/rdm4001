@@ -106,6 +106,7 @@ BaseTexture* TextureCache::createCacheTexture(const char* path, Info info) {
     textures[path] =
         std::pair<TextureCache::Info, std::unique_ptr<BaseTexture>>(
             info, device->createTexture());
+    return textures[path].second.get();
   } else {
     throw std::runtime_error("Texture already exists");
   }
@@ -159,7 +160,8 @@ class RenderJob : public SchedulerJob {
 
         // clear buffers
         device->targetAttachments(&drawBuffers[0], 1);
-        device->clear(0.3, 0.3, 0.3, 0.0);
+        device->clear(engine->clearColor.x, engine->clearColor.y,
+                      engine->clearColor.z, 0.0);
         device->targetAttachments(&drawBuffers[1], 1);
         device->clear(0.0, 0.0, 0.0, 0.0);
 
@@ -299,6 +301,8 @@ Engine::Engine(World* world, void* hwnd) {
   textureCache.reset(new TextureCache(device.get()));
   materialCache.reset(new MaterialCache(device.get()));
   meshCache.reset(new MeshCache(this));
+
+  clearColor = glm::vec3(0.3, 0.3, 0.3);
 
   fullscreenMaterial =
       materialCache->getOrLoad("PostProcess").value_or(nullptr);

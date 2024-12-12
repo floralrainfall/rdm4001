@@ -77,15 +77,15 @@ class WorldTitleJob : public SchedulerJob {
   }
 };
 
-World::World() {
+World::World(WorldConstructorSettings settings) {
   title = "A rdm presentation";
 
   scheduler.reset(new Scheduler());
   scheduler->addJob(new WorldJob(this));
   scheduler->addJob(new WorldTitleJob(this));
 
-  physics.reset(new PhysicsWorld(this));
-  networkManager.reset(new network::NetworkManager(this));
+  if (settings.physics) physics.reset(new PhysicsWorld(this));
+  if (settings.network) networkManager.reset(new network::NetworkManager(this));
 
   running = true;
 

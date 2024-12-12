@@ -36,6 +36,14 @@ class Camera {
     this->leftHanded = b;
     vdirty = true;
   }
+  void setNear(float near) {
+    this->near = near;
+    pdirty = true;
+  }
+  void setFar(float far) {
+    this->far = far;
+    pdirty = true;
+  }
 
   glm::mat4 getProjectionMatrix() { return pmatrix; }
   glm::mat4 getUiProjectionMatrix() { return uipmatrix; }
@@ -46,6 +54,8 @@ class Camera {
   glm::vec2 fbSize;
   Projection p;
   float fov;
+  float near;
+  float far;
   glm::vec3 eye;
   glm::vec3 up;
   glm::vec3 target;

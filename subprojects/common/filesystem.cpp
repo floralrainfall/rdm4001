@@ -61,7 +61,7 @@ bool DataFolderAPI::getFileExists(const char* path) {
 }
 
 OptionalData DataFolderAPI::getFileData(const char* path) {
-  FILE* fp = fopen((basedir + path).c_str(), "r");
+  FILE* fp = fopen((basedir + path).c_str(), "rb");
   if (fp) {
     fseek(fp, 0, SEEK_END);
     size_t sz = ftell(fp);

@@ -36,7 +36,8 @@ struct InputObject {
       int delta[2];
       int position[2];
       int global_position[2];
-      bool pressed[3];  // mb 1 = 0
+      int button;
+      bool mouse_down;
       int wheel;
     } mouse;
   } data;
@@ -47,14 +48,23 @@ class Input {
 
   std::mutex flushing;
   glm::vec2 mouseDelta;
+  glm::vec2 mousePosition;
+  bool mouseButtonsDown[10];
   std::deque<InputObject> events;
   bool mouseLocked;
+  bool editingText;
+  std::string text;
   float mouseSensitivity;
 
   bool keysDown[255];
 
  public:
   static Input* singleton();
+
+  bool isEditingText() { return editingText; }
+  void startEditingText(bool clear = true);
+  void stopEditingText();
+  std::string& getEditedText();
 
   void beginFrame();
   void postEvent(InputObject object);
@@ -71,6 +81,7 @@ class Input {
   };
 
   glm::vec2 getMouseDelta() { return mouseDelta; };
+  glm::vec2 getMousePosition() { return mousePosition; };
 
   Axis* newAxis(std::string axis, SDL_Keycode positive, SDL_Keycode negative);
   Axis* getAxis(std::string axis);
@@ -85,6 +96,7 @@ class Input {
   Signal<InputObject> onEvent;
 
   bool isKeyDown(int c) { return keysDown[c]; };
+  bool isMouseButtonDown(int i) { return mouseButtonsDown[i]; }
 
   std::map<int, Signal<>> keyDownSignals;
 

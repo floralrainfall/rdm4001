@@ -7,6 +7,7 @@
 #include "gfx/gui/gui.hpp"
 #include "gfx/heightmap.hpp"
 #include "gfx/imgui/imgui.h"
+#include "gstate.hpp"
 #include "input.hpp"
 #include "logging.hpp"
 #include "map.hpp"
@@ -15,6 +16,8 @@
 #include "putil/fpscontroller.hpp"
 #include "settings.hpp"
 #include "sound.hpp"
+#include "state.hpp"
+#include "world.hpp"
 #include "worldspawn.hpp"
 #include "wplayer.hpp"
 
@@ -72,10 +75,12 @@ void WGame::addEntityConstructors(network::NetworkManager* manager) {
 
 void WGame::initializeClient() {
   addEntityConstructors(getWorld()->getNetworkManager());
-  game->worldspawn = 0;
+
+  startGameState(GameStateConstructor<WWGameState>);
 
   // gfxEngine->setForcedAspect(4.0 / 3.0);
 
+  world->setTitle("RDM");
   world->getPhysicsWorld()->getWorld()->setGravity(btVector3(0, 0, -206.67));
 
   std::scoped_lock lock(world->worldLock);
@@ -130,6 +135,7 @@ void WGame::initializeClient() {
           game->worldspawn->getFile()->updatePosition(
               gfxEngine->getCamera().getPosition());
 
+        /*
         glm::ivec2 size = gfxEngine->getContext()->getBufferSize();
         ImGui::SetNextWindowSize(ImVec2(size.x, size.y));
         ImGui::SetNextWindowPos(ImVec2(0, 0));
@@ -138,7 +144,7 @@ void WGame::initializeClient() {
                          ImGuiWindowFlags_NoDecoration |
                          ImGuiWindowFlags_NoBringToFrontOnFocus);
 
-        ImGui::End();
+                         ImGui::End();*/
       } else {
         ImGui::Begin("Connecting to server...");
         ImGui::Text("Waiting for worldspawn");
@@ -151,6 +157,7 @@ void WGame::initializeClient() {
         ImGui::Text("Establishing connection...");
         ImGui::End();
       } else {
+        /*
         ImGui::Begin("RDM4001 License");
         ImGui::Text("%s", copyright());
         ImGui::End();
@@ -229,6 +236,7 @@ void WGame::initializeClient() {
           default:
             break;
         }
+        */
       }
     }
   });
@@ -253,6 +261,10 @@ void WGame::initializeServer() {
 
 void WGame::initialize() {
   hostParams = new HostParameters;
+
+  WorldConstructorSettings& settings = getWorldConstructorSettings();
+  settings.network = true;
+  settings.physics = true;
 
   if (rdm::Settings::singleton()->getHintDs()) {
     startServer();

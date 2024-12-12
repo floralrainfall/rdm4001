@@ -27,8 +27,5 @@ void main() {
   vec3 result = vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5) * intensity;
   float brightness = dot(result, vec3(0.2126, 0.7152, 0.0722));
   f_color = vec4(result, 1.0);
-  if (brightness > 1.0)
-    f_bloom = vec4(f_color);
-  else
-    f_bloom = vec4(0.0, 0.0, 0.0, 1.0);
+  f_bloom = vec4(f_color.rgb * brightness, 1.0);
 }

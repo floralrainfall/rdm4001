@@ -12,6 +12,7 @@
 #include "gfx/gui/gui.hpp"
 #include "input.hpp"
 #include "physics.hpp"
+#include "world.hpp"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/quaternion.hpp>
@@ -90,6 +91,9 @@ RGame::RGame() {
 RGame::~RGame() { delete game; }
 
 void RGame::initialize() {
+  WorldConstructorSettings& settings = getWorldConstructorSettings();
+  settings.physics = true;
+
   startClient();
 
   std::scoped_lock lock(world->worldLock);
@@ -112,6 +116,9 @@ void RGame::initialize() {
     glm::vec3 forward = glm::vec3(0, 0, 1);
     gfx::Camera& cam = gfxEngine->getCamera();
     float speed = 10.0;
+
+    // FIXME: for some reason i had these flipped but the ray marcher glsl still
+    // interprets the 'eye' as target and the 'target' as eye
     cam.setPosition(
         cam.getPosition() +
         (vm * glm::vec3(lrA->value, 0.0, fbA->value) * speed * (1.f / 60.f)));

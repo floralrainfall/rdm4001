@@ -9,6 +9,8 @@ Camera::Camera() {
   target = glm::vec3(0, 2, 0);
   up = glm::vec3(0, 0, 1);
   fov = 90.f;
+  near = 1.f;
+  far = 65535.f;
   p = Perspective;
   leftHanded = false;
   pdirty = true;
@@ -19,9 +21,9 @@ void Camera::updateCamera(glm::vec2 framebufferSize) {
   if (pdirty || fbSize != framebufferSize) {
     switch (p) {
       case Perspective:
-        pmatrix = glm::perspective(fov * (M_PIf / 180.f),
-                                   framebufferSize.x / framebufferSize.y, 1.0f,
-                                   65535.f);
+        pmatrix =
+            glm::perspective(fov * (M_PIf / 180.f),
+                             framebufferSize.x / framebufferSize.y, near, far);
         break;
       case Orthographic:
         pmatrix = glm::ortho(0.f, 1.f, 0.f, 1.f);
@@ -33,9 +35,9 @@ void Camera::updateCamera(glm::vec2 framebufferSize) {
   }
   if (vdirty) {
     if (leftHanded)
-      vmatrix = glm::lookAtLH(target, eye, up);
+      vmatrix = glm::lookAtLH(eye, target, up);
     else
-      vmatrix = glm::lookAt(target, eye, up);
+      vmatrix = glm::lookAt(eye, target, up);
     vdirty = false;
   }
 }

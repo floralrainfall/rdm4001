@@ -74,6 +74,8 @@ class Engine {
 
   Camera cam;
 
+  glm::vec3 clearColor;
+
   bool isInitialized;
   void initialize();
   void render();
@@ -128,7 +130,10 @@ class Engine {
     return t;
   }
 
+  void setClearColor(glm::vec3 color) { clearColor = color; }
+
   glm::vec2 getTargetResolution() { return targetResolution; }
+  glm::vec2 getWindowResolution() { return windowResolution; }
 
   BaseContext* getContext() { return context.get(); }
   BaseDevice* getDevice() { return device.get(); }

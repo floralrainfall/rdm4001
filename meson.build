@@ -7,6 +7,7 @@ if get_option('vcpkg').enabled()
 endif
 
 sdl2 = dependency('sdl2')
+sdl2_ttf = dependency('sdl2_ttf')
 glm = dependency('glm')
 openal = dependency('openal')
 assimp = dependency('assimp')
@@ -40,6 +41,8 @@ gamelib = static_library('game', [
   'game.hpp',
   'graph.cpp',
   'graph.hpp',
+  'state.cpp',
+  'state.hpp',
   'input.cpp',
   'input.hpp',
   'scheduler.cpp',
@@ -74,12 +77,10 @@ gamelib = static_library('game', [
   'network/player.cpp',
   'network/player.hpp',
 
-  'gfx/gui/element.cpp',
-  'gfx/gui/element.hpp',
   'gfx/gui/gui.cpp',
   'gfx/gui/gui.hpp',
-  'gfx/gui/layout.cpp',
-  'gfx/gui/layout.hpp',
+  'gfx/gui/font.cpp',
+  'gfx/gui/font.hpp',
 
   'gfx/imgui/imconfig.h',
   'gfx/imgui/imstb_truetype.h',
@@ -121,7 +122,7 @@ gamelib = static_library('game', [
   'gfx/gl_device.hpp',
   'gfx/gl_types.cpp',
   'gfx/gl_types.hpp',
-], cpp_args: options + obz_options, include_directories: [inc], dependencies: [libsndfile, boost_dep, enet, common_dep, glad_dep, obz_dep, sdl2, glm, openal, assimp, bullet, easy_profiler])
+], cpp_args: options + obz_options, include_directories: [inc], dependencies: [libsndfile, boost_dep, enet, common_dep, glad_dep, obz_dep, sdl2, sdl2_ttf, glm, openal, assimp, bullet, easy_profiler])
 
 rdm4001_dep = declare_dependency(include_directories: inc,
 				 link_with: gamelib)
@@ -143,6 +144,8 @@ executable('wawaworld', [
   'wawaworld/main.cpp',
   'wawaworld/map.cpp',
   'wawaworld/map.hpp',
+  'wawaworld/gstate.cpp',
+  'wawaworld/gstate.hpp',
   'wawaworld/wgame.cpp',
   'wawaworld/wgame.hpp',
   'wawaworld/worldspawn.cpp',

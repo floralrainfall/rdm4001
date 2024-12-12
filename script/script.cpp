@@ -18,7 +18,7 @@ static int _basPrint(struct mb_interpreter_t* s, const char* fmt, ...) {
   va_start(argptr, fmt);
   result = vsnprintf(ptr, len, fmt, argptr);
   if (result < 0) {
-    fprintf(stderr, "Encoding error.\n");
+    Log::printf(LOG_ERROR, "Encoding error.\n");
   } else if (result > (int)len) {
     len = result + 1;
     ptr = (char*)malloc(result + 1);

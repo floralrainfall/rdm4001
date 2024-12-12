@@ -61,8 +61,11 @@ SchedulerJob::SchedulerJob(const char* name, bool stopOnCancel) {
 SchedulerJob::~SchedulerJob() { stopBlocking(); }
 
 void JobStatistics::addDeltaTimeSample(double dt) {
-  memcpy(deltaTimeSamples, &deltaTimeSamples[1],
-         sizeof(double) * (SCHEDULER_TIME_SAMPLES - 1));
+  for (int i = 0; i < SCHEDULER_TIME_SAMPLES - 1; i++) {
+    deltaTimeSamples[i] = deltaTimeSamples[i + 1];
+  }
+  // memcpy(deltaTimeSamples, &deltaTimeSamples[1],
+  //      sizeof(double) * (SCHEDULER_TIME_SAMPLES - 1));
   deltaTimeSamples[SCHEDULER_TIME_SAMPLES - 1] = dt;
 }
 

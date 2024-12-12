@@ -347,6 +347,7 @@ void BSPFile::draw() {
         if (model.m_program) {
           gfx::BaseProgram* program =
               model.m_program->prepareDevice(engine->getDevice(), 0);
+
           renderFaceModel(&model, program);
           m_facesRendered++;
         }

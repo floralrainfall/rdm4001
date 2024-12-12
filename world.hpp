@@ -10,6 +10,16 @@
 #include "scheduler.hpp"
 
 namespace rdm {
+struct WorldConstructorSettings {
+  bool network;
+  bool physics;
+
+  WorldConstructorSettings() {
+    network = false;
+    physics = false;
+  }
+};
+
 class World {
   friend class WorldJob;
   friend class WorldTitleJob;
@@ -25,7 +35,7 @@ class World {
   void tick();
 
  public:
-  World();
+  World(WorldConstructorSettings settings = WorldConstructorSettings());
   ~World();
 
   Signal<> stepping;

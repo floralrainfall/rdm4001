@@ -4,6 +4,7 @@
 
 #include <stdexcept>
 
+#include "fun.hpp"
 #include "logging.hpp"
 #include "network/entity.hpp"
 #include "scheduler.hpp"
@@ -64,11 +65,9 @@ NetworkManager::NetworkManager(World* world) {
   ticks = 0;
   latency = 0.f;
 
-  registerConstructor(EntityConstructor<Player>, "Player");
-  playerType = "Player";
+  playerType = "";
 
-  char* username = getenv("USER");
-  this->username = username;
+  username = Fun::getSystemUsername();
   nextDtPacket = 0.0;
 
   password = "RDMRDMRDM";
@@ -184,6 +183,12 @@ void NetworkManager::service() {
 
                   Log::printf(LOG_INFO, "%s authenticating", username.c_str());
                   remotePeer->type = Peer::ConnectedPlayer;
+                  if (playerType.empty()) {
+                    throw std::runtime_error(
+                        "Please use NetworkManager::setPlayerType to set the "
+                        "player type to class which derives "
+                        "rdm::network::Player");
+                  }
                   remotePeer->playerEntity = (Player*)instantiate(playerType);
                   remotePeer->playerEntity->remotePeerId.set(
                       remotePeer->peerId);

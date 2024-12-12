@@ -1,16 +1,18 @@
-#include "gfx/gui/gui.hpp"
-
-#include <SDL2/SDL_ttf.h>
+#include "gui.hpp"
 
 #include <format>
 #include <numeric>
 
 #include "filesystem.hpp"
+#include "fun.hpp"
 #include "gfx/base_types.hpp"
 #include "gfx/engine.hpp"
+#include "gfx/gui/font.hpp"
+#include "input.hpp"
 #include "logging.hpp"
 #include "rapidxml.hpp"
 #include "rapidxml_utils.hpp"
+#include "script/my_basic.h"
 
 namespace rdm::gfx::gui {
 GuiManager::GuiManager(gfx::Engine* engine) {
@@ -18,6 +20,8 @@ GuiManager::GuiManager(gfx::Engine* engine) {
   panel = cache->getOrLoad("GuiPanel").value();
   text = cache->getOrLoad("GuiText").value();
   image = cache->getOrLoad("GuiImage").value();
+
+  fontCache.reset(new FontCache());
 
   this->engine = engine;
 
@@ -38,27 +42,156 @@ GuiManager::GuiManager(gfx::Engine* engine) {
   squareArrayPointers->upload();
 
   parseXml("dat3/root.xml");
+  parseXml(std::format("dat3/{}.xml", Fun::getModuleName()).c_str());
   for (auto& component : components) {
     component.second.variableChanged.fire();
   }
 }
 
+static int _BasDOM(struct mb_interpreter_t* s, void** l) {
+  int result = MB_FUNC_OK;
+  mb_value_t thisref;
+  mb_get_value_by_name(s, NULL, "__globalDom", &thisref);
+  Log::printf(LOG_DEBUG, "%p", thisref.value.usertype_ref);
+  mb_push_usertype(s, NULL, thisref.value.usertype_ref);
+  return result;
+}
+
+void Component::scriptUpdate(script::Script* script) {
+  struct mb_interpreter_t* bas = script->getInterpreter();
+
+  mb_value_t thisref;
+  thisref.type = MB_DT_USERTYPE_REF;
+  thisref.value.usertype_ref = (void*)this;
+  void* l;
+  mb_add_var(bas, &l, "__globalDom", thisref, true);
+
+  mb_begin_module(bas, "GUI");
+  mb_register_func(bas, "DOM", _BasDOM);
+  mb_end_module(bas);
+
+  for (auto& var : inVars) {
+  }
+}
+
+void Component::layoutUpdate(TreeNode* root) {
+  for (TreeNode& node : root->children) {
+    layoutUpdate(&node);
+  }
+}
+
+static std::map<std::string, glm::vec3> definedColors = {
+    {"white", glm::vec3(1.0)},
+    {"black", glm::vec3(0.0)},
+    {"red", glm::vec3(1.0, 0.0, 0.0)},
+    {"green", glm::vec3(0.0, 1.0, 0.0)},
+    {"blue", glm::vec3(0.0, 0.0, 1.0)},
+    {"link", glm::vec3(0.2, 0.2, 0.6)},
+    {"link_hover", glm::vec3(0.2, 0.2, 1.0)},
+    {"link_press", glm::vec3(0.5, 0.2, 1.0)}};
+
 void Component::render(GuiManager* manager, gfx::Engine* engine) {
-  for (auto& element : elements) {
+  if (!domRoot.visible) return;
+
+  glm::vec2 offset = glm::vec2(0);
+  glm::ivec2 inc_factor;
+  glm::vec2 fbSize = engine->getWindowResolution();
+  bool alignRight = false;
+  bool alignTop = false;
+
+  switch (grow) {
+    case Horizontal:
+      inc_factor = glm::vec2(1, 0);
+      break;
+    case Vertical:
+      inc_factor = glm::vec2(0, 1);
+      break;
+  }
+
+  switch (anchor) {
+    case TopRight:
+      inc_factor = -inc_factor;
+      alignRight = true;
+      alignTop = true;
+      offset.y = fbSize.y;
+      break;
+    case TopLeft:
+      inc_factor = -inc_factor;
+      alignTop = true;
+      offset.y = fbSize.y;
+      break;
+    case BottomRight:
+      alignRight = true;
+      break;
+    case BottomLeft:
+      break;
+  }
+
+  int padding = 2;
+  for (auto& index : elementIndex) {
+    std::pair<std::string, Element> element =
+        std::make_pair(index, elements[index]);
     switch (element.second.type) {
+      case Element::Label: {
+        if (element.second.dirty) {
+          OutFontTexture t = FontRender::render(element.second.font,
+                                                element.second.value.c_str());
+          element.second.texture->upload2d(t.w, t.h, DtUnsignedByte,
+                                           BaseTexture::RGBA, t.data);
+          element.second.dirty = false;
+          element.second.textureSize = glm::ivec2(t.w, t.h);
+        }
+      }
       case Element::Image: {
         gfx::BaseProgram* bp =
             manager->image->prepareDevice(engine->getDevice(), 0);
+        if (alignTop)
+          offset +=
+              inc_factor * (element.second.textureSize + glm::ivec2(padding));
+        BaseTexture* displayTexture = element.second.texture;
+        glm::vec3 displayColor = element.second.color;
+        glm::vec2 pos = Input::singleton()->getMousePosition();
+        if (Math::pointInRect2d(
+                glm::vec4(offset.x,
+                          fbSize.y - offset.y - element.second.textureSize.y,
+                          element.second.textureSize.x,
+                          element.second.textureSize.y),
+                pos)) {
+          if (element.second.link) displayColor = definedColors["link_hover"];
+          if (element.second.textureHover)
+            displayTexture = element.second.textureHover;
+          if (Input::singleton()->isMouseButtonDown(1)) {
+            if (element.second.link) displayColor = definedColors["link_press"];
+            if (element.second.texturePressed)
+              displayTexture = element.second.texturePressed;
+            element.second.mouseDown.fire();
+          }
+        }
         bp->setParameter(
             "texture0", DtSampler,
             BaseProgram::Parameter{.texture.slot = 0,
-                                   .texture.texture = element.second.texture});
+                                   .texture.texture = displayTexture});
         bp->setParameter(
             "scale", DtVec2,
             BaseProgram::Parameter{.vec2 = element.second.textureSize});
-        bp->setParameter("offset", DtVec2,
-                         BaseProgram::Parameter{.vec2 = glm::ivec2(0, 0)});
+        bp->setParameter("color", DtVec3,
+                         BaseProgram::Parameter{.vec3 = displayColor});
+        if (alignRight) {
+          bp->setParameter(
+              "offset", DtVec2,
+              BaseProgram::Parameter{
+                  .vec2 =
+                      offset +
+                      glm::vec2(-element.second.textureSize.x + fbSize.x, 0)});
+
+        } else {
+          bp->setParameter("offset", DtVec2,
+                           BaseProgram::Parameter{.vec2 = offset});
+        }
         bp->bind();
+        if (!alignTop)
+          offset +=
+              inc_factor * (element.second.textureSize + glm::ivec2(padding));
         manager->squareArrayPointers->bind();
         engine->getDevice()->draw(manager->squareElementBuffer.get(),
                                   DtUnsignedByte, BaseDevice::Triangles, 6);
@@ -66,24 +199,152 @@ void Component::render(GuiManager* manager, gfx::Engine* engine) {
       default:
         break;
     }
+    elements[element.first] = element.second;
+  }
+}
+
+static void parseXmlNode(GuiManager* manager, Component* component,
+                         TreeNode* parentNode,
+                         rapidxml::xml_node<>* parentXmlNode) {
+  for (rapidxml::xml_node<>* child = parentXmlNode->first_node(); child;
+       child = child->next_sibling()) {
+    try {
+      TreeNode node;
+      node.div = false;
+      std::string name = child->name();
+      std::string elid;
+      if (name == "label") {
+        Component::Element em;
+        em.type = Component::Element::Label;
+        em.value = child->value();
+
+        rapidxml::xml_attribute<>* id = child->first_attribute("id");
+        elid = id ? id->value()
+                  : std::format("label-{}", component->elements.size());
+
+        rapidxml::xml_attribute<>* fontname = child->first_attribute("font");
+        std::string _fontname =
+            fontname ? fontname->value() : "dat3/default.ttf";
+
+        rapidxml::xml_attribute<>* ptsize = child->first_attribute("ptsize");
+        int _ptsize = ptsize ? std::atoi(ptsize->value()) : 12;
+
+        rapidxml::xml_attribute<>* link = child->first_attribute("link");
+        bool _link =
+            link ? link->value() != std::string("false") ? true : false : false;
+
+        em.link = _link;
+
+        rapidxml::xml_attribute<>* color = child->first_attribute("color");
+        em.color = color   ? definedColors[color->value()]
+                   : _link ? definedColors["link"]
+                           : glm::vec3(1.f);
+
+        em.font = manager->getFontCache()->get(_fontname.c_str(), _ptsize);
+        if (!em.font)
+          em.font = manager->getFontCache()->get("dat3/default.ttf", _ptsize);
+
+        std::string name = std::format("{}{}", rand() % 1000, elid);
+        manager->namedTextures[name].reset(
+            manager->getEngine()->getDevice()->createTexture().release());
+        em.texture = manager->namedTextures[name].get();
+        em.dirty = true;
+        em.textureHover = 0;
+        em.texturePressed = 0;
+        component->elementIndex.push_back(elid);
+        component->elements[elid] = em;
+      } else if (name == "div") {
+        TreeNode newNode;
+        rapidxml::xml_attribute<>* id = child->first_attribute("id");
+        if (id) {
+          elid = id->value();
+        } else {
+          elid = std::format("div-{}", component->elements.size());
+        }
+        parseXmlNode(manager, component, &newNode, child);
+        node.div = true;
+        node.visible = true;
+        node.children.push_back(newNode);
+      } else if (name == "image") {
+        Component::Element em;
+        em.type = Component::Element::Image;
+        em.color = glm::vec3(1);
+
+        rapidxml::xml_attribute<>* hover = child->first_attribute("hover");
+        em.textureHover = hover ? manager->getEngine()
+                                      ->getTextureCache()
+                                      ->getOrLoad2d(hover->value())
+                                      .value()
+                                      .second
+                                : NULL;
+        rapidxml::xml_attribute<>* down = child->first_attribute("down");
+        em.texturePressed = down ? manager->getEngine()
+                                       ->getTextureCache()
+                                       ->getOrLoad2d(down->value())
+                                       .value()
+                                       .second
+                                 : NULL;
+
+        auto t = manager->getEngine()
+                     ->getTextureCache()
+                     ->getOrLoad2d(child->first_attribute("src")->value())
+                     .value();
+        em.textureSize = glm::ivec2(t.first.width, t.first.height);
+        em.texture = t.second;
+        rapidxml::xml_attribute<>* id = child->first_attribute("id");
+        elid = id ? id->value()
+                  : std::format("image-{}", component->elements.size());
+        component->elementIndex.push_back(elid);
+        component->elements[elid] = em;
+      } else {
+        throw std::runtime_error("Unknown element");
+      }
+      node.elem = elid;
+      Log::printf(LOG_DEBUG, "Created %s", elid.c_str());
+      parentNode->children.push_back(node);
+    } catch (std::exception& e) {
+      Log::printf(LOG_WARN, "Error in element %s: %s", parentXmlNode->name(),
+                  e.what());
+    }
   }
 }
 
 void GuiManager::parseXml(const char* file) {
-  common::OptionalData d = common::FileSystem::singleton()->readFile(file);
+  auto d = common::FileSystem::singleton()->getFileIO(file, "r");
   if (d) {
+    size_t fileSize = d.value()->fileSize();
+    char* xmld = (char*)malloc(fileSize + 4);
+    memset(xmld, 0, fileSize + 4);
+    size_t rd = d.value()->read(xmld, fileSize);
     try {
       Component component;
 
       rapidxml::xml_document<> doc;
-      doc.parse<0>((char*)d->data());
+      doc.parse<rapidxml::parse_full>(xmld);
+
       rapidxml::xml_node<>* node = doc.first_node();
+      if (!node) throw std::runtime_error("Missing root node");
+
+      rapidxml::xml_attribute<>* rootName = node->first_attribute("name");
+      if (rootName) {
+        auto it = components.find(rootName->value());
+        if (it != components.end()) {
+          return;  // already exists
+        }
+      } else {
+        throw std::runtime_error("XML root entry has no name attribute");
+      }
 
       std::map<std::string, Component::Anchor> anchors;
       anchors["BottomLeft"] = Component::BottomLeft;
       anchors["BottomRight"] = Component::BottomRight;
       anchors["TopLeft"] = Component::TopLeft;
       anchors["TopRight"] = Component::TopRight;
+
+      std::map<std::string, Component::GrowMode> growModes;
+      growModes["Horizontal"] = Component::Horizontal;
+      growModes["Vertical"] = Component::Horizontal;
+
       rapidxml::xml_attribute<>* anchor = node->first_attribute("anchor");
       if (anchor) {
         component.anchor = anchors[anchor->value()];
@@ -91,10 +352,13 @@ void GuiManager::parseXml(const char* file) {
         component.anchor = Component::TopLeft;
       }
 
-      auto it = components.find(node->first_attribute("name")->value());
-      if (it != components.end()) {
-        return;  // already exists
+      rapidxml::xml_attribute<>* growMode = node->first_attribute("grow");
+      if (growMode) {
+        component.grow = growModes[growMode->value()];
+      } else {
+        component.grow = Component::Vertical;
       }
+
       for (rapidxml::xml_node<>* child = node->first_node(); child;
            child = child->next_sibling()) {
         std::string name = child->name();
@@ -103,11 +367,23 @@ void GuiManager::parseXml(const char* file) {
           parseXml(src.c_str());
         } else if (name == "script") {
           script::Script s;
-#ifndef NDEBUG
-          Log::printf(LOG_DEBUG, "Loaded script\n%s", child->value());
-#endif
+          std::string contents;
 
-          s.load(child->value());
+          if (rapidxml::xml_attribute<>* src = child->first_attribute("src")) {
+            common::OptionalData d =
+                common::FileSystem::singleton()->readFile(src->value());
+            if (d) {
+              contents = std::string(d->begin(), d->end());
+            } else {
+              throw std::runtime_error("Couldn't find script src");
+            }
+          } else {
+            contents = child->value();
+          }
+#ifndef NDEBUG
+          Log::printf(LOG_DEBUG, "Loaded script\n%s", contents.c_str());
+#endif
+          s.load(contents);
           component.scripts.push_back(s);
         } else if (name == "in_vars") {
           for (rapidxml::xml_node<>* _child = child->first_node(); _child;
@@ -125,6 +401,7 @@ void GuiManager::parseXml(const char* file) {
 
             v.type = types[type];
             v.defaultValue = defaultVar;
+            v.value = 0;
             switch (v.type) {
               case Component::Var::Float:
                 v.value = new float;
@@ -141,45 +418,21 @@ void GuiManager::parseXml(const char* file) {
             }
             component.inVars[name] = v;
           }
-        } else if (name == "label") {
-          Component::Element em;
-          em.type = Component::Element::Label;
-          em.value = child->value();
-
-          rapidxml::xml_attribute<>* id = child->first_attribute("id");
-          if (id) {
-            component.elements[id->value()] = em;
-          } else {
-            std::string newid =
-                std::format("label-{}", component.elements.size());
-            component.elements[newid] = em;
-          }
-        } else if (name == "image") {
-          Component::Element em;
-          em.type = Component::Element::Image;
-          auto t = engine->getTextureCache()
-                       ->getOrLoad2d(child->first_attribute("src")->value())
-                       .value();
-          em.textureSize = glm::ivec2(t.first.width, t.first.height);
-          em.texture = t.second;
-
-          rapidxml::xml_attribute<>* id = child->first_attribute("id");
-          if (id) {
-            component.elements[id->value()] = em;
-          } else {
-            std::string newid =
-                std::format("image-{}", component.elements.size());
-            component.elements[newid] = em;
-          }
+        } else if (name == "dom") {
+          component.domRoot.div = true;
+          component.domRoot.visible = true;
+          parseXmlNode(this, &component, &component.domRoot, child);
         } else {
           Log::printf(LOG_WARN, "Unknown element %s", name.c_str());
         }
       }
 
       std::string name = node->first_attribute("name")->value();
-      component.variableChanged.listen([component, name] {
+      component.variableChanged.listen([this, name] {
+        Component& component = components[name];
         Log::printf(LOG_DEBUG, "Component %s changed, updating", name.c_str());
         for (auto script : component.scripts) {
+          component.scriptUpdate(&script);
           script.run();
         }
       });
@@ -187,10 +440,17 @@ void GuiManager::parseXml(const char* file) {
       components[name] = component;
       Log::printf(LOG_DEBUG, "Loaded XML %s", file);
     } catch (rapidxml::parse_error& e) {
-      Log::printf(LOG_ERROR, "XML parse error: %s (%s)", file, e.what());
+      Log::printf(LOG_ERROR, "XML parse error: %s (%s, \"%s\")", file, e.what(),
+                  e.where<char>());
+#ifndef NDEBUG
+      Log::printf(LOG_DEBUG, "%s", xmld);
+#endif
     } catch (std::exception& e) {
       Log::printf(LOG_ERROR, "Error loading XML: %s (%s)", file, e.what());
     }
+
+    free(xmld);
+    delete d.value();
   } else {
     Log::printf(LOG_ERROR, "Error loading XML: %s", file);
   }
@@ -279,11 +539,10 @@ void GuiManager::render() {
             SDL_Surface* texSurf = 0;
             if (element.wrapped)
               texSurf = TTF_RenderUTF8_Blended_Wrapped(
-                  font, element.getText().c_str(), white, element.maxScale.x);
-            else
-              texSurf = TTF_RenderUTF8_Blended(font,
-    element.getText().c_str(), white); if (!texSurf) { Log::printf(LOG_DEBUG,
-    "TTF_GetError = %s (Text: %s)", TTF_GetError(),
+                  font, element.getText().c_str(), white,
+    element.maxScale.x); else texSurf = TTF_RenderUTF8_Blended(font,
+    element.getText().c_str(), white); if (!texSurf) {
+    Log::printf(LOG_DEBUG, "TTF_GetError = %s (Text: %s)", TTF_GetError(),
     element.getText().c_str()); throw std::runtime_error("Couldn't render
     TTF");
             }
@@ -291,12 +550,12 @@ void GuiManager::render() {
                 SDL_ConvertSurfaceFormat(texSurf, SDL_PIXELFORMAT_ABGR8888,
     0); SDL_LockSurface(texSurfConv);
             element.uniqueTexture->upload2d(texSurfConv->w, texSurfConv->h,
-                                            DtUnsignedByte, BaseTexture::RGBA,
-                                            texSurfConv->pixels);
-            if (element.override) {
+                                            DtUnsignedByte,
+    BaseTexture::RGBA, texSurfConv->pixels); if (element.override) {
               element.maxScale = glm::vec2(texSurfConv->w, texSurfConv->h);
               layout.second.update(
-                  layout.second.size);  // requires layout update to take max
+                  layout.second.size);  // requires layout update to take
+    max
                                         // scale into account
             }
             SDL_UnlockSurface(texSurfConv);

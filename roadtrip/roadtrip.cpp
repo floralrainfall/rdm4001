@@ -6,6 +6,9 @@
 #include "settings.hpp"
 namespace rt {
 void RoadTrip::initialize() {
+  rdm::WorldConstructorSettings& settings = getWorldConstructorSettings();
+  settings.network = true;
+
   if (rdm::Settings::singleton()->getHintDs()) {
     startServer();
   } else {

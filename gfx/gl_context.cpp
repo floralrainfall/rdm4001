@@ -47,9 +47,14 @@ GLContext::GLContext(void* hwnd) : BaseContext(hwnd) {
     glDebugMessageCallback(MessageCallback, 0);
   }
 
-  Log::printf(LOG_INFO, "Vendor:   %s", glGetString(GL_VENDOR));
-  Log::printf(LOG_INFO, "Renderer: %s", glGetString(GL_RENDERER));
-  Log::printf(LOG_INFO, "Version:  %s", glGetString(GL_VERSION));
+  Log::printf(LOG_EXTERNAL, "Vendor:   %s", glGetString(GL_VENDOR));
+  Log::printf(LOG_EXTERNAL, "Renderer: %s", glGetString(GL_RENDERER));
+  Log::printf(LOG_EXTERNAL, "Version:  %s", glGetString(GL_VERSION));
+
+  glClearColor(0.0, 0.0, 0.0, 0.0);  // clear because the first frame takes so
+                                     // long it renders garbled graphics
+  glClear(GL_COLOR_BUFFER_BIT);
+  swapBuffers();
 }
 
 void GLContext::swapBuffers() {

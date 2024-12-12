@@ -146,6 +146,7 @@ void FpsController::updateCamera(gfx::Camera& camera) {
   glm::vec3 forward = glm::vec3(1, 0, 0);
   camera.setPosition(origin);
   camera.setTarget(origin + (cameraView * forward));
+  camera.setUp(glm::vec3(0, 0, 1));
 }
 
 void FpsController::physicsStep() {
