@@ -1,11 +1,14 @@
 #pragma once
 #include <functional>
+
+#include "sound.hpp"
 namespace rdm {
 class Game;
 
 class GameState {
   Game* game;
   float timer;
+  rdm::SoundEmitter* emitter;
 
  public:
   GameState(Game* game);
@@ -13,7 +16,11 @@ class GameState {
   enum States {
     Intro,
     MainMenu,
+    MenuOnlinePlay,
+    InGame,
   };
+
+  std::map<States, std::string> stateMusic;
 
  private:
   States state;

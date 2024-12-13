@@ -88,7 +88,9 @@ static std::map<std::string, glm::vec3> definedColors = {
     {"blue", glm::vec3(0.0, 0.0, 1.0)},
     {"link", glm::vec3(0.2, 0.2, 0.6)},
     {"link_hover", glm::vec3(0.2, 0.2, 1.0)},
-    {"link_press", glm::vec3(0.5, 0.2, 1.0)}};
+    {"link_press", glm::vec3(0.5, 0.2, 1.0)},
+    {"textarea", glm::vec3(0.3)},
+    {"textarea_edit", glm::vec3(0.1)}};
 
 void Component::render(GuiManager* manager, gfx::Engine* engine) {
   if (!domRoot.visible) return;
@@ -127,19 +129,38 @@ void Component::render(GuiManager* manager, gfx::Engine* engine) {
       break;
   }
 
-  int padding = 2;
+  int padding = 4;
   for (auto& index : elementIndex) {
     std::pair<std::string, Element> element =
         std::make_pair(index, elements[index]);
     switch (element.second.type) {
+      case Element::TextField:
+        if (selectedElement == &elements[index]) {
+          std::string inText = Input::singleton()->getEditedText();
+          if (inText != element.second.value) {
+            element.second.value = inText;
+            element.second.dirty = true;
+          }
+          element.second.color = definedColors["textarea_active"];
+        } else {
+          element.second.color = definedColors["textarea"];
+        }
+        if (element.second.value.empty()) {
+          element.second.value = "...........";
+          element.second.dirty = true;
+        }
       case Element::Label: {
         if (element.second.dirty) {
           OutFontTexture t = FontRender::render(element.second.font,
                                                 element.second.value.c_str());
-          element.second.texture->upload2d(t.w, t.h, DtUnsignedByte,
-                                           BaseTexture::RGBA, t.data);
-          element.second.dirty = false;
-          element.second.textureSize = glm::ivec2(t.w, t.h);
+          if (t.data != NULL) {
+            element.second.texture->upload2d(t.w, t.h, DtUnsignedByte,
+                                             BaseTexture::RGBA, t.data);
+            element.second.dirty = false;
+            element.second.textureSize = glm::ivec2(t.w, t.h);
+          } else {
+            throw std::runtime_error("t.data == NULL");
+          }
         }
       }
       case Element::Image: {
@@ -151,11 +172,18 @@ void Component::render(GuiManager* manager, gfx::Engine* engine) {
         BaseTexture* displayTexture = element.second.texture;
         glm::vec3 displayColor = element.second.color;
         glm::vec2 pos = Input::singleton()->getMousePosition();
+        glm::vec2 displayOffset = offset;
+        if (alignRight)
+          displayOffset.x -= 2;
+        else
+          displayOffset.x += 2;
         if (Math::pointInRect2d(
-                glm::vec4(offset.x,
-                          fbSize.y - offset.y - element.second.textureSize.y,
-                          element.second.textureSize.x,
-                          element.second.textureSize.y),
+                glm::vec4(
+                    displayOffset.x +
+                        (alignRight ? -element.second.textureSize.x + fbSize.x
+                                    : 0),
+                    fbSize.y - displayOffset.y - element.second.textureSize.y,
+                    element.second.textureSize.x, element.second.textureSize.y),
                 pos)) {
           if (element.second.link) displayColor = definedColors["link_hover"];
           if (element.second.textureHover)
@@ -164,8 +192,26 @@ void Component::render(GuiManager* manager, gfx::Engine* engine) {
             if (element.second.link) displayColor = definedColors["link_press"];
             if (element.second.texturePressed)
               displayTexture = element.second.texturePressed;
-            element.second.mouseDown.fire();
+            if (!element.second.pressed) {
+              if (element.second.type == Element::TextField) {
+                Input::singleton()->startEditingText(true);
+                selectedElement = &elements[index];
+                Log::printf(LOG_DEBUG, "Started editing text");
+              } else {
+                element.second.mouseDown.fire();
+              }
+              element.second.pressed = true;
+            }
+          } else {
+            element.second.pressed = false;
           }
+        } else {
+          if (Input::singleton()->isMouseButtonDown(1)) {
+            if (selectedElement == &elements[index]) {
+              selectedElement = NULL;
+            }
+          }
+          element.second.pressed = false;
         }
         bp->setParameter(
             "texture0", DtSampler,
@@ -181,12 +227,12 @@ void Component::render(GuiManager* manager, gfx::Engine* engine) {
               "offset", DtVec2,
               BaseProgram::Parameter{
                   .vec2 =
-                      offset +
+                      displayOffset +
                       glm::vec2(-element.second.textureSize.x + fbSize.x, 0)});
 
         } else {
           bp->setParameter("offset", DtVec2,
-                           BaseProgram::Parameter{.vec2 = offset});
+                           BaseProgram::Parameter{.vec2 = displayOffset});
         }
         bp->bind();
         if (!alignTop)
@@ -239,6 +285,35 @@ static void parseXmlNode(GuiManager* manager, Component* component,
         em.color = color   ? definedColors[color->value()]
                    : _link ? definedColors["link"]
                            : glm::vec3(1.f);
+
+        em.font = manager->getFontCache()->get(_fontname.c_str(), _ptsize);
+        if (!em.font)
+          em.font = manager->getFontCache()->get("dat3/default.ttf", _ptsize);
+
+        std::string name = std::format("{}{}", rand() % 1000, elid);
+        manager->namedTextures[name].reset(
+            manager->getEngine()->getDevice()->createTexture().release());
+        em.texture = manager->namedTextures[name].get();
+        em.dirty = true;
+        em.textureHover = 0;
+        em.texturePressed = 0;
+        component->elementIndex.push_back(elid);
+        component->elements[elid] = em;
+      } else if (name == "textfield") {
+        Component::Element em;
+        em.type = Component::Element::TextField;
+        em.value = child->value();
+
+        rapidxml::xml_attribute<>* id = child->first_attribute("id");
+        elid = id ? id->value()
+                  : std::format("textfield-{}", component->elements.size());
+
+        rapidxml::xml_attribute<>* fontname = child->first_attribute("font");
+        std::string _fontname =
+            fontname ? fontname->value() : "dat3/default.ttf";
+
+        rapidxml::xml_attribute<>* ptsize = child->first_attribute("ptsize");
+        int _ptsize = ptsize ? std::atoi(ptsize->value()) : 12;
 
         em.font = manager->getFontCache()->get(_fontname.c_str(), _ptsize);
         if (!em.font)

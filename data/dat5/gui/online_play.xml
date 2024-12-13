@@ -1,0 +1,9 @@
+<gui name="MenuOnlinePlay" anchor="TopLeft">
+  <dom>
+    <label color="black">IP Address</label>
+    <textfield id="IPAddress"></textfield>
+    <label color="black">Port</label>
+    <textfield id="Port">7938</textfield>
+    <label link="true" id="Connect">Connect</label>
+  </dom>
+</gui>

@@ -33,7 +33,7 @@ struct Component {
   };
 
   struct Element {
-    enum Type { Label, Image };
+    enum Type { Label, Image, TextField };
     Type type;
 
     glm::ivec2 position;
@@ -49,6 +49,7 @@ struct Component {
     BaseTexture* textureHover;
     BaseTexture* texturePressed;
     glm::ivec2 textureSize;
+    bool pressed;
 
     Signal<> mouseDown;
 
@@ -61,6 +62,8 @@ struct Component {
   enum GrowMode { Horizontal, Vertical };
   Anchor anchor;
   GrowMode grow;
+
+  Element* selectedElement;
 
   Signal<> variableChanged;
 

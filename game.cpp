@@ -293,6 +293,8 @@ void Game::pollEvents() {
             char* temp = SDL_GetClipboardText();
             text = temp;
             SDL_free(temp);
+          } else if (event.key.keysym.sym == SDLK_RETURN) {
+            Input::singleton()->stopEditingText();
           }
         } else {
           object.type = event.type == SDL_KEYDOWN ? InputObject::KeyPress

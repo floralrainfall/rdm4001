@@ -1,16 +1,51 @@
 #include "state.hpp"
 
 #include <glm/ext/matrix_transform.hpp>
+#include <numeric>
 
 #include "fun.hpp"
 #include "game.hpp"
 #include "gfx/base_types.hpp"
 #include "gfx/gui/gui.hpp"
+#include "input.hpp"
+#include "network/network.hpp"
+#include "settings.hpp"
 namespace rdm {
+static CVar cl_nointro("cl_nointro", "0", CVARF_GLOBAL | CVARF_SAVE);
+
 GameState::GameState(Game* game) {
   this->game = game;
-  state = Intro;
+  state = cl_nointro.getBool() ? MainMenu : Intro;
   timer = 10.f;
+  emitter = game->getSoundManager()->newEmitter();
+
+  game->getGfxEngine()->initialized.listen([this, game] {
+    auto mainMenuButtons =
+        game->getGfxEngine()->getGuiManager()->getComponentByName(
+            "MainMenuButtons");
+    mainMenuButtons.value()->elements["Quit"].mouseDown.listen([] {
+      InputObject obj;
+      obj.type = InputObject::Quit;
+      Input::singleton()->postEvent(obj);
+    });
+    mainMenuButtons.value()->elements["OnlinePlay"].mouseDown.listen(
+        [this] { state = MenuOnlinePlay; });
+
+    auto menuOnlinePlay =
+        game->getGfxEngine()->getGuiManager()->getComponentByName(
+            "MenuOnlinePlay");
+    if (menuOnlinePlay) {
+      menuOnlinePlay.value()->elements["Connect"].mouseDown.listen(
+          [this, game, menuOnlinePlay] {
+            std::string ip =
+                menuOnlinePlay.value()->elements["IPAddress"].value;
+            std::string port = menuOnlinePlay.value()->elements["Port"].value;
+            game->getWorld()->getNetworkManager()->connect(
+                ip, std::atoi(port.c_str()));
+            state = InGame;
+          });
+    }
+  });
 
   game->getGfxEngine()->renderStepped.listen([this, game] {
     auto mainMenu =
@@ -18,6 +53,9 @@ GameState::GameState(Game* game) {
     auto mainMenuButtons =
         game->getGfxEngine()->getGuiManager()->getComponentByName(
             "MainMenuButtons");
+    auto menuOnlinePlay =
+        game->getGfxEngine()->getGuiManager()->getComponentByName(
+            "MenuOnlinePlay");
     if (!mainMenu) {
       Log::printf(LOG_ERROR,
                   "Define component MainMenu in the file for dat3/%s.xml",
@@ -32,13 +70,28 @@ GameState::GameState(Game* game) {
       return;
     }
     switch (state) {
+      default:
+      case InGame:
+        game->getGfxEngine()->setClearColor(glm::vec3(0.f));
+        menuOnlinePlay.value()->domRoot.visible = false;
+        mainMenuButtons.value()->domRoot.visible = false;
+        mainMenu.value()->domRoot.visible = false;
+        break;
+      case MenuOnlinePlay:
+        menuOnlinePlay.value()->domRoot.visible = true;
+        mainMenuButtons.value()->domRoot.visible = false;
+        mainMenu.value()->domRoot.visible = false;
+        break;
       case MainMenu: {
+        game->getGfxEngine()->setClearColor(glm::vec3(1.f));
         mainMenuButtons.value()->domRoot.visible = true;
         mainMenu.value()->domRoot.visible = true;
+        if (menuOnlinePlay) menuOnlinePlay.value()->domRoot.visible = false;
       } break;
       case Intro: {
         mainMenuButtons.value()->domRoot.visible = false;
         mainMenu.value()->domRoot.visible = false;
+        if (menuOnlinePlay) menuOnlinePlay.value()->domRoot.visible = false;
         Graph::Node node;
         node.basis = glm::identity<glm::mat3>();
         node.origin = glm::vec3(0);
@@ -78,13 +131,31 @@ GameState::GameState(Game* game) {
   });
 
   game->getWorld()->stepped.listen([this, game] {
+    if (!emitter->isPlaying()) {
+      if (stateMusic.find(state) != stateMusic.end())
+        emitter->play(game->getSoundManager()
+                          ->getSoundCache()
+                          ->get(stateMusic[state], Sound::Stream)
+                          .value());
+      else
+        emitter->stop();
+    }
+
     switch (state) {
       case Intro:
-
         timer -= 1.0 / 60.0;
-        if (timer <= 0.0) state = MainMenu;
+        if (timer <= 0.0) {
+          state = MainMenu;
+          emitter->stop();
+        }
         break;
-      case MainMenu:
+      case MainMenu: {
+      } break;
+      case InGame:
+        if (game->getWorld()->getNetworkManager()->getLocalPeer().type ==
+            network::Peer::Unconnected) {
+          state = MainMenu;
+        }
         break;
     }
   });

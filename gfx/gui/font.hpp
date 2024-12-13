@@ -8,6 +8,8 @@
 namespace rdm::gfx::gui {
 struct Font {
   TTF_Font* font;
+
+  ~Font();
 };
 
 struct OutFontTexture {

@@ -27,6 +27,7 @@ Input::Input() {
   mousePosition = glm::vec3(0);
 
   memset(keysDown, 0, sizeof(keysDown));
+  memset(mouseButtonsDown, 0, sizeof(mouseButtonsDown));
 
 #ifdef __linux
   signal(SIGINT, intHandler);

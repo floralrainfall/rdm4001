@@ -145,7 +145,7 @@ void NetworkManager::service() {
 
 #ifndef DISABLE_OBZ
                   // doesn't do anything yet but will verify official servers
-                  obz::ObzCrypt::singleton()->readCryptPacket(stream);
+                  obz::ObzCrypt::singleton()->readCryptPacket(stream, false);
 #endif
 
                   ticks = _ticks;
@@ -155,6 +155,12 @@ void NetworkManager::service() {
                   authenticateStream.writeString(this->username);
                   authenticateStream.writeString(password);
                   authenticateStream.writeString(userPassword);
+
+#ifndef DISABLE_OBZ
+                  obz::ObzCrypt::singleton()->writeCryptPacket(
+                      authenticateStream, false);
+#endif
+
                   enet_peer_send(localPeer.peer, NETWORK_STREAM_META,
                                  authenticateStream.createPacket(
                                      ENET_PACKET_FLAG_RELIABLE));
@@ -165,6 +171,11 @@ void NetworkManager::service() {
                   std::string username = stream.readString();
                   std::string password = stream.readString();
                   std::string userPassword = stream.readString();
+
+#ifndef DISABLE_OBZ
+                  obz::ObzCrypt::singleton()->readCryptPacket(stream, true);
+#endif
+
                   if (!userPassword.empty())
                     if (userPassword != this->userPassword) {
                       Log::printf(LOG_INFO, "%s failed userPassword",
@@ -409,7 +420,8 @@ void NetworkManager::service() {
           welcomePacketStream.write<float>(distributedTime);
 
 #ifndef DISABLE_OBZ
-          obz::ObzCrypt::singleton()->writeCryptPacket(welcomePacketStream);
+          obz::ObzCrypt::singleton()->writeCryptPacket(welcomePacketStream,
+                                                       true);
 #endif
 
           enet_peer_send(

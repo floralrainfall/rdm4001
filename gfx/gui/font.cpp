@@ -2,6 +2,7 @@
 
 #include <format>
 
+#include "SDL_error.h"
 #include "filesystem.hpp"
 #include "logging.hpp"
 namespace rdm::gfx::gui {
@@ -16,6 +17,12 @@ OutFontTexture FontRender::render(Font* font, const char* text) {
   color.b = 255;
   color.a = 255;
   surf = TTF_RenderUTF8_Blended(font->font, text, color);
+  if (!surf) {
+    Log::printf(LOG_ERROR, "TTF render returned null, %s", SDL_GetError());
+    t.data = NULL;
+    return t;
+  }
+
   SDL_Surface* conv =
       SDL_ConvertSurfaceFormat(surf, SDL_PIXELFORMAT_ABGR8888, 0);
   SDL_LockSurface(conv);
@@ -48,6 +55,8 @@ OutFontTexture FontRender::render(Font* font, const char* text) {
 }
 
 OutFontTexture::~OutFontTexture() { delete data; }
+
+Font::~Font() {}
 
 FontCache::FontCache() {
   if (int error = TTF_Init() != 0) {
