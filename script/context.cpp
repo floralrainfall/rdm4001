@@ -11,6 +11,8 @@ void Context::setGfxEngine(gfx::Engine* engine) { this->engine = engine; }
 void Context::setContext(Script* script) {
   struct mb_interpreter_t* s = script->getInterpreter();
   mb_set_userdata(s, this);
+
+  setContextCall.fire(s);
   API::registerApi(s);
 }
 }  // namespace rdm::script

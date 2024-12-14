@@ -62,5 +62,7 @@ class Game {
 
   SoundManager* getSoundManager() { return soundManager.get(); }
   gfx::Engine* getGfxEngine() { return gfxEngine.get(); }
+
+  GameState* getGameState() { return gameState.get(); }
 };
 }  // namespace rdm

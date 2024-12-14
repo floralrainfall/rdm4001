@@ -87,6 +87,48 @@ static int _BasSetValue(struct mb_interpreter_t* s, void** l) {
   return result;
 }
 
+static int _BasOnPressed(struct mb_interpreter_t* s, void** l) {
+  int result = MB_FUNC_OK;
+
+  char* componentName;
+  char* id;
+  char* runtime;
+
+  mb_check(mb_attempt_open_bracket(s, l));
+  mb_check(mb_pop_string(s, l, &componentName));
+  mb_check(mb_pop_string(s, l, &id));
+  mb_check(mb_pop_string(s, l, &runtime));
+  mb_check(mb_attempt_close_bracket(s, l));
+
+  script::Context* context;
+  mb_get_userdata(s, (void**)&context);
+
+  auto component =
+      context->getEngine()->getGuiManager()->getComponentByName(componentName);
+  if (!component) {
+    Log::printf(LOG_ERROR, "GUI could not find component %s", component);
+    return MB_FUNC_ERR;
+  }
+
+  auto it = component.value()->elements.find(id);
+  if (it == component.value()->elements.end()) {
+    Log::printf(LOG_ERROR, "GUI could not find id %s", id);
+    return MB_FUNC_ERR;
+  }
+
+  std::string _runtime = runtime;
+  it->second.mouseDown.listen([s, l, _runtime] {
+    mb_value_t routine;
+    mb_value_t args[1];
+    mb_value_t ret;
+    mb_get_routine(s, l, _runtime.c_str(), &routine);
+    mb_make_nil(ret);
+    mb_eval_routine(s, l, routine, args, 0, &ret);
+  });
+
+  return MB_FUNC_OK;
+}
+
 static int _BasGetInValue(struct mb_interpreter_t* s, void** l) {
   int result = MB_FUNC_OK;
 
@@ -136,6 +178,7 @@ void API::registerApi(struct mb_interpreter_t* s) {
   mb_register_func(s, "SETVALUE", _BasSetValue);
   mb_register_func(s, "GETVALUE", _BasGetValue);
   mb_register_func(s, "GETINVALUE", _BasGetInValue);
+  mb_register_func(s, "ONPRESSED", _BasOnPressed);
   mb_end_module(s);
 }
 }  // namespace rdm::gfx::gui

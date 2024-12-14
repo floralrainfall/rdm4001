@@ -22,6 +22,8 @@ class GameState {
 
   std::map<States, std::string> stateMusic;
 
+  void setState(States s) { state = s; }
+
  private:
   States state;
 };

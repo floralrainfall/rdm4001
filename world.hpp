@@ -11,13 +11,17 @@
 #include "script/context.hpp"
 
 namespace rdm {
+class Game;
+
 struct WorldConstructorSettings {
   bool network;
   bool physics;
+  Game* game;
 
   WorldConstructorSettings() {
     network = false;
     physics = false;
+    game = NULL;
   }
 };
 
@@ -30,6 +34,7 @@ class World {
   std::unique_ptr<network::NetworkManager> networkManager;
   std::unique_ptr<Scheduler> scheduler;
   std::unique_ptr<script::Context> scriptContext;
+  Game* game;
   std::string title;
   bool running;
   double time;
@@ -48,6 +53,7 @@ class World {
 
   void setTitle(std::string title);
 
+  Game* getGame() { return game; }
   script::Context* getScriptContext() { return scriptContext.get(); }
   Scheduler* getScheduler() { return scheduler.get(); }
   PhysicsWorld* getPhysicsWorld() { return physics.get(); }

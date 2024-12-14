@@ -143,7 +143,7 @@ void FpsController::updateCamera(gfx::Camera& camera) {
   cameraView = glm::toMat3(pitchQuat * yawQuat);
   moveView = glm::toMat3(pitchQuat);
 
-  glm::vec3 forward = glm::vec3(1, 0, 0);
+  glm::vec3 forward = glm::vec3(-1, 0, 0);
   camera.setPosition(origin);
   camera.setTarget(origin + (cameraView * forward));
   camera.setUp(glm::vec3(0, 0, 1));

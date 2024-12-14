@@ -64,6 +64,7 @@ void Component::layoutUpdate(TreeNode* root) {
 
 static std::map<std::string, glm::vec3> definedColors = {
     {"white", glm::vec3(1.0)},
+    {"gray", glm::vec3(0.5)},
     {"black", glm::vec3(0.0)},
     {"red", glm::vec3(1.0, 0.0, 0.0)},
     {"green", glm::vec3(0.0, 1.0, 0.0)},
@@ -367,7 +368,6 @@ static void parseXmlNode(GuiManager* manager, Component* component,
         throw std::runtime_error("Unknown element");
       }
       node.elem = elid;
-      Log::printf(LOG_DEBUG, "Created %s", elid.c_str());
       parentNode->children.push_back(node);
     } catch (std::exception& e) {
       Log::printf(LOG_WARN, "Error in element %s: %s", parentXmlNode->name(),

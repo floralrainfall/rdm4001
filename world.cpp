@@ -88,6 +88,7 @@ World::World(WorldConstructorSettings settings) {
   if (settings.physics) physics.reset(new PhysicsWorld(this));
   if (settings.network) networkManager.reset(new network::NetworkManager(this));
 
+  this->game = settings.game;
   running = true;
 
   Input::singleton()->quitSignal.listen([this](InputObject o) {

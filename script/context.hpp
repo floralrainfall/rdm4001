@@ -1,5 +1,7 @@
 #pragma once
 
+#include "script/my_basic.h"
+#include "signal.hpp"
 namespace rdm {
 class World;
 
@@ -16,6 +18,8 @@ class Context {
 
  public:
   Context(World* world);
+
+  Signal<struct mb_interpreter_t*> setContextCall;
 
   World* getWorld() { return world; };
   gfx::Engine* getEngine() { return engine; };

@@ -9,15 +9,50 @@
 #include "gfx/gui/gui.hpp"
 #include "input.hpp"
 #include "network/network.hpp"
+#include "script/my_basic.h"
 #include "settings.hpp"
 namespace rdm {
 static CVar cl_nointro("cl_nointro", "0", CVARF_GLOBAL | CVARF_SAVE);
+
+static int _BasSetState(mb_interpreter_t* s, void** l) {
+  char* state;
+
+  std::map<std::string, GameState::States> stateNames = {
+      {"MainMenu", GameState::MainMenu},
+      {"MenuOnlinePlay", GameState::MenuOnlinePlay},
+      {"InGame", GameState::InGame},
+      {"Intro", GameState::Intro},
+  };
+
+  mb_check(mb_attempt_open_bracket(s, l));
+  mb_check(mb_pop_string(s, l, &state));
+  mb_check(mb_attempt_close_bracket(s, l));
+
+  auto it = stateNames.find(state);
+  if (it == stateNames.end()) {
+    Log::printf(LOG_ERROR, "Unknown state %s", state);
+    return MB_FUNC_ERR;
+  }
+
+  script::Context* context;
+  mb_get_userdata(s, (void**)&context);
+  context->getWorld()->getGame()->getGameState()->setState(stateNames[state]);
+
+  return MB_FUNC_OK;
+}
 
 GameState::GameState(Game* game) {
   this->game = game;
   state = cl_nointro.getBool() ? MainMenu : Intro;
   timer = 10.f;
   emitter = game->getSoundManager()->newEmitter();
+
+  game->getWorld()->getScriptContext()->setContextCall.listen(
+      [](mb_interpreter_t* s) {
+        mb_begin_module(s, "STATE");
+        mb_register_func(s, "SET", _BasSetState);
+        mb_end_module(s);
+      });
 
   game->getGfxEngine()->initialized.listen([this, game] {
     auto mainMenuButtons =

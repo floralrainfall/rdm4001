@@ -54,6 +54,7 @@ Game::Game() {
   network::NetworkManager::initialize();
 
   window = NULL;
+  worldSettings.game = this;
 
   Log::singleton()->setLevel((LogType)cl_loglevel.getInt());
   cl_loglevel.changing.listen(

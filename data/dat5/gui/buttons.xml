@@ -1,4 +1,10 @@
 <gui name="MainMenuButtons" anchor="TopRight">
+  <script>
+    def pressed()
+    state.set("MenuOnlinePlay")
+    enddef
+    gui.onpressed("MainMenuButtons", "Settings", "PRESSED")
+  </script>
   <dom>
     <label font="dat3/eras.ttf" ptsize="16" id="OnlinePlay" link="true">Online Play</label>
     <label font="dat3/eras.ttf" ptsize="16" id="HostServer" link="true">Host Server</label>
