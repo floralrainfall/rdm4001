@@ -1,2 +1,2 @@
-print(gui.dom)
-print(gui.dom())
+renderFps = gui.getinvalue("FPS", "renderFps")
+gui.setvalue("FPS", "fpsText", "FPS: " + xl.realtostr(renderFps))

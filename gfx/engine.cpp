@@ -316,6 +316,8 @@ Engine::Engine(World* world, void* hwnd) {
   renderJob = world->getScheduler()->addJob(new RenderJob(this));
   world->stepped.listen([this] { stepped(); });
   isInitialized = false;
+
+  this->world = world;
 }
 
 void Engine::renderFullscreenQuad(

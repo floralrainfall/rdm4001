@@ -7,12 +7,14 @@
 #include "fun.hpp"
 #include "gfx/base_types.hpp"
 #include "gfx/engine.hpp"
+#include "gfx/gui/api.hpp"
 #include "gfx/gui/font.hpp"
 #include "input.hpp"
 #include "logging.hpp"
 #include "rapidxml.hpp"
 #include "rapidxml_utils.hpp"
 #include "script/my_basic.h"
+#include "world.hpp"
 
 namespace rdm::gfx::gui {
 GuiManager::GuiManager(gfx::Engine* engine) {
@@ -43,32 +45,12 @@ GuiManager::GuiManager(gfx::Engine* engine) {
 
   parseXml("dat3/root.xml");
   parseXml(std::format("dat3/{}.xml", Fun::getModuleName()).c_str());
-  for (auto& component : components) {
-    component.second.variableChanged.fire();
-  }
-}
-
-static int _BasDOM(struct mb_interpreter_t* s, void** l) {
-  int result = MB_FUNC_OK;
-  mb_value_t thisref;
-  mb_get_value_by_name(s, NULL, "__globalDom", &thisref);
-  Log::printf(LOG_DEBUG, "%p", thisref.value.usertype_ref);
-  mb_push_usertype(s, NULL, thisref.value.usertype_ref);
-  return result;
 }
 
 void Component::scriptUpdate(script::Script* script) {
   struct mb_interpreter_t* bas = script->getInterpreter();
 
-  mb_value_t thisref;
-  thisref.type = MB_DT_USERTYPE_REF;
-  thisref.value.usertype_ref = (void*)this;
-  void* l;
-  mb_add_var(bas, &l, "__globalDom", thisref, true);
-
-  mb_begin_module(bas, "GUI");
-  mb_register_func(bas, "DOM", _BasDOM);
-  mb_end_module(bas);
+  API::registerApi(bas);
 
   for (auto& var : inVars) {
   }
@@ -101,6 +83,11 @@ void Component::render(GuiManager* manager, gfx::Engine* engine) {
   bool alignRight = false;
   bool alignTop = false;
 
+  if (variablesDirty) {
+    variableChanged.fire();
+    variablesDirty = false;
+  }
+
   switch (grow) {
     case Horizontal:
       inc_factor = glm::vec2(1, 0);
@@ -130,6 +117,7 @@ void Component::render(GuiManager* manager, gfx::Engine* engine) {
   }
 
   int padding = 4;
+  gfx::BaseProgram* bp = manager->image->prepareDevice(engine->getDevice(), 0);
   for (auto& index : elementIndex) {
     std::pair<std::string, Element> element =
         std::make_pair(index, elements[index]);
@@ -149,6 +137,7 @@ void Component::render(GuiManager* manager, gfx::Engine* engine) {
           element.second.value = "...........";
           element.second.dirty = true;
         }
+        bp->setParameter("bgcolor", DtVec4, {.vec4 = glm::vec4(0.4)});
       case Element::Label: {
         if (element.second.dirty) {
           OutFontTexture t = FontRender::render(element.second.font,
@@ -164,8 +153,6 @@ void Component::render(GuiManager* manager, gfx::Engine* engine) {
         }
       }
       case Element::Image: {
-        gfx::BaseProgram* bp =
-            manager->image->prepareDevice(engine->getDevice(), 0);
         if (alignTop)
           offset +=
               inc_factor * (element.second.textureSize + glm::ivec2(padding));
@@ -222,6 +209,10 @@ void Component::render(GuiManager* manager, gfx::Engine* engine) {
             BaseProgram::Parameter{.vec2 = element.second.textureSize});
         bp->setParameter("color", DtVec3,
                          BaseProgram::Parameter{.vec3 = displayColor});
+        if (element.second.type != Element::TextField) {
+          bp->setParameter("bgcolor", DtVec4,
+                           {.vec4 = glm::vec4(displayColor, 0.0)});
+        }
         if (alignRight) {
           bp->setParameter(
               "offset", DtVec2,
@@ -245,6 +236,7 @@ void Component::render(GuiManager* manager, gfx::Engine* engine) {
       default:
         break;
     }
+    element.second.dirty = false;
     elements[element.first] = element.second;
   }
 }
@@ -420,6 +412,8 @@ void GuiManager::parseXml(const char* file) {
       growModes["Horizontal"] = Component::Horizontal;
       growModes["Vertical"] = Component::Horizontal;
 
+      component.variablesDirty = true;
+
       rapidxml::xml_attribute<>* anchor = node->first_attribute("anchor");
       if (anchor) {
         component.anchor = anchors[anchor->value()];
@@ -441,7 +435,7 @@ void GuiManager::parseXml(const char* file) {
           std::string src = child->first_attribute("src")->value();
           parseXml(src.c_str());
         } else if (name == "script") {
-          script::Script s;
+          script::Script s(engine->getWorld()->getScriptContext());
           std::string contents;
 
           if (rapidxml::xml_attribute<>* src = child->first_attribute("src")) {
@@ -455,11 +449,10 @@ void GuiManager::parseXml(const char* file) {
           } else {
             contents = child->value();
           }
-#ifndef NDEBUG
-          Log::printf(LOG_DEBUG, "Loaded script\n%s", contents.c_str());
-#endif
-          s.load(contents);
           component.scripts.push_back(s);
+          script::Script* _s = &component.scripts[component.scripts.size() - 1];
+          component.scriptUpdate(_s);
+          _s->load(contents);
         } else if (name == "in_vars") {
           for (rapidxml::xml_node<>* _child = child->first_node(); _child;
                _child = _child->next_sibling()) {
@@ -504,10 +497,9 @@ void GuiManager::parseXml(const char* file) {
 
       std::string name = node->first_attribute("name")->value();
       component.variableChanged.listen([this, name] {
-        Component& component = components[name];
-        Log::printf(LOG_DEBUG, "Component %s changed, updating", name.c_str());
-        for (auto script : component.scripts) {
-          component.scriptUpdate(&script);
+        Component* component = &components[name];
+        for (auto& script : component->scripts) {
+          component->scriptUpdate(&script);
           script.run();
         }
       });
@@ -543,6 +535,13 @@ void GuiManager::render() {
   BaseProgram* _panel = panel->prepareDevice(engine->getDevice(), 0);
   BaseProgram* _image = image->prepareDevice(engine->getDevice(), 0);
   BaseProgram* _text = text->prepareDevice(engine->getDevice(), 0);
+
+  auto fps = getComponentByName("FPS");
+  if (fps) {
+    *(float*)(fps.value()->inVars["renderFps"].value) =
+        1.0 / engine->getRenderJob()->getStats().getAvgDeltaTime();
+    fps.value()->variablesDirty = true;
+  }
 
   for (auto& component : components) {
     component.second.render(this, engine);

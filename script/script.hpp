@@ -1,13 +1,14 @@
 #pragma once
 #include <string>
 
+#include "context.hpp"
 #include "my_basic.h"
 namespace rdm::script {
 class Script {
   struct mb_interpreter_t* bas;
 
  public:
-  Script();
+  Script(Context* context);
   ~Script();
 
   void run();

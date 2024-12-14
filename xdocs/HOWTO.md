@@ -75,9 +75,9 @@ Then your `mygame` should be in the directory. You have now made your first game
 RDM4001 requires that you have structure similar to its own. Copy over the `data` directory if you have any trouble with it finding certain files. At the time of writing, it requires the following data directories/files:
 
 - dat1/ (material/shader directory)
-- dat3/gui.json
+- In earlier verisons, a file named dat3/gui.json was required, but because of the new XML GUI system, it is not needed
 
-These should be placed in (PROJECT ROOT)/data.
+These should be placed in (PROJECT ROOT)/data. When compiled in release mode, it should be in the same directory as the game executable.
 
 ## Pointers
 
@@ -88,3 +88,4 @@ Some things you might find interesting are:
 - rdm::gfx::MeshCache
 - rdm::gfx::BaseDevice
 - rdm::gfx::Engine
+- rdm::GameState

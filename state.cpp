@@ -35,6 +35,8 @@ GameState::GameState(Game* game) {
         game->getGfxEngine()->getGuiManager()->getComponentByName(
             "MenuOnlinePlay");
     if (menuOnlinePlay) {
+      menuOnlinePlay.value()->elements["Cancel"].mouseDown.listen(
+          [this] { state = MainMenu; });
       menuOnlinePlay.value()->elements["Connect"].mouseDown.listen(
           [this, game, menuOnlinePlay] {
             std::string ip =
@@ -73,7 +75,7 @@ GameState::GameState(Game* game) {
       default:
       case InGame:
         game->getGfxEngine()->setClearColor(glm::vec3(0.f));
-        menuOnlinePlay.value()->domRoot.visible = false;
+        if (menuOnlinePlay) menuOnlinePlay.value()->domRoot.visible = false;
         mainMenuButtons.value()->domRoot.visible = false;
         mainMenu.value()->domRoot.visible = false;
         break;

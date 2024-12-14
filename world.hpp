@@ -8,6 +8,7 @@
 #include "network/network.hpp"
 #include "physics.hpp"
 #include "scheduler.hpp"
+#include "script/context.hpp"
 
 namespace rdm {
 struct WorldConstructorSettings {
@@ -28,6 +29,7 @@ class World {
   std::unique_ptr<PhysicsWorld> physics;
   std::unique_ptr<network::NetworkManager> networkManager;
   std::unique_ptr<Scheduler> scheduler;
+  std::unique_ptr<script::Context> scriptContext;
   std::string title;
   bool running;
   double time;
@@ -46,6 +48,7 @@ class World {
 
   void setTitle(std::string title);
 
+  script::Context* getScriptContext() { return scriptContext.get(); }
   Scheduler* getScheduler() { return scheduler.get(); }
   PhysicsWorld* getPhysicsWorld() { return physics.get(); }
   network::NetworkManager* getNetworkManager() { return networkManager.get(); }

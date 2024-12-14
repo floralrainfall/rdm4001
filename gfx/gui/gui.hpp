@@ -63,6 +63,8 @@ struct Component {
   Anchor anchor;
   GrowMode grow;
 
+  bool variablesDirty;
+
   Element* selectedElement;
 
   Signal<> variableChanged;

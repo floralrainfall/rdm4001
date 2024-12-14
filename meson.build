@@ -60,10 +60,14 @@ gamelib = static_library('game', [
   'fun.cpp',
   'fun.hpp',
 
-  'script/my_basic.h',
+  'script/api.cpp',
+  'script/api.hpp',
   'script/my_basic.c',
-  'script/script.hpp',
+  'script/my_basic.h',
   'script/script.cpp',
+  'script/script.hpp',
+  'script/context.cpp',
+  'script/context.hpp',
 
   'putil/fpscontroller.cpp',
   'putil/fpscontroller.hpp',
@@ -77,6 +81,8 @@ gamelib = static_library('game', [
   'network/player.cpp',
   'network/player.hpp',
 
+  'gfx/gui/api.cpp',
+  'gfx/gui/api.hpp',
   'gfx/gui/gui.cpp',
   'gfx/gui/gui.hpp',
   'gfx/gui/font.cpp',

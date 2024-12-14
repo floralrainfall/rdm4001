@@ -17,7 +17,7 @@
 
 namespace rdm {
 class World;
-}
+}  // namespace rdm
 
 namespace rdm::gfx {
 class TextureCache {
@@ -96,6 +96,8 @@ class Engine {
 
  public:
   Engine(World* world, void* hwnd);
+
+  World* getWorld() { return world; }
 
   void renderFullscreenQuad(
       BaseTexture* texture, Material* material = 0,

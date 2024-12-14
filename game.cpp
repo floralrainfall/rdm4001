@@ -161,6 +161,8 @@ void Game::startClient() {
       window, ((gfx::gl::GLContext*)gfxEngine->getContext())->getContext());
   gfxEngine->getContext()->unsetCurrent();
 
+  world->getScriptContext()->setGfxEngine(gfxEngine.get());
+
   if (worldSettings.network) {
     world->getNetworkManager()->setGfxEngine(gfxEngine.get());
     world->getNetworkManager()->setGame(this);
@@ -283,7 +285,7 @@ void Game::pollEvents() {
         if (Input::singleton()->isEditingText()) {
           if (event.type != SDL_KEYDOWN) break;
           std::string& text = Input::singleton()->getEditedText();
-          if (event.key.keysym.sym == SDLK_BACKSPACE && text.length() > 0) {
+          if (event.key.keysym.sym == SDLK_BACKSPACE && text.length() != 0) {
             text.pop_back();
           } else if (event.key.keysym.sym == SDLK_c &&
                      SDL_GetModState() & KMOD_CTRL) {

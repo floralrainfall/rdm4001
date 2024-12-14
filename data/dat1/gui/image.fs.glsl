@@ -5,5 +5,9 @@ in vec2 f_uv;
 
 uniform sampler2D texture0;
 uniform vec3 color;
+uniform vec4 bgcolor;
 
-void main() { diffuseColor = texture(texture0, f_uv) * vec4(color, 1.0); }
+void main() {
+  vec4 o_color = texture(texture0, f_uv) * vec4(color, 1.0);
+  diffuseColor = mix(bgcolor, vec4(o_color), o_color.a);
+}

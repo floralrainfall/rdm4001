@@ -1,4 +1,5 @@
 <gui name="Root" anchor="BottomRight">
+  <component src="dat3/components/fps.xml" />
   <dom>
     <label font="dat3/serif.ttf" ptsize="9">© entropy interactive 2024-2025, RDM4001 is licensed under the GNU GPLv3</label>
   </dom>
