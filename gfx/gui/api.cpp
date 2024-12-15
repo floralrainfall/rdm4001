@@ -1,5 +1,6 @@
 #include "api.hpp"
 
+#include <algorithm>
 #include <numeric>
 #include <string>
 
@@ -117,6 +118,7 @@ static int _BasOnPressed(struct mb_interpreter_t* s, void** l) {
   }
 
   std::string _runtime = runtime;
+  std::transform(_runtime.begin(), _runtime.end(), _runtime.begin(), ::toupper);
   it->second.mouseDown.listen([s, l, _runtime] {
     mb_value_t routine;
     mb_value_t args[1];
@@ -173,12 +175,72 @@ static int _BasGetInValue(struct mb_interpreter_t* s, void** l) {
   return result;
 }
 
+static int _BasSetVisible(struct mb_interpreter_t* s, void** l) {
+  char* componentName;
+  int visible;
+
+  mb_check(mb_attempt_open_bracket(s, l));
+  mb_check(mb_pop_string(s, l, &componentName));
+  mb_check(mb_pop_int(s, l, &visible));
+  mb_check(mb_attempt_close_bracket(s, l));
+
+  script::Context* context;
+  mb_get_userdata(s, (void**)&context);
+
+  auto component =
+      context->getEngine()->getGuiManager()->getComponentByName(componentName);
+  if (!component) {
+    Log::printf(LOG_ERROR, "GUI could not find component %s", component);
+    return MB_FUNC_ERR;
+  }
+
+  component.value()->domRoot.visible = visible;
+
+  return MB_FUNC_OK;
+}
+
+static int _BasSetColor(struct mb_interpreter_t* s, void** l) {
+  char* componentName;
+  char* id;
+  glm::vec3 color;
+
+  mb_check(mb_attempt_open_bracket(s, l));
+  mb_check(mb_pop_string(s, l, &componentName));
+  mb_check(mb_pop_string(s, l, &id));
+  mb_check(mb_pop_real(s, l, &color.x));
+  mb_check(mb_pop_real(s, l, &color.y));
+  mb_check(mb_pop_real(s, l, &color.z));
+  mb_check(mb_attempt_close_bracket(s, l));
+
+  script::Context* context;
+  mb_get_userdata(s, (void**)&context);
+
+  auto component =
+      context->getEngine()->getGuiManager()->getComponentByName(componentName);
+  if (!component) {
+    Log::printf(LOG_ERROR, "GUI could not find component %s", component);
+    return MB_FUNC_ERR;
+  }
+
+  auto it = component.value()->elements.find(id);
+  if (it == component.value()->elements.end()) {
+    Log::printf(LOG_ERROR, "GUI could not find id %s", id);
+    return MB_FUNC_ERR;
+  }
+
+  it->second.color = color;
+
+  return MB_FUNC_OK;
+}
+
 void API::registerApi(struct mb_interpreter_t* s) {
   mb_begin_module(s, "GUI");
   mb_register_func(s, "SETVALUE", _BasSetValue);
   mb_register_func(s, "GETVALUE", _BasGetValue);
   mb_register_func(s, "GETINVALUE", _BasGetInValue);
   mb_register_func(s, "ONPRESSED", _BasOnPressed);
+  mb_register_func(s, "SETVISIBLE", _BasSetVisible);
+  mb_register_func(s, "SETCOLOR", _BasSetColor);
   mb_end_module(s);
 }
 }  // namespace rdm::gfx::gui

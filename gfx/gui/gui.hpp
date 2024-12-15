@@ -49,6 +49,7 @@ struct Component {
     BaseTexture* textureHover;
     BaseTexture* texturePressed;
     glm::ivec2 textureSize;
+    glm::ivec2 minSize;
     bool pressed;
 
     Signal<> mouseDown;

@@ -18,11 +18,18 @@ class GameState {
     MainMenu,
     MenuOnlinePlay,
     InGame,
+    Connecting,
   };
 
   std::map<States, std::string> stateMusic;
+  Signal<> switchingState;
 
-  void setState(States s) { state = s; }
+  void setState(States s) {
+    state = s;
+    switchingState.fire();
+  }
+
+  States getState() { return state; }
 
  private:
   States state;

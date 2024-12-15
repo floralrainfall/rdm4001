@@ -14,6 +14,29 @@
 namespace rdm {
 static CVar cl_nointro("cl_nointro", "0", CVARF_GLOBAL | CVARF_SAVE);
 
+static int _BasGetState(mb_interpreter_t* s, void** l) {
+  std::map<GameState::States, std::string> stateNames = {
+      {GameState::MainMenu, "MainMenu"},
+      {GameState::MenuOnlinePlay, "MenuOnlinePlay"},
+      {GameState::InGame, "InGame"},
+      {GameState::Intro, "Intro"},
+      {GameState::Connecting, "Connecting"},
+  };
+
+  mb_check(mb_attempt_open_bracket(s, l));
+  mb_check(mb_attempt_close_bracket(s, l));
+
+  script::Context* context;
+  mb_get_userdata(s, (void**)&context);
+
+  std::string stateName =
+      stateNames[context->getWorld()->getGame()->getGameState()->getState()];
+
+  mb_push_string(s, l, mb_memdup(stateName.data(), stateName.size() + 1));
+
+  return MB_FUNC_OK;
+}
+
 static int _BasSetState(mb_interpreter_t* s, void** l) {
   char* state;
 
@@ -22,7 +45,7 @@ static int _BasSetState(mb_interpreter_t* s, void** l) {
       {"MenuOnlinePlay", GameState::MenuOnlinePlay},
       {"InGame", GameState::InGame},
       {"Intro", GameState::Intro},
-  };
+      {"Connecting", GameState::Connecting}};
 
   mb_check(mb_attempt_open_bracket(s, l));
   mb_check(mb_pop_string(s, l, &state));
@@ -41,6 +64,32 @@ static int _BasSetState(mb_interpreter_t* s, void** l) {
   return MB_FUNC_OK;
 }
 
+static int _BasStateCallback(mb_interpreter_t* s, void** l) {
+  char* runtime;
+
+  mb_check(mb_attempt_open_bracket(s, l));
+  mb_check(mb_pop_string(s, l, &runtime));
+  mb_check(mb_attempt_close_bracket(s, l));
+
+  script::Context* context;
+  mb_get_userdata(s, (void**)&context);
+
+  std::string _runtime = runtime;
+  std::transform(_runtime.begin(), _runtime.end(), _runtime.begin(), ::toupper);
+  context->getWorld()->getGame()->getGameState()->switchingState.listen(
+      [s, l, _runtime] {
+        mb_value_t routine;
+        mb_value_t args[1];
+        mb_value_t ret;
+        mb_get_routine(s, l, _runtime.c_str(), &routine);
+        mb_make_nil(ret);
+        mb_make_nil(args[0]);
+        mb_eval_routine(s, l, routine, args, 0, &ret);
+      });
+
+  return MB_FUNC_OK;
+}
+
 GameState::GameState(Game* game) {
   this->game = game;
   state = cl_nointro.getBool() ? MainMenu : Intro;
@@ -51,6 +100,8 @@ GameState::GameState(Game* game) {
       [](mb_interpreter_t* s) {
         mb_begin_module(s, "STATE");
         mb_register_func(s, "SET", _BasSetState);
+        mb_register_func(s, "GET", _BasGetState);
+        mb_register_func(s, "ADDCALLBACK", _BasStateCallback);
         mb_end_module(s);
       });
 
@@ -64,14 +115,14 @@ GameState::GameState(Game* game) {
       Input::singleton()->postEvent(obj);
     });
     mainMenuButtons.value()->elements["OnlinePlay"].mouseDown.listen(
-        [this] { state = MenuOnlinePlay; });
+        [this] { setState(MenuOnlinePlay); });
 
     auto menuOnlinePlay =
         game->getGfxEngine()->getGuiManager()->getComponentByName(
             "MenuOnlinePlay");
     if (menuOnlinePlay) {
       menuOnlinePlay.value()->elements["Cancel"].mouseDown.listen(
-          [this] { state = MainMenu; });
+          [this] { setState(MainMenu); });
       menuOnlinePlay.value()->elements["Connect"].mouseDown.listen(
           [this, game, menuOnlinePlay] {
             std::string ip =
@@ -79,7 +130,7 @@ GameState::GameState(Game* game) {
             std::string port = menuOnlinePlay.value()->elements["Port"].value;
             game->getWorld()->getNetworkManager()->connect(
                 ip, std::atoi(port.c_str()));
-            state = InGame;
+            setState(InGame);
           });
     }
   });
@@ -107,6 +158,7 @@ GameState::GameState(Game* game) {
       return;
     }
     switch (state) {
+      case Connecting:
       default:
       case InGame:
         game->getGfxEngine()->setClearColor(glm::vec3(0.f));
@@ -178,21 +230,32 @@ GameState::GameState(Game* game) {
         emitter->stop();
     }
 
+    if (game->getWorld()->getNetworkManager()->getLocalPeer().type ==
+        network::Peer::ConnectedPlayer) {
+      setState(InGame);
+    } else if (game->getWorld()->getNetworkManager()->getLocalPeer().type ==
+               network::Peer::Undifferentiated) {
+      setState(Connecting);
+    }
+
     switch (state) {
       case Intro:
         timer -= 1.0 / 60.0;
         if (timer <= 0.0) {
-          state = MainMenu;
+          setState(MainMenu);
           emitter->stop();
         }
         break;
       case MainMenu: {
       } break;
+      case Connecting:
       case InGame:
         if (game->getWorld()->getNetworkManager()->getLocalPeer().type ==
             network::Peer::Unconnected) {
-          state = MainMenu;
+          setState(MainMenu);
         }
+        break;
+      default:
         break;
     }
   });

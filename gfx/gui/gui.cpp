@@ -73,7 +73,8 @@ static std::map<std::string, glm::vec3> definedColors = {
     {"link_hover", glm::vec3(0.2, 0.2, 1.0)},
     {"link_press", glm::vec3(0.5, 0.2, 1.0)},
     {"textarea", glm::vec3(0.3)},
-    {"textarea_edit", glm::vec3(0.1)}};
+    {"textarea_edit", glm::vec3(0.1)},
+    {"pinkish", glm::vec3(0.84, 0.48, 0.72)}};
 
 void Component::render(GuiManager* manager, gfx::Engine* engine) {
   if (!domRoot.visible) return;
@@ -155,8 +156,9 @@ void Component::render(GuiManager* manager, gfx::Engine* engine) {
       }
       case Element::Image: {
         if (alignTop)
-          offset +=
-              inc_factor * (element.second.textureSize + glm::ivec2(padding));
+          offset += inc_factor * (glm::max(element.second.minSize,
+                                           element.second.textureSize) +
+                                  glm::ivec2(padding));
         BaseTexture* displayTexture = element.second.texture;
         glm::vec3 displayColor = element.second.color;
         glm::vec2 pos = Input::singleton()->getMousePosition();
@@ -228,8 +230,9 @@ void Component::render(GuiManager* manager, gfx::Engine* engine) {
         }
         bp->bind();
         if (!alignTop)
-          offset +=
-              inc_factor * (element.second.textureSize + glm::ivec2(padding));
+          offset += inc_factor * (glm::max(element.second.minSize,
+                                           element.second.textureSize) +
+                                  glm::ivec2(padding));
         manager->squareArrayPointers->bind();
         engine->getDevice()->draw(manager->squareElementBuffer.get(),
                                   DtUnsignedByte, BaseDevice::Triangles, 6);
@@ -274,6 +277,11 @@ static void parseXmlNode(GuiManager* manager, Component* component,
 
         em.link = _link;
 
+        rapidxml::xml_attribute<>* minsize = child->first_attribute("minsize");
+        glm::vec4 minSize4 =
+            minsize ? Math::stringToVec4(minsize->value()) : glm::vec4(0);
+        em.minSize = glm::vec2(minSize4.x, minSize4.y);
+
         rapidxml::xml_attribute<>* color = child->first_attribute("color");
         em.color = color   ? definedColors[color->value()]
                    : _link ? definedColors["link"]
@@ -296,6 +304,7 @@ static void parseXmlNode(GuiManager* manager, Component* component,
         Component::Element em;
         em.type = Component::Element::TextField;
         em.value = child->value();
+        em.minSize = glm::vec2(0);
 
         rapidxml::xml_attribute<>* id = child->first_attribute("id");
         elid = id ? id->value()
@@ -337,6 +346,7 @@ static void parseXmlNode(GuiManager* manager, Component* component,
         Component::Element em;
         em.type = Component::Element::Image;
         em.color = glm::vec3(1);
+        em.minSize = glm::vec2(0);
 
         rapidxml::xml_attribute<>* hover = child->first_attribute("hover");
         em.textureHover = hover ? manager->getEngine()

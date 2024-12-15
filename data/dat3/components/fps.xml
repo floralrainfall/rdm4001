@@ -1,4 +1,4 @@
-<gui name="FPS" anchor="BottomLeft">
+<gui name="FPS" anchor="TopRight">
   <in_vars>
     <v name="worldFps" type="float">0.0</v>
     <v name="renderFps" type="float">0.0</v>

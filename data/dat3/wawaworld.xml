@@ -1,3 +1,4 @@
 <gui name="RootWawaworld">
   <component src="dat5/gui/main_menu.xml"></component>
+  <component src="dat5/gui/hud.xml"></component>
 </gui>
