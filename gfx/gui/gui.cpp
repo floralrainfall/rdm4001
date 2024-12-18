@@ -550,6 +550,8 @@ void GuiManager::render() {
   if (fps) {
     *(float*)(fps.value()->inVars["renderFps"].value) =
         1.0 / engine->getRenderJob()->getStats().getAvgDeltaTime();
+    *(float*)(fps.value()->inVars["realRenderDt"].value) =
+        engine->getRenderJob()->getStats().deltaTime;
     fps.value()->variablesDirty = true;
   }
 

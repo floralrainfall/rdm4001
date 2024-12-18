@@ -107,6 +107,10 @@ gamelib = static_library('game', [
   'gfx/engine.hpp',
   'gfx/entity.cpp',
   'gfx/entity.hpp',
+  'gfx/rendercommand.cpp',
+  'gfx/rendercommand.hpp',
+  'gfx/renderpass.cpp',
+  'gfx/renderpass.hpp',
   'gfx/heightmap.cpp',
   'gfx/heightmap.hpp',
   'gfx/material.cpp',
@@ -157,7 +161,14 @@ executable('wawaworld', [
   'wawaworld/worldspawn.cpp',
   'wawaworld/worldspawn.hpp',
   'wawaworld/wplayer.cpp',
-  'wawaworld/wplayer.hpp'
+  'wawaworld/wplayer.hpp',
+  'wawaworld/weapon.cpp',
+  'wawaworld/weapon.hpp',
+
+  'wawaworld/weapons/sniper.cpp',
+  'wawaworld/weapons/sniper.hpp',
+  'wawaworld/weapons/magnum.cpp',
+  'wawaworld/weapons/magnum.hpp',
 ], cpp_args: options, include_directories: [inc, inc2], dependencies: [common_dep, sdl2, glm, b3geometry_dep, easy_profiler], link_with: gamelib)
 
 executable('roadtrip', [

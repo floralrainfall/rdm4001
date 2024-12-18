@@ -265,6 +265,7 @@ void GLProgram::link() {
 void GLProgram::bindParameters() {
   for (auto& [name, pair] : parameters) {
     GLuint object = glGetUniformLocation(program, name.c_str());
+    if (!pair.first.dirty) continue;
     switch (pair.first.type) {
       case DtInt:
         glUniform1i(object, pair.second.integer);

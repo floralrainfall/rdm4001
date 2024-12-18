@@ -114,6 +114,7 @@ BaseTexture* TextureCache::createCacheTexture(const char* path, Info info) {
 
 static CVar r_bloomamount("r_bloomamount", "10", CVARF_SAVE | CVARF_GLOBAL);
 static CVar r_rate("r_rate", "60.0", CVARF_SAVE | CVARF_GLOBAL);
+static CVar r_bloom("r_bloom", "1", CVARF_SAVE | CVARF_GLOBAL);
 
 class RenderJob : public SchedulerJob {
   Engine* engine;
@@ -162,10 +163,14 @@ class RenderJob : public SchedulerJob {
         device->targetAttachments(&drawBuffers[0], 1);
         device->clear(engine->clearColor.x, engine->clearColor.y,
                       engine->clearColor.z, 0.0);
-        device->targetAttachments(&drawBuffers[1], 1);
-        device->clear(0.0, 0.0, 0.0, 0.0);
+        if (r_bloom.getBool()) {
+          device->targetAttachments(&drawBuffers[1], 1);
+          device->clear(0.0, 0.0, 0.0, 0.0);
 
-        device->targetAttachments(drawBuffers, 2);
+          device->targetAttachments(drawBuffers, 2);
+        } else {
+          device->targetAttachments(drawBuffers, 1);
+        }
       }
 
       device->viewport(0, 0, engine->targetResolution.x,
@@ -198,52 +203,59 @@ class RenderJob : public SchedulerJob {
       device->setDepthState(BaseDevice::Always);
       device->setCullState(BaseDevice::None);
 
+      if (r_bloom.getBool()) {
 #ifndef DISABLE_EASY_PROFILER
-      EASY_BLOCK("Bloom");
+        EASY_BLOCK("Bloom");
 #endif
 
-      {
-        bool horizontal = true, firstIteration = true;
-        int amount = r_bloomamount.getInt();
-        std::shared_ptr<gfx::Material> material =
-            engine->getMaterialCache()->getOrLoad("GaussianBlur").value();
-        for (int i = 0; i < amount; i++) {
-          void* framebuffer = engine->getDevice()->bindFramebuffer(
-              engine->pingpongFramebuffer[horizontal].get());
-          engine->renderFullscreenQuad(
-              NULL, material.get(),
-              [this, horizontal, firstIteration](BaseProgram* program) {
-                program->setParameter(
-                    "horizontal", DtInt,
-                    BaseProgram::Parameter{.integer = horizontal});
-                program->setParameter(
-                    "image", DtSampler,
-                    BaseProgram::Parameter{
-                        .texture.slot = 0,
-                        .texture.texture =
-                            firstIteration
-                                ? engine->fullscreenTextureBloom.get()
-                                : engine->pingpongTexture[!horizontal].get()});
-              });
-          horizontal = !horizontal;
-          if (firstIteration) firstIteration = false;
-          engine->getDevice()->unbindFramebuffer(framebuffer);
+        {
+          bool horizontal = true, firstIteration = true;
+          int amount = r_bloomamount.getInt();
+          std::shared_ptr<gfx::Material> material =
+              engine->getMaterialCache()->getOrLoad("GaussianBlur").value();
+          for (int i = 0; i < amount; i++) {
+            void* framebuffer = engine->getDevice()->bindFramebuffer(
+                engine->pingpongFramebuffer[horizontal].get());
+            engine->renderFullscreenQuad(
+                NULL, material.get(),
+                [this, horizontal, firstIteration](BaseProgram* program) {
+                  program->setParameter(
+                      "horizontal", DtInt,
+                      BaseProgram::Parameter{.integer = horizontal});
+                  program->setParameter(
+                      "image", DtSampler,
+                      BaseProgram::Parameter{
+                          .texture.slot = 0,
+                          .texture.texture =
+                              firstIteration
+                                  ? engine->fullscreenTextureBloom.get()
+                                  : engine->pingpongTexture[!horizontal]
+                                        .get()});
+                });
+            horizontal = !horizontal;
+            if (firstIteration) firstIteration = false;
+            engine->getDevice()->unbindFramebuffer(framebuffer);
+          }
         }
-      }
 
 #ifndef DISABLE_EASY_PROFILER
-      EASY_END_BLOCK;
+        EASY_END_BLOCK;
 #endif
+      }
 
       device->viewport(0, 0, engine->windowResolution.x,
                        engine->windowResolution.y);
       engine->renderFullscreenQuad(
           engine->fullscreenTexture.get(), NULL, [this](BaseProgram* p) {
+            if (r_bloom.getBool())
+              p->setParameter(
+                  "texture1", DtSampler,
+                  BaseProgram::Parameter{
+                      .texture.slot = 1,
+                      .texture.texture = engine->pingpongTexture[1].get()});
             p->setParameter(
-                "texture1", DtSampler,
-                BaseProgram::Parameter{
-                    .texture.slot = 1,
-                    .texture.texture = engine->pingpongTexture[1].get()});
+                "bloom", DtInt,
+                BaseProgram::Parameter{.integer = r_bloom.getBool()});
             p->setParameter(
                 "target_res", DtVec2,
                 BaseProgram::Parameter{.vec2 = engine->targetResolution});
@@ -444,6 +456,10 @@ void Engine::render() {
     } catch (std::exception& error) {
       Log::printf(LOG_ERROR, "Error rendering entity %i", i);
     }
+  }
+
+  for (int i = 0; i < RenderPass::_Max; i++) {
+    passes[i].render(this);
   }
 }
 

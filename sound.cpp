@@ -311,6 +311,8 @@ SoundEmitter::~SoundEmitter() {
   if (parent)
     parent->delEmitter(this);  // since we should always come from a
                                // newEmitter call we should do taht
+  alSourceStop(source);
+  alDeleteSources(1, &source);
 }
 
 void SoundManager::service() {

@@ -2,6 +2,7 @@
   <in_vars>
     <v name="worldFps" type="float">0.0</v>
     <v name="renderFps" type="float">0.0</v>
+    <v name="realRenderDt" type="float">0.0</v>
     <v name="physicsFps" type="float">0.0</v>
     <v name="networkFps" type="float">0.0</v>
   </in_vars>

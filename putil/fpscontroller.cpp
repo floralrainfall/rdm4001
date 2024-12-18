@@ -147,6 +147,8 @@ void FpsController::updateCamera(gfx::Camera& camera) {
   camera.setPosition(origin);
   camera.setTarget(origin + (cameraView * forward));
   camera.setUp(glm::vec3(0, 0, 1));
+  camera.setNear(1.0);
+  camera.setFar(65535.f);
 }
 
 void FpsController::physicsStep() {
@@ -184,8 +186,6 @@ void FpsController::physicsStep() {
   } else {
     anim = Fall;
   }
-
-  Log::printf(LOG_DEBUG, "%i", anim);
 
   if (localPlayer) {
 #ifndef DISABLE_EASY_PROFILER

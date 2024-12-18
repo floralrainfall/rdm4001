@@ -13,6 +13,7 @@ uniform int banding_effect = 0xff3;
 uniform vec2 target_res;
 uniform float forced_aspect;
 uniform vec2 window_res;
+uniform bool bloom;
 
 vec3 bandize(vec3 col) {
   vec3 out_color_raw = col;
@@ -54,8 +55,10 @@ void main() {
       4;*/
   vec3 base_color = texelFetch(texture0, uv, 0).rgb;
 
-  vec3 bloom_color = texelFetch(texture1, uv, 0).rgb;
-  base_color += bloom_color;
+  if (bloom) {
+    vec3 bloom_color = texelFetch(texture1, uv, 0).rgb;
+    base_color += bloom_color;
+  }
   vec3 result = base_color.rgb;
   // vec3 result = vec3(1.0) - exp(-base_color * exposure);
   // result = pow(result, vec3(1.0 / gamma));

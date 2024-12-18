@@ -26,6 +26,7 @@ Input::Input() {
   mouseDelta = glm::vec3(0);
   mousePosition = glm::vec3(0);
 
+  editingText = false;
   memset(keysDown, 0, sizeof(keysDown));
   memset(mouseButtonsDown, 0, sizeof(mouseButtonsDown));
 
@@ -45,9 +46,13 @@ rdm::Input* Input::singleton() {
 void Input::startEditingText(bool clear) {
   if (clear) text.clear();
   SDL_StartTextInput();
+  editingText = true;
 }
 
-void Input::stopEditingText() { SDL_StopTextInput(); }
+void Input::stopEditingText() {
+  SDL_StopTextInput();
+  editingText = false;
+}
 
 std::string& Input::getEditedText() { return text; }
 

@@ -3,12 +3,15 @@
 #include <cmath>
 #include <memory>
 
+#include "SDL_keycode.h"
 #include "gfx/base_types.hpp"
 #include "gfx/engine.hpp"
 #include "gfx/imgui/imgui.h"
 #include "gfx/material.hpp"
 #include "gfx/mesh.hpp"
+#include "input.hpp"
 #include "logging.hpp"
+#include "network/entity.hpp"
 #include "physics.hpp"
 #include "putil/fpscontroller.hpp"
 #include "settings.hpp"
@@ -40,6 +43,11 @@ class PlayerEntity : public gfx::Entity {
 
 static CVar cl_showpos("cl_showpos", "0", CVARF_SAVE);
 
+std::map<int, std::string> WPlayer::weaponIds = {
+    {1, "WeaponSniper"},
+    {2, "WeaponMagnum"},
+};
+
 WPlayer::WPlayer(net::NetworkManager* manager, net::EntityId id)
     : Player(manager, id) {
   controller.reset(
@@ -47,6 +55,10 @@ WPlayer::WPlayer(net::NetworkManager* manager, net::EntityId id)
   controller->setLocalPlayer(false);
   entityNode = new rdm::Graph::Node();
   entityNode->scale = glm::vec3(6.f);
+  wantedWeaponId = getManager()->isBackend() ? -1 : 1;
+  heldWeaponRef = 0;
+  firingState[0] = false;
+  firingState[1] = false;
   if (!getManager()->isBackend()) {
     soundEmitter.reset(getGame()->getSoundManager()->newEmitter());
     soundEmitter->node = entityNode;
@@ -57,6 +69,8 @@ WPlayer::WPlayer(net::NetworkManager* manager, net::EntityId id)
                            .value());
     soundEmitter->setPitch(0.f);
     soundEmitter->setLooping(true);
+
+    getManager()->addPendingUpdate(getEntityId());
 
     worldJob = getWorld()->stepped.listen([this] {
       if (isLocalPlayer()) {
@@ -124,6 +138,8 @@ WPlayer::WPlayer(net::NetworkManager* manager, net::EntityId id)
                               gfx::BaseProgram::Parameter{
                                   .matrix4x4 = entityNode->worldTransform()});
         model->render(getGfxEngine()->getDevice());
+      } else {
+        if (heldWeaponRef) heldWeaponRef->renderView();
       }
     });
     /*getGfxEngine()->renderStepped.addClosure([this] {
@@ -148,55 +164,135 @@ void WPlayer::tick() {
   Worldspawn* worldspawn =
       dynamic_cast<Worldspawn*>(getManager()->findEntityByType("Worldspawn"));
 
+  heldWeaponRef =
+      dynamic_cast<Weapon*>(getManager()->getEntityById(heldWeaponId));
+  if (heldWeaponRef) heldWeaponRef->setOwnerRef(this);
+
+  bool needsUpdate = false;
+
+  if (!isLocalPlayer()) {
+    if (heldWeaponRef) {
+      if (firingState[0])
+        heldWeaponRef->primaryFire();
+      else if (firingState[1])
+        heldWeaponRef->secondaryFire();
+    }
+  }
+
+  if (!getManager()->isBackend()) {
+    if (isLocalPlayer()) {
+      for (int i = 0; i < 9; i++) {
+        if (rdm::Input::singleton()->isKeyDown(SDLK_1 + i)) {
+          Log::printf(LOG_DEBUG, "%i", i);
+          auto it = weaponIds.find(i + 1);
+          if (it != weaponIds.end()) {
+            wantedWeaponId = i + 1;
+            getManager()->addPendingUpdate(getEntityId());
+          }
+          break;
+        }
+      }
+
+      if (rdm::Input::singleton()->isMouseButtonDown(1)) {
+        if (heldWeaponRef) {
+          if (!firingState[0]) needsUpdate = true;
+          firingState[0] = true;
+          heldWeaponRef->primaryFire();
+        }
+      } else {
+        if (firingState[0]) needsUpdate = true;
+        firingState[0] = false;
+      }
+    }
+  }
+
   if (worldspawn && worldspawn->getFile()) {
     controller->setEnable(true);
-    if (!getManager()->isBackend()) {
+    if (!getManager()->isBackend() && isLocalPlayer()) {
       btTransform transform = controller->getTransform();
 
       btVector3 vel = controller->getRigidBody()->getLinearVelocity();
       soundEmitter->setPitch(
           controller->isGrounded() ? ((vel.length() < 1) ? 0.0 : 1.f) : 0.f);
 
-      if (isLocalPlayer()) {
-        if (worldspawn && worldspawn->getFile()) {
-          btVector3 forward = btVector3(0, 0, 1);
-          btVector3 forward_old = forward * transform.getBasis();
-          btVector3 forward_new = forward * oldTransform.getBasis();
-          btVector3 origin_old = transform.getOrigin();
-          btVector3 origin_new = oldTransform.getOrigin();
-          bool needsUpdate = false;
-          if (forward_old.dot(forward_new) > 0.1) needsUpdate = true;
-          if (origin_old.distance(origin_new) > 0.1) needsUpdate = true;
+      if (worldspawn && worldspawn->getFile()) {
+        btVector3 forward = btVector3(0, 0, 1);
+        btVector3 forward_old = forward * transform.getBasis();
+        btVector3 forward_new = forward * oldTransform.getBasis();
+        btVector3 origin_old = transform.getOrigin();
+        btVector3 origin_new = oldTransform.getOrigin();
+        if (forward_old.dot(forward_new) > 0.1) needsUpdate = true;
+        if (origin_old.distance(origin_new) > 0.1) needsUpdate = true;
 
-          if (needsUpdate) {
-            oldTransform = transform;
+        if (needsUpdate) {
+          oldTransform = transform;
 
-            getManager()->addPendingUpdateUnreliable(getEntityId());
-          }
+          getManager()->addPendingUpdateUnreliable(getEntityId());
         }
-
-        controller->setLocalPlayer(true);
-      } else {
-        controller->setLocalPlayer(false);
       }
+
+      controller->setLocalPlayer(true);
+    } else {
+      controller->setLocalPlayer(false);
     }
   } else
     controller->setEnable(false);
 }
 
-void WPlayer::serialize(net::BitStream& stream) { Player::serialize(stream); }
+void WPlayer::serialize(net::BitStream& stream) {
+  Player::serialize(stream);
+  if (getManager()->isBackend()) {
+    stream.write<network::EntityId>(heldWeaponId);
+  } else {
+    stream.write<int>(wantedWeaponId);
+  }
+}
 
 void WPlayer::deserialize(net::BitStream& stream) {
   Player::deserialize(stream);
+  if (getManager()->isBackend()) {
+    int wantedWeapon = stream.read<int>();
+    if (wantedWeaponId != wantedWeapon) {
+      auto it = weaponIds.find(wantedWeapon);
+      if (it != weaponIds.end()) {
+        if (heldWeaponRef) {
+          getManager()->deleteEntity(heldWeaponRef->getEntityId());
+        }
+        heldWeaponRef =
+            dynamic_cast<Weapon*>(getManager()->instantiate(it->second));
+        Log::printf(LOG_DEBUG, "Instantiated weapon %s",
+                    heldWeaponRef->getTypeName());
+        wantedWeaponId = wantedWeapon;
+        heldWeaponId = heldWeaponRef->getEntityId();
+        getManager()->addPendingUpdate(getEntityId());
+      } else {
+        Log::printf(LOG_WARN, "Unknown wantedWeapon id %i", wantedWeapon);
+      }
+    }
+  } else {
+    heldWeaponId = stream.read<network::EntityId>();
+  }
 }
 
 void WPlayer::serializeUnreliable(net::BitStream& stream) {
-  std::scoped_lock lock(getWorld()->getPhysicsWorld()->mutex);
-  controller->serialize(stream);
+  {
+    std::scoped_lock lock(getWorld()->getPhysicsWorld()->mutex);
+    controller->serialize(stream);
+  }
+
+  stream.write<bool>(firingState[0]);
+  stream.write<bool>(firingState[1]);
 }
 
 void WPlayer::deserializeUnreliable(net::BitStream& stream) {
-  std::scoped_lock lock(getWorld()->getPhysicsWorld()->mutex);
-  controller->deserialize(stream);
+  {
+    std::scoped_lock lock(getWorld()->getPhysicsWorld()->mutex);
+    controller->deserialize(stream);
+  }
+
+  if (!isLocalPlayer()) {
+    firingState[0] = stream.read<bool>();
+    firingState[1] = stream.read<bool>();
+  }
 }
 }  // namespace ww

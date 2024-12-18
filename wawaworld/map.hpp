@@ -42,7 +42,7 @@ struct BSPFaceModel {
   gfx::BaseTexture* m_lightmap;
   std::unique_ptr<gfx::BaseBuffer> m_buffer;
   std::unique_ptr<gfx::BaseBuffer> m_index;
-  std::shared_ptr<gfx::Material> m_program;
+  enum Type { Opaque, Sky } type;
   int m_indexCount;
   std::unique_ptr<gfx::BaseArrayPointers> m_layout;
 };
@@ -170,7 +170,8 @@ class BSPFile {
   void addLeafFaces(BSPLeaf* leaf, bool brush, bool leafface);
   void parseTreeNode(BSPNode* node, bool brush, bool leafface);
   BSPFaceModel addFaceModel(BSPFace* face);
-  void renderFaceModel(BSPFaceModel* model, gfx::BaseProgram* program);
+  void renderFaceModel(gfx::RenderList& list, BSPFaceModel* model,
+                       gfx::BaseProgram* program);
 
   gfx::Engine* engine;
 

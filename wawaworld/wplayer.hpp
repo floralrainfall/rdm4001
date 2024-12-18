@@ -8,6 +8,7 @@
 #include "putil/fpscontroller.hpp"
 #include "signal.hpp"
 #include "sound.hpp"
+#include "weapon.hpp"
 
 namespace net = rdm::network;
 namespace ww {
@@ -19,12 +20,26 @@ class WPlayer : public net::Player {
   rdm::ClosureId worldJob;
   rdm::ClosureId gfxJob;
   btTransform oldTransform;
+  int wantedWeaponId;
+  net::EntityId heldWeaponId;
+  Weapon* heldWeaponRef;
+
+  static std::map<int, std::string> weaponIds;
+
+  int health;
+  int maxHealth;
+  int armor;
+  int maxArmor;
+
+  bool firingState[2];
 
   std::unique_ptr<rdm::SoundEmitter> soundEmitter;
 
  public:
   WPlayer(net::NetworkManager* manager, net::EntityId id);
   virtual ~WPlayer();
+
+  rdm::Graph::Node* getNode() { return entityNode; }
 
   virtual void tick();
   rdm::putil::FpsController* getController() { return controller.get(); }

@@ -23,7 +23,7 @@ void main() {
   vec3 i = normalize(v_fmpos - view_position);
   vec3 r = reflect(i, normalize(v_fnormal));
 
-  float intensity = dot(v_fnormal, normalize(vec3(0.5, 0.5, 0.5)));
+  float intensity = dot(v_fnormal, normalize(vec3(-0.5, -0.5, 0.5)));
   vec3 result = vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5) * intensity;
   float brightness = dot(result, vec3(0.2126, 0.7152, 0.0722));
   f_color = vec4(result, 1.0);

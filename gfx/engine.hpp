@@ -12,6 +12,7 @@
 #include "gfx/base_types.hpp"
 #include "gfx/gui/gui.hpp"
 #include "gfx/mesh.hpp"
+#include "renderpass.hpp"
 #include "scheduler.hpp"
 #include "signal.hpp"
 
@@ -94,8 +95,12 @@ class Engine {
   double maxFbScale;
   double forcedAspect;
 
+  RenderPass passes[RenderPass::_Max];
+
  public:
   Engine(World* world, void* hwnd);
+
+  RenderPass& pass(RenderPass::Pass pass) { return passes[pass]; };
 
   World* getWorld() { return world; }
 

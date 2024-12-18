@@ -10,6 +10,8 @@
 #include "gfx/base_types.hpp"
 #include "gfx/engine.hpp"
 #include "gfx/entity.hpp"
+#include "gfx/rendercommand.hpp"
+#include "gfx/renderpass.hpp"
 #include "logging.hpp"
 
 #ifndef DISABLE_EASY_PROFILER
@@ -215,13 +217,9 @@ BSPFaceModel BSPFile::addFaceModel(BSPFace* face) {
     if (texture.name ==
         std::string("textures/skies/skybox"))  // TODO: make this not hardcoded
     {
-      m.m_program =
-          engine->getMaterialCache()
-              ->getOrLoad("BspSky")
-              .value();  // Material::getMaterial("materials/bsp/sky.mmf")->getProgram();
-      m.m_texture = m_skybox.get();
+      m.type = BSPFaceModel::Sky;
     } else {
-      m.m_program = engine->getMaterialCache()->getOrLoad("BspBrush").value();
+      m.type = BSPFaceModel::Opaque;
       std::string extensions[] = {
           ".png", ".jpg", ".tga", ".PNG", ".JPG", ".TGA",
       };
@@ -251,7 +249,6 @@ BSPFaceModel BSPFile::addFaceModel(BSPFace* face) {
     }
   } catch (std::exception& e) {
     m.m_texture = 0;
-    m.m_program = 0;
   }
 
   m.m_layout->upload();
@@ -294,12 +291,12 @@ void BSPFile::parseTreeNode(BSPNode* node, bool brush, bool leafface) {
   }
 }
 
-void BSPFile::renderFaceModel(BSPFaceModel* model, gfx::BaseProgram* program) {
+void BSPFile::renderFaceModel(gfx::RenderList& list, BSPFaceModel* model,
+                              gfx::BaseProgram* program) {
   if (!m_gfxEnabled) return;
   if (!model->m_index.get()) return;
-  if (!program) return;
 
-  model->m_layout->bind();
+  /*model->m_layout->bind();
   program->setParameter(
       "lightmap", gfx::DtSampler,
       gfx::BaseProgram::Parameter{.texture.texture = model->m_lightmap,
@@ -312,11 +309,19 @@ void BSPFile::renderFaceModel(BSPFaceModel* model, gfx::BaseProgram* program) {
   program->setParameter(
       "skybox", gfx::DtSampler,
       gfx::BaseProgram::Parameter{.texture.texture = m_skybox.get(),
-                                  .texture.slot = 1});
-  program->bind();
-  engine->getDevice()->draw(model->m_index.get(), gfx::DtUnsignedInt,
+      .texture.slot = 1});*/
+
+  gfx::RenderCommand command(gfx::BaseDevice::Triangles, model->m_index.get(),
+                             model->m_indexCount / sizeof(int),
+                             model->m_layout.get());
+  if (model->type == BSPFaceModel::Opaque) {
+    command.setTexture(0, model->m_texture);
+    command.setTexture(1, model->m_lightmap);
+  }
+  list.add(command);
+  /*engine->getDevice()->draw(model->m_index.get(), gfx::DtUnsignedInt,
                             gfx::BaseDevice::Triangles,
-                            model->m_indexCount / sizeof(int));
+                            model->m_indexCount / sizeof(int));*/
 }
 
 void BSPFile::draw() {
@@ -325,9 +330,26 @@ void BSPFile::draw() {
   EASY_FUNCTION("BSPFile::draw");
 #endif
 
-  engine->getDevice()->setCullState(gfx::BaseDevice::BackCCW);
+  gfx::RenderListSettings settings;
+  settings.cull = rdm::gfx::BaseDevice::BackCCW;
 
-  engine->getDevice()->setDepthState(gfx::BaseDevice::LEqual);
+  gfx::RenderList opaque(engine->getMaterialCache()
+                             ->getOrLoad("BspBrush")
+                             .value()
+                             ->prepareDevice(engine->getDevice(), 0),
+                         NULL, settings);
+  gfx::BaseProgram* sky =
+      engine->getMaterialCache()->getOrLoad("BspSky").value()->prepareDevice(
+          engine->getDevice(), 0);
+  sky->setParameter("skybox", gfx::DtSampler,
+                    gfx::BaseProgram::Parameter{
+                        .texture.slot = 0, .texture.texture = m_skybox.get()});
+  gfx::RenderList skybox(sky, NULL, settings);
+  gfx::RenderList transparent(engine->getMaterialCache()
+                                  ->getOrLoad("BspBrush")
+                                  .value()
+                                  ->prepareDevice(engine->getDevice(), 0),
+                              NULL, settings);
 
   m_facesRendered = 0;
   m_leafsRendered = 0;
@@ -344,29 +366,42 @@ void BSPFile::draw() {
 
       for (int j = 0; j < leaf.m_models.size(); j++) {
         BSPFaceModel& model = leaf.m_models[j];
-        if (model.m_program) {
-          gfx::BaseProgram* program =
-              model.m_program->prepareDevice(engine->getDevice(), 0);
-
-          renderFaceModel(&model, program);
-          m_facesRendered++;
+        switch (model.type) {
+          case BSPFaceModel::Opaque:
+            renderFaceModel(opaque, &model, NULL);
+            break;
+          case BSPFaceModel::Sky:
+            renderFaceModel(skybox, &model, NULL);
+            break;
         }
+        m_facesRendered++;
       }
       m_leafsRendered++;
     }
   } else {
+    /*
     for (int i = 0; i < m_models.size(); i++) {
       BSPFaceModel& model = m_models.at(i);
       if (model.m_program) {
         gfx::BaseProgram* program =
             model.m_program->prepareDevice(engine->getDevice(), 0);
-        renderFaceModel(&model, program);
+        renderFaceModel(opaque, &model, program);
         m_facesRendered++;
       }
-    }
+      }*/
   }
 
-  engine->getDevice()->setCullState(gfx::BaseDevice::FrontCCW);  // reset state
+  opaque.sort([](gfx::RenderCommand const& a, gfx::RenderCommand const& b) {
+    gfx::BaseTexture *_a, *_b;
+    _a = a.getTexture(0);
+    _b = b.getTexture(0);
+
+    return _a == _b ? (a.getTexture(1) < b.getTexture(1)) : (_a < _b);
+  });
+
+  engine->pass(gfx::RenderPass::Opaque).add(opaque);
+  engine->pass(gfx::RenderPass::Opaque).add(skybox);
+  engine->pass(gfx::RenderPass::Transparent).add(transparent);
 }
 
 void BSPFile::removeFromPhysicsWorld(PhysicsWorld* world) {

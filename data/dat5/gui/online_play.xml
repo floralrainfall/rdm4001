@@ -1,7 +1,7 @@
 <gui name="MenuOnlinePlay" anchor="TopLeft">
   <dom>
     <label font="dat3/serif.ttf" color="black">IP Address</label>
-    <textfield font="dat3/serif.ttf" id="IPAddress"></textfield>
+    <textfield font="dat3/serif.ttf" id="IPAddress">127.0.0.1</textfield>
     <label font="dat3/serif.ttf" color="black">Port</label>
     <textfield font="dat3/serif.ttf" id="Port">7938</textfield>
     <label font="dat3/serif.ttf" link="true" id="Connect">Connect</label>

@@ -7,8 +7,7 @@ Player::Player(NetworkManager* manager, EntityId id) : Entity(manager, id) {
 }
 
 bool Player::isLocalPlayer() {
-  if (getManager()->isBackend())
-    throw std::runtime_error("Calling isLocalPlayer on backend");
+  if (getManager()->isBackend()) return false;
   return getManager()->getLocalPeer().playerEntity == this;
 }
 

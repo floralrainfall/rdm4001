@@ -101,7 +101,7 @@ void SchedulerJob::task(SchedulerJob* job) {
 #ifndef DISABLE_EASY_PROFILER
     EASY_BLOCK("Step");
 #endif
-    std::chrono::time_point start = std::chrono::high_resolution_clock::now();
+    std::chrono::time_point start = std::chrono::steady_clock::now();
 
     Result r;
     try {
@@ -149,26 +149,28 @@ void SchedulerJob::task(SchedulerJob* job) {
     }
 
     double frameRate = job->getFrameRate();
-    std::chrono::time_point end = std::chrono::high_resolution_clock::now();
+    std::chrono::time_point end = std::chrono::steady_clock::now();
     std::chrono::duration execution = end - start;
     if (frameRate != 0.0) {  // run as fast as we can if there is no frame rate
 #ifndef DISABLE_EASY_PROFILER
       EASY_BLOCK("Sleep");
 #endif
       std::chrono::duration sleep =
-          std::chrono::duration<double>(frameRate) - execution;
+          std::chrono::duration<double>(frameRate) - execution -
+          std::chrono::duration<double>(frameRate * 0.00599999999999);
+      std::chrono::time_point until = end + sleep;
       if (job->stopOnCancel) {
-        if (job->killMutex.try_lock_until(end + sleep)) {
+        if (job->killMutex.try_lock_until(until)) {
           Log::printf(LOG_DEBUG, "killMutex unlocked on %s",
                       job->getStats().name);
           running = false;
         }
       } else {
-        std::this_thread::sleep_until(end + sleep);
+        std::this_thread::sleep_until(until);
       }
     }
     job->stats.deltaTime = std::chrono::duration<double>(execution).count();
-    end = std::chrono::high_resolution_clock::now();
+    end = std::chrono::steady_clock::now();
     execution = end - start;
     job->stats.totalDeltaTime =
         std::chrono::duration<double>(execution).count();

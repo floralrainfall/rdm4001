@@ -2,6 +2,7 @@
 
 #include <enet/enet.h>
 
+#include <chrono>
 #include <stdexcept>
 
 #include "fun.hpp"
@@ -60,6 +61,7 @@ NetworkManager::NetworkManager(World* world) {
   world->getScheduler()->addJob(new NetworkJob(this));
 
   localPeer.type = Peer::Unconnected;
+  localPeer.peerId = -2;
   lastId = 0;
   lastPeerId = 0;
   ticks = 0;
@@ -336,6 +338,7 @@ void NetworkManager::service() {
                 else {
                   float newTime = stream.read<float>();
                   float diff = newTime - distributedTime;
+                  lastTick = std::chrono::steady_clock::now();
                   if (fabsf(diff) > 0.05) {
                     Log::printf(LOG_WARN,
                                 "Updating distributedTime (diff: %f, new: %f)",
@@ -541,9 +544,10 @@ void NetworkManager::service() {
         Entity* entity = pair.second.get();
         if (Player* playerEntity = dynamic_cast<Player*>(entity)) {
           if (playerEntity->remotePeerId.get() == localPeer.peerId) {
-            Log::printf(LOG_DEBUG, "Found player entity id %i, username %s",
-                        playerEntity->remotePeerId.get(),
-                        playerEntity->displayName.get().c_str());
+            Log::printf(
+                LOG_DEBUG, "Found player entity id %i, eid %i, username %s",
+                playerEntity->remotePeerId.get(), playerEntity->getEntityId(),
+                playerEntity->displayName.get().c_str());
             localPeer.playerEntity = playerEntity;
           }
         }
@@ -692,6 +696,12 @@ Entity* NetworkManager::findEntityByType(std::string typeName) {
     if (entity.second->getTypeName() == typeName) return entity.second.get();
   }
   return NULL;
+}
+
+Entity* NetworkManager::getEntityById(EntityId id) {
+  auto it = entities.find(id);
+  if (it == entities.end()) return NULL;
+  return it->second.get();
 }
 
 std::vector<Entity*> NetworkManager::findEntitiesByType(std::string typeName) {

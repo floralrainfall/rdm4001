@@ -1,6 +1,7 @@
 #pragma once
 #include <enet/enet.h>
 
+#include <chrono>
 #include <functional>
 #include <map>
 #include <memory>
@@ -76,6 +77,8 @@ class NetworkManager {
   std::vector<EntityId> pendingUpdates;
   std::vector<EntityId> pendingUpdatesUnreliable;
 
+  std::chrono::time_point<std::chrono::steady_clock> lastTick;
+
  public:
   NetworkManager(World* world);
   ~NetworkManager();
@@ -123,6 +126,8 @@ class NetworkManager {
                            std::string typeName);
   Entity* findEntityByType(std::string typeName);
   std::vector<Entity*> findEntitiesByType(std::string typeName);
+
+  Entity* getEntityById(EntityId id);
 
   void addPendingUpdate(EntityId id) { pendingUpdates.push_back(id); };
   void addPendingUpdateUnreliable(EntityId id) {

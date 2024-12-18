@@ -17,6 +17,8 @@
 #include "settings.hpp"
 #include "sound.hpp"
 #include "state.hpp"
+#include "weapons/magnum.hpp"
+#include "weapons/sniper.hpp"
 #include "world.hpp"
 #include "worldspawn.hpp"
 #include "wplayer.hpp"
@@ -70,6 +72,10 @@ void WGame::addEntityConstructors(network::NetworkManager* manager) {
   manager->registerConstructor(network::EntityConstructor<Worldspawn>,
                                "Worldspawn");
   manager->registerConstructor(network::EntityConstructor<WPlayer>, "WPlayer");
+  manager->registerConstructor(network::EntityConstructor<WeaponSniper>,
+                               "WeaponSniper");
+  manager->registerConstructor(network::EntityConstructor<WeaponMagnum>,
+                               "WeaponMagnum");
   manager->setPlayerType("WPlayer");
 }
 
