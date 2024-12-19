@@ -339,13 +339,13 @@ default
 55 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 56 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
 57 // SURFACE_META V: 5 I: 9 planar
@@ -501,13 +501,13 @@ default
 82 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
+	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
 83 // SURFACE_META V: 4 I: 6 planar
 {
 	shader textures/rdm/leaf
-	lightmapAxis ( -1.000000 0.000000 0.000000 )
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
 84 // SURFACE_META V: 8 I: 24 planar
@@ -684,16 +684,16 @@ default
 	lightmapAxis ( -1.000000 0.000000 0.000000 )
 }
 
-113 // SURFACE_META V: 4 I: 6 planar
-{
-	shader textures/rdm/leaf
-	lightmapAxis ( 0.000000 -1.000000 0.000000 )
-}
-
-114 // SURFACE_META V: 3 I: 3 planar
+113 // SURFACE_META V: 3 I: 3 planar
 {
 	shader textures/rdm/leaf
 	lightmapAxis ( -1.000000 0.000000 0.000000 )
+}
+
+114 // SURFACE_META V: 4 I: 6 planar
+{
+	shader textures/rdm/leaf
+	lightmapAxis ( 0.000000 -1.000000 0.000000 )
 }
 
 115 // SURFACE_META V: 5 I: 9 planar

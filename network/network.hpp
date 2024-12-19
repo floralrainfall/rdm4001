@@ -72,7 +72,7 @@ class NetworkManager {
   std::string username;
 
   std::map<std::string, EntityConstructorFunction> constructors;
-  std::map<EntityId, std::unique_ptr<Entity>> entities;
+  std::unordered_map<EntityId, std::unique_ptr<Entity>> entities;
 
   std::vector<EntityId> pendingUpdates;
   std::vector<EntityId> pendingUpdatesUnreliable;

@@ -57,7 +57,7 @@ WPlayer::WPlayer(net::NetworkManager* manager, net::EntityId id)
   entityNode->scale = glm::vec3(6.f);
   wantedWeaponId = getManager()->isBackend() ? -1 : 1;
   heldWeaponRef = NULL;
-  heldWeaponId = -1;
+
   firingState[0] = false;
   firingState[1] = false;
   if (!getManager()->isBackend()) {
@@ -118,7 +118,6 @@ WPlayer::WPlayer(net::NetworkManager* manager, net::EntityId id)
       }
 
       // if (getManager()->getLocalPeer().peerId == remotePeerId.get()) return;
-      getGame()->getSoundManager()->listenerNode = entityNode;
 
       if (!isLocalPlayer()) {
         std::shared_ptr<gfx::Material> material =
@@ -134,13 +133,10 @@ WPlayer::WPlayer(net::NetworkManager* manager, net::EntityId id)
                                 .value();
         model->render(getGfxEngine()->getDevice());
 
-        entityNode->origin = controller->getNetworkPosition();
-        program->setParameter("model", gfx::DtMat4,
-                              gfx::BaseProgram::Parameter{
-                                  .matrix4x4 = entityNode->worldTransform()});
-        model->render(getGfxEngine()->getDevice());
+        // if (heldWeaponRef) heldWeaponRef->renderWorld();
       } else {
-        if (heldWeaponRef) heldWeaponRef->renderView();
+        getGame()->getSoundManager()->listenerNode = entityNode;
+        // if (heldWeaponRef) heldWeaponRef->renderView();
       }
     });
     /*getGfxEngine()->renderStepped.addClosure([this] {
@@ -158,6 +154,9 @@ WPlayer::WPlayer(net::NetworkManager* manager, net::EntityId id)
       controller->teleport(worldspawn->spawnLocation());
       getManager()->addPendingUpdateUnreliable(getEntityId());
     }
+
+    giveWeapon(
+        dynamic_cast<Weapon*>(getManager()->instantiate("WeaponSniper")));
   }
 }
 
@@ -168,13 +167,17 @@ WPlayer::~WPlayer() {
   }
 }
 
+void WPlayer::giveWeapon(Weapon* weapon) {
+  if (getManager()->isBackend()) {
+    weapon->setOwnerRef(this);
+    ownedWeapons.push_back(weapon);
+    getManager()->addPendingUpdate(getEntityId());
+  }
+}
+
 void WPlayer::tick() {
   Worldspawn* worldspawn =
       dynamic_cast<Worldspawn*>(getManager()->findEntityByType("Worldspawn"));
-
-  heldWeaponRef =
-      dynamic_cast<Weapon*>(getManager()->getEntityById(heldWeaponId));
-  if (heldWeaponRef) heldWeaponRef->setOwnerRef(this);
 
   bool needsUpdate = false;
 
@@ -229,8 +232,8 @@ void WPlayer::tick() {
         btVector3 forward_new = forward * oldTransform.getBasis();
         btVector3 origin_old = transform.getOrigin();
         btVector3 origin_new = oldTransform.getOrigin();
-        Log::printf(LOG_DEBUG, "%f, %f", forward_old.dot(forward_new),
-                    origin_old.distance(origin_new));
+        // Log::printf(LOG_DEBUG, "%f, %f", forward_old.dot(forward_new),
+        //            origin_old.distance(origin_new));
 
         if (forward_old.dot(forward_new) < 0.9) needsUpdate = true;
         if (origin_old.distance(origin_new) > 0.1) needsUpdate = true;
@@ -253,17 +256,21 @@ void WPlayer::tick() {
 void WPlayer::serialize(net::BitStream& stream) {
   Player::serialize(stream);
   if (getManager()->isBackend()) {
-    stream.write<network::EntityId>(heldWeaponId);
+    stream.write<unsigned char>(heldWeaponIndex);
+    stream.write<int>(ownedWeapons.size());
+    for (int i = 0; i < ownedWeapons.size(); i++) {
+      stream.write<network::EntityId>(ownedWeapons[i]->getEntityId());
+    }
   } else {
-    stream.write<int>(wantedWeaponId);
+    stream.write<unsigned char>(wantedWeaponId);
   }
 }
 
 void WPlayer::deserialize(net::BitStream& stream) {
   Player::deserialize(stream);
   if (getManager()->isBackend()) {
-    int wantedWeapon = stream.read<int>();
-    if (wantedWeaponId != wantedWeapon) {
+    unsigned char wantedWeapon = stream.read<unsigned char>();
+    /*if (wantedWeaponId != wantedWeapon) {
       auto it = weaponIds.find(wantedWeapon);
       if (it != weaponIds.end()) {
         if (heldWeaponRef) {
@@ -279,9 +286,36 @@ void WPlayer::deserialize(net::BitStream& stream) {
       } else {
         Log::printf(LOG_WARN, "Unknown wantedWeapon id %i", wantedWeapon);
       }
+      }*/
+    if (ownedWeapons.size()) {
+      if (wantedWeapon < ownedWeapons.size()) {
+        heldWeaponRef = ownedWeapons[wantedWeapon];
+        wantedWeaponId = wantedWeapon;
+      } else {
+        wantedWeaponId = 0;
+        heldWeaponRef = ownedWeapons[wantedWeaponId];
+      }
+    } else {
+      heldWeaponRef = 0;
     }
   } else {
-    heldWeaponId = stream.read<network::EntityId>();
+    wantedWeaponId = stream.read<unsigned char>();
+    heldWeaponIndex = wantedWeaponId;
+    ownedWeapons.clear();
+    int numWeapons = stream.read<int>();
+    for (int i = 0; i < numWeapons; i++) {
+      net::EntityId id = stream.read<net::EntityId>();
+      Weapon* weapon = dynamic_cast<Weapon*>(getManager()->getEntityById(id));
+      if (weapon) {
+        weapon->setOwnerRef(this);
+        ownedWeapons.push_back(weapon);
+      } else {
+        Log::printf(LOG_ERROR, "Invalid weapon id %i", id);
+      }
+    }
+    if (ownedWeapons.size()) {
+      heldWeaponRef = ownedWeapons[wantedWeaponId];
+    }
   }
 }
 

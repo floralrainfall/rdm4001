@@ -114,6 +114,8 @@ void BSPFile::addLeafFaces(BSPLeaf* leaf, bool brushen, bool leaffaceen) {
 
   // DEV_MSG("leaf %p cluster %i area %i n_leaffaces %i", leaf, leaf->cluster,
   // leaf->area, leaf->n_leaffaces);
+  Log::printf(LOG_DEBUG, "Leaf %p Cluster %i Area %i Leaffaces %i", leaf,
+              leaf->cluster, leaf->area, leaf->n_leaffaces);
   int* leaffaces = (int*)direntData[BSP_LEAFFACES];
   int* leafbrushes = (int*)direntData[BSP_LEAFBRUSHES];
   BSPFace* faces = (BSPFace*)direntData[BSP_FACES];
@@ -381,7 +383,10 @@ void BSPFile::draw() {
   sky->setParameter("skybox", gfx::DtSampler,
                     gfx::BaseProgram::Parameter{
                         .texture.slot = 0, .texture.texture = m_skybox.get()});
-  gfx::RenderList skybox(sky, NULL, settings);
+  gfx::RenderListSettings skySettings;
+  skySettings.cull = rdm::gfx::BaseDevice::BackCCW;
+  skySettings.state = rdm::gfx::BaseDevice::Disabled;
+  gfx::RenderList skybox(sky, NULL, skySettings);
   gfx::RenderList transparent(engine->getMaterialCache()
                                   ->getOrLoad("BspBrush")
                                   .value()
@@ -416,16 +421,18 @@ void BSPFile::draw() {
       m_leafsRendered++;
     }
   } else {
-    /*
     for (int i = 0; i < m_models.size(); i++) {
       BSPFaceModel& model = m_models.at(i);
-      if (model.m_program) {
-        gfx::BaseProgram* program =
-            model.m_program->prepareDevice(engine->getDevice(), 0);
-        renderFaceModel(opaque, &model, program);
-        m_facesRendered++;
+      switch (model.type) {
+        case BSPFaceModel::Opaque:
+          renderFaceModel(opaque, &model, NULL);
+          break;
+        case BSPFaceModel::Sky:
+          renderFaceModel(skybox, &model, NULL);
+          break;
       }
-      }*/
+      m_facesRendered++;
+    }
   }
 
   opaque.sort([](gfx::RenderCommand const& a, gfx::RenderCommand const& b) {
@@ -436,8 +443,8 @@ void BSPFile::draw() {
     return _a == _b ? (a.getTexture(0) < b.getTexture(0)) : (_a < _b);
   });
 
-  engine->pass(gfx::RenderPass::Opaque).add(opaque);
   engine->pass(gfx::RenderPass::Opaque).add(skybox);
+  engine->pass(gfx::RenderPass::Opaque).add(opaque);
   engine->pass(gfx::RenderPass::Transparent).add(transparent);
 }
 
@@ -491,18 +498,32 @@ void BSPFile::addToPhysicsWorld(PhysicsWorld* world) {
   m_physicsWorld = world;
 }
 
+int BSPFile::findLeaf(glm::vec3 position) {
+  int i = 0;
+  while (i >= 0) {
+    BSPNode node = ((BSPNode*)direntData[BSP_NODES])[i];
+    BSPPlane plane = ((BSPPlane*)direntData[BSP_PLANES])[node.plane];
+    float distance = glm::dot(plane.normal, position) - plane.dist;
+    i = distance >= 0 ? node.children[0] : node.children[1];
+  }
+  return -i - 1;
+}
+
 int BSPFile::getCluster(glm::vec3 p) {
-  glm::ivec3 posi =
-      glm::ivec3((int)roundf(p.x), (int)roundf(p.y), (int)roundf(p.z));
-  for (BSPLeafModel& model : m_leafs) {
+  // glm::ivec3 posi =
+  //     glm::ivec3((int)roundf(p.x), (int)roundf(p.y), (int)roundf(p.z));
+  int leaf = findLeaf(p);
+  Log::printf(LOG_DEBUG, "%i", leaf);
+  return ((BSPLeaf*)direntData[BSP_LEAFS])[leaf].cluster;
+  /*for (BSPLeafModel& model : m_leafs) {
     if (posi.x >= model.mins[0] && posi.x <= model.maxs[0] &&
         posi.y >= model.mins[1] && posi.y <= model.maxs[1] &&
         posi.z >= model.mins[2] && posi.z <= model.maxs[2]) {
       // inside this leaf
       return model.m_cluster;
     }
-  }
-  return -1;
+    }*/
+  // return -1;
 }
 
 bool BSPFile::canSeeCluster(int x, int y) {

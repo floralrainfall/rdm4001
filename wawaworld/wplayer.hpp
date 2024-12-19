@@ -21,8 +21,9 @@ class WPlayer : public net::Player {
   rdm::ClosureId gfxJob;
   btTransform oldTransform;
   int wantedWeaponId;
-  net::EntityId heldWeaponId;
   Weapon* heldWeaponRef;
+  int heldWeaponIndex;
+  std::vector<Weapon*> ownedWeapons;
 
   static std::map<int, std::string> weaponIds;
 
@@ -38,6 +39,8 @@ class WPlayer : public net::Player {
  public:
   WPlayer(net::NetworkManager* manager, net::EntityId id);
   virtual ~WPlayer();
+
+  void giveWeapon(Weapon* weapon);
 
   rdm::Graph::Node* getNode() { return entityNode; }
 

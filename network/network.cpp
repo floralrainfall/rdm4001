@@ -222,7 +222,7 @@ void NetworkManager::service() {
                     EntityId id = stream.read<EntityId>();
                     std::string typeName = stream.readString();
                     Entity* ent = instantiate(typeName, id);
-                    ent->deserialize(stream);
+                    // ent->deserialize(stream);
 
                     Log::printf(LOG_DEBUG, "created %s", typeName.c_str());
                   }
@@ -458,6 +458,8 @@ void NetworkManager::service() {
     EASY_BLOCK("Backend Peer Management");
 #endif
     for (auto& peer : peers) {
+      std::vector<int> pendingUpdates;
+
       if (int pendingNewIds = peer.second.pendingNewIds.size()) {
         BitStream newIdStream;
         newIdStream.write<PacketId>(NewIdPacket);
@@ -466,7 +468,8 @@ void NetworkManager::service() {
           newIdStream.write<EntityId>(id);
           Entity* ent = entities[id].get();
           newIdStream.writeString(ent->getTypeName());
-          ent->serialize(newIdStream);
+          pendingUpdates.push_back(id);
+          // ent->serialize(newIdStream);
         }
         enet_peer_send(peer.second.peer, NETWORK_STREAM_ENTITY,
                        newIdStream.createPacket(ENET_PACKET_FLAG_RELIABLE));
@@ -483,6 +486,29 @@ void NetworkManager::service() {
         enet_peer_send(peer.second.peer, NETWORK_STREAM_ENTITY,
                        delIdStream.createPacket(ENET_PACKET_FLAG_RELIABLE));
         peer.second.pendingDelIds.clear();
+      }
+
+      if (int _pendingUpdates = pendingUpdates.size()) {
+        BitStream deltaIdStream, deltaIdStreamUnreliable;
+        deltaIdStream.write<PacketId>(DeltaIdPacket);
+        deltaIdStreamUnreliable.write<PacketId>(DeltaIdPacket);
+        deltaIdStream.write<int>(_pendingUpdates);
+        deltaIdStreamUnreliable.write<int>(_pendingUpdates);
+        for (auto id : pendingUpdates) {
+          deltaIdStream.write<EntityId>(id);
+          deltaIdStreamUnreliable.write<EntityId>(id);
+
+          Entity* ent = entities[id].get();
+          ent->serialize(deltaIdStream);
+          ent->serializeUnreliable(deltaIdStreamUnreliable);
+        }
+        ENetPacket* packet =
+            deltaIdStream.createPacket(ENET_PACKET_FLAG_RELIABLE);
+        ENetPacket* packetUnreliable = deltaIdStream.createPacket(0);
+        enet_peer_send(peer.second.peer, NETWORK_STREAM_ENTITY, packet);
+        enet_peer_send(peer.second.peer, NETWORK_STREAM_ENTITY,
+                       packetUnreliable);
+        // need not be cleared because std::vector will clean itself up
       }
     }
 

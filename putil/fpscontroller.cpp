@@ -253,6 +253,7 @@ void FpsController::deserialize(network::BitStream& stream, bool backend) {
     float dist =
         glm::distance(BulletHelpers::fromVector3(bodyTransform.getOrigin()),
                       BulletHelpers::fromVector3(origin));
+    Log::printf(LOG_DEBUG, "Prediction diff: %f", dist);
     if (dist > velocity.length() * 2.f) {
       Log::printf(LOG_DEBUG, "Resetting position");
       networkPosition = BulletHelpers::fromVector3(bodyTransform.getOrigin());
@@ -269,6 +270,7 @@ void FpsController::deserialize(network::BitStream& stream, bool backend) {
     bodyTransform.setBasis(basis);
 
     rigidBody->setLinearVelocity(velocity);
+    rigidBody->setAngularVelocity(btVector3(0.0, 0.0, 0.0));
     if (enable) rigidBody->activate(true);
     rigidBody->setWorldTransform(bodyTransform);
   } else {

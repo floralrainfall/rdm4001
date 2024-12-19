@@ -214,6 +214,7 @@ class BSPFile {
   //  void hwapiDraw(HWProgramReference* program);
   void updatePosition(glm::vec3 new_pos);
   void setSkybox(gfx::BaseTexture* skybox);
+  int findLeaf(glm::vec3 position);
   int getCluster(glm::vec3 p);
   bool canSeeCluster(int x, int y);
   bool canSee(glm::vec3 x, glm::vec3 y);
