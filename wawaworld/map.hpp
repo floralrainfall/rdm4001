@@ -73,6 +73,12 @@ struct BSPLightmap {
   unsigned char lightmap[128][128][3];
 };
 
+struct BSPLightVolume {
+  unsigned char ambient[3];
+  unsigned char directional[3];
+  unsigned char direction[2];
+};
+
 struct BSPFace {
   unsigned int texture;
   unsigned int effect;
@@ -95,6 +101,10 @@ struct BSPNode {
   int children[2];
   int maxs[3];
   int mins[3];
+};
+
+struct BSPEntity {
+  std::map<std::string, std::string> properties;
 };
 
 struct BSPLeaf {
@@ -139,6 +149,15 @@ struct BSPBrushModel {
   unsigned int texture;
 };
 
+struct BSPModel {
+  float mins[3];
+  float maxs[3];
+  int face;
+  int n_face;
+  int brush;
+  int n_brushes;
+};
+
 class BSPFile {
   struct BSPLeafModel {
     std::vector<BSPFaceModel> m_models;
@@ -165,6 +184,7 @@ class BSPFile {
   int m_leafsRendered;
 
   std::unique_ptr<gfx::BaseTexture> m_skybox;
+  std::vector<BSPEntity> entities;
 
   void readEntitesLump(BSPDirentry* dirent);
   void addLeafFaces(BSPLeaf* leaf, bool brush, bool leafface);
@@ -178,6 +198,8 @@ class BSPFile {
  public:
   BSPFile(const char* bsp);
   ~BSPFile();
+
+  std::vector<BSPEntity> getEntities() { return entities; }
 
   std::unique_ptr<gfx::BaseArrayPointers> createModelLayout();
   void addToPhysicsWorld(PhysicsWorld* world);

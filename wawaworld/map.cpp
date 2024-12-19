@@ -3,6 +3,7 @@
 #include <bullet/Bullet3Geometry/b3GeometryUtil.h>
 
 #include <climits>
+#include <sstream>
 #include <stdexcept>
 
 #include "filesystem.hpp"
@@ -48,7 +49,8 @@ BSPFile::BSPFile(const char* bsp) {
       BSPDirentry* ent = &m_header.dirents[i];
       void* ent_data = ent->loadData(od.value());
       direntData[i] = ent_data;
-      Log::printf(LOG_DEBUG, "Loaded dirent %i", i);
+      Log::printf(LOG_DEBUG, "Loaded dirent %i (size %i bytes)", i,
+                  ent->length);
     }
 
     BSPDirentry* f = &m_header.dirents[BSP_ENTITIES];
@@ -69,7 +71,42 @@ BSPFile::~BSPFile() {
   }
 }
 
-void BSPFile::readEntitesLump(BSPDirentry* dirent) {}
+void BSPFile::readEntitesLump(BSPDirentry* dirent) {
+  std::string entityData((char*)direntData[BSP_ENTITIES], dirent->length);
+  std::stringstream ss(entityData);
+  std::string str;
+
+  bool inClass;
+  std::map<std::string, std::string> classProperties;
+
+  while (std::getline(ss, str, '\n')) {
+    if (str == "{") {
+      classProperties.clear();
+      inClass = true;
+    } else if (str == "}") {
+      BSPEntity e;
+      e.properties = classProperties;
+      entities.push_back(e);
+      inClass = false;
+    } else {
+      if (!inClass) {
+        Log::printf(LOG_WARN, "Value placed out of class definition");
+        continue;
+      }
+      if (str.empty()) continue;
+      size_t p = str.find(' ');
+      if (p == std::string::npos) {
+        Log::printf(LOG_WARN, "p = std::string::npos (%s)", str.c_str());
+        continue;
+      }
+      std::string n = str.substr(0, p);
+      std::string v = str.substr(p + 1);
+      n = n.substr(1, n.size() - 2);
+      v = v.substr(1, v.size() - 2);
+      classProperties[n] = v;
+    }
+  }
+}
 
 void BSPFile::addLeafFaces(BSPLeaf* leaf, bool brushen, bool leaffaceen) {
   int leafcount = m_header.dirents[BSP_LEAFS].length / sizeof(BSPLeaf);
@@ -393,10 +430,10 @@ void BSPFile::draw() {
 
   opaque.sort([](gfx::RenderCommand const& a, gfx::RenderCommand const& b) {
     gfx::BaseTexture *_a, *_b;
-    _a = a.getTexture(0);
-    _b = b.getTexture(0);
+    _a = a.getTexture(1);
+    _b = b.getTexture(1);
 
-    return _a == _b ? (a.getTexture(1) < b.getTexture(1)) : (_a < _b);
+    return _a == _b ? (a.getTexture(0) < b.getTexture(0)) : (_a < _b);
   });
 
   engine->pass(gfx::RenderPass::Opaque).add(opaque);

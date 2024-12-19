@@ -36,6 +36,8 @@ class FpsController {
   bool grounded;
   bool jumping;
 
+  std::mutex m;
+
   void physicsStep();
 
   void moveGround(btVector3& vel, glm::vec2 wishdir);
@@ -54,7 +56,7 @@ class FpsController {
   void updateCamera(gfx::Camera& camera);
 
   void serialize(network::BitStream& stream);
-  void deserialize(network::BitStream& stream);
+  void deserialize(network::BitStream& stream, bool backend = false);
 
   void imguiDebug();
 

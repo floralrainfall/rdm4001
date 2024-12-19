@@ -84,6 +84,8 @@ void FpsController::imguiDebug() {
 }
 
 void FpsController::teleport(glm::vec3 p) {
+  std::scoped_lock l(m);
+
   networkPosition = p;
   btTransform& transform = rigidBody->getWorldTransform();
   transform.setOrigin(BulletHelpers::toVector3(p));
@@ -163,7 +165,9 @@ void FpsController::physicsStep() {
     return;
   }
 
-  btTransform transform = rigidBody->getWorldTransform();
+  std::scoped_lock l(m);
+
+  btTransform& transform = rigidBody->getWorldTransform();
   float dist = glm::distance(networkPosition,
                              BulletHelpers::fromVector3(transform.getOrigin()));
   //  Log::printf(LOG_DEBUG, "%f", dist);
@@ -209,6 +213,14 @@ void FpsController::physicsStep() {
 
     rigidBody->setLinearVelocity(vel);
     btTransform& transform = rigidBody->getWorldTransform();
+
+    /*if (dist > 16.f) {
+      Log::printf(LOG_DEBUG, "%f", dist);
+      Log::printf(LOG_DEBUG, "%f, %f, %f", networkPosition.x, networkPosition.y,
+                  networkPosition.z);
+      transform.setOrigin(BulletHelpers::toVector3(networkPosition));
+      }*/
+
     transform.setBasis(BulletHelpers::toMat3(moveView));
   }
 }
@@ -226,7 +238,7 @@ void FpsController::serialize(network::BitStream& stream) {
   stream.write<btVector3FloatData>(vectorData);
 }
 
-void FpsController::deserialize(network::BitStream& stream) {
+void FpsController::deserialize(network::BitStream& stream, bool backend) {
   btVector3 origin;
   origin.deSerialize(stream.read<btVector3FloatData>());
 
@@ -236,10 +248,24 @@ void FpsController::deserialize(network::BitStream& stream) {
   btVector3 velocity;
   velocity.deSerialize(stream.read<btVector3FloatData>());
 
-  networkPosition = BulletHelpers::fromVector3(origin);
+  if (backend) {
+    btTransform& bodyTransform = rigidBody->getWorldTransform();
+    float dist =
+        glm::distance(BulletHelpers::fromVector3(bodyTransform.getOrigin()),
+                      BulletHelpers::fromVector3(origin));
+    if (dist > velocity.length() * 2.f) {
+      Log::printf(LOG_DEBUG, "Resetting position");
+      networkPosition = BulletHelpers::fromVector3(bodyTransform.getOrigin());
+    } else {
+      networkPosition = BulletHelpers::fromVector3(origin);
+    }
+  } else {
+    networkPosition = BulletHelpers::fromVector3(origin);
+  }
+
   if (!localPlayer) {
     btTransform& bodyTransform = rigidBody->getWorldTransform();
-    bodyTransform.setOrigin(origin);
+    bodyTransform.setOrigin(BulletHelpers::toVector3(networkPosition));
     bodyTransform.setBasis(basis);
 
     rigidBody->setLinearVelocity(velocity);
@@ -249,6 +275,7 @@ void FpsController::deserialize(network::BitStream& stream) {
     btTransform& ourTransform = rigidBody->getWorldTransform();
     float dist = glm::distance(
         networkPosition, BulletHelpers::fromVector3(ourTransform.getOrigin()));
+    if (dist > 100.f) ourTransform.setOrigin(origin);
   }
 }
 

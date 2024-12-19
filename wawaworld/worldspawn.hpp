@@ -17,14 +17,16 @@ class Worldspawn : public net::Entity {
   std::string nextMapName;
   float roundStartTime;
   rdm::SoundEmitter* emitter;
+  std::vector<glm::vec3> mapSpawnLocations;
+  int nextSpawnLocation;
 
   std::string mapPath(std::string name);
-  glm::vec3 spawnLocation();
 
  public:
   enum Status { InGame, RoundBeginning, WaitingForPlayer, Unknown };
 
   void destroyFile();
+  glm::vec3 spawnLocation();
 
   Worldspawn(net::NetworkManager* manager, net::EntityId id);
   virtual ~Worldspawn();

@@ -1,5 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
+
+#include "fun.hpp"
 namespace rdm::gfx {
 class Camera {
   bool pdirty, vdirty;

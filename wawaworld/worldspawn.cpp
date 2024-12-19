@@ -1,6 +1,7 @@
 #pragma once
 #include "worldspawn.hpp"
 
+#include <cstdio>
 #include <format>
 
 #include "game.hpp"
@@ -22,6 +23,7 @@ Worldspawn::Worldspawn(net::NetworkManager* manager, net::EntityId id)
   mapName = "";
   nextMapName = sv_nextmap.getValue();
   currentStatus = Unknown;
+  nextSpawnLocation = 0;
   if (!getManager()->isBackend()) {
     worldJob = getWorld()->stepped.listen([this] {
       std::scoped_lock lock(mutex);
@@ -51,6 +53,18 @@ void Worldspawn::loadFile(const char* _file) {
     std::scoped_lock lock(mutex);
     file->addToPhysicsWorld(getWorld()->getPhysicsWorld());
   });
+
+  if (getManager()->isBackend()) {
+    std::vector<BSPEntity> entities = file->getEntities();
+    for (auto entity : entities) {
+      if (entity.properties["classname"] == "info_player_deathmatch") {
+        glm::vec3 p = Math::stringToVec4(entity.properties["origin"]);
+        mapSpawnLocations.push_back(p);
+        Log::printf(LOG_DEBUG, "new spawn location = %f, %f, %f", p.x, p.y,
+                    p.z);
+      }
+    }
+  }
 }
 
 void Worldspawn::destroyFile() {
@@ -114,6 +128,7 @@ void Worldspawn::tick() {
             WPlayer* player = dynamic_cast<WPlayer*>(ent);
             rdm::putil::FpsController* controller = player->getController();
             controller->teleport(spawnLocation());
+            getManager()->addPendingUpdateUnreliable(player->getEntityId());
           }
         }
       }
@@ -154,7 +169,17 @@ void Worldspawn::serialize(net::BitStream& stream) {
   }
 }
 
-glm::vec3 Worldspawn::spawnLocation() { return glm::vec3(0, 0, 100); }
+glm::vec3 Worldspawn::spawnLocation() {
+  if (!mapSpawnLocations.size()) {
+    return glm::vec3(0, 0, 0);
+  }
+  int id = nextSpawnLocation;
+  nextSpawnLocation = rand() % mapSpawnLocations.size();
+  glm::vec3 location = mapSpawnLocations[id];
+  Log::printf(LOG_DEBUG, "spawn location %i = %f, %f, %f", id, location.x,
+              location.y, location.z);
+  return location;
+}
 
 std::string Worldspawn::mapPath(std::string name) {
   return std::format("dat5/baseq3/maps/{}.bsp", name);
@@ -180,13 +205,6 @@ void Worldspawn::deserialize(net::BitStream& stream) {
           file->initGfx(getGfxEngine());
           entity = getGfxEngine()->addEntity<MapEntity>(file);
         });
-
-        WPlayer* player =
-            dynamic_cast<WPlayer*>(getManager()->getLocalPeer().playerEntity);
-        if (player) {
-          player->getController()->setEnable(true);
-          player->getController()->teleport(spawnLocation());
-        }
 
         pendingAddToGfx = true;
       }

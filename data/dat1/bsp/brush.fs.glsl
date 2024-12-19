@@ -72,7 +72,7 @@ void main() {
   //  vec4 samples = texture(skybox, vec3(r.x, -r.z, r.y)) * shininess;
 
   // float intensity = dot(v_fnormal, normalize(vec3(0.5, 0.5, 0.5)));
-  vec3 result = vec3(0.2) + samplet.xyz * samplel.xyz /* + samples.xyz*/;
+  vec3 result = samplet.xyz * samplel.xyz /* + samples.xyz*/;
   // vec3 result = vec3(0.2) + (intensity * vec3(0.8));
   //  float brightness = dot(result, vec3(0.2126, 0.7152, 0.0722));
   float brightness = max(dot(result, vec3(0.2126, 0.7152, 0.0722)) - 0.5, 0);

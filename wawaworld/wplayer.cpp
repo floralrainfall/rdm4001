@@ -56,7 +56,8 @@ WPlayer::WPlayer(net::NetworkManager* manager, net::EntityId id)
   entityNode = new rdm::Graph::Node();
   entityNode->scale = glm::vec3(6.f);
   wantedWeaponId = getManager()->isBackend() ? -1 : 1;
-  heldWeaponRef = 0;
+  heldWeaponRef = NULL;
+  heldWeaponId = -1;
   firingState[0] = false;
   firingState[1] = false;
   if (!getManager()->isBackend()) {
@@ -150,6 +151,13 @@ WPlayer::WPlayer(net::NetworkManager* manager, net::EntityId id)
           getGfxEngine()->getMaterialCache()->getOrLoad("Mesh").value());
           });*/
     rdm::Log::printf(rdm::LOG_DEBUG, "worldJob = %i", worldJob);
+  } else {
+    Worldspawn* worldspawn =
+        dynamic_cast<Worldspawn*>(getManager()->findEntityByType("Worldspawn"));
+    if (worldspawn) {
+      controller->teleport(worldspawn->spawnLocation());
+      getManager()->addPendingUpdateUnreliable(getEntityId());
+    }
   }
 }
 
@@ -221,7 +229,10 @@ void WPlayer::tick() {
         btVector3 forward_new = forward * oldTransform.getBasis();
         btVector3 origin_old = transform.getOrigin();
         btVector3 origin_new = oldTransform.getOrigin();
-        if (forward_old.dot(forward_new) > 0.1) needsUpdate = true;
+        Log::printf(LOG_DEBUG, "%f, %f", forward_old.dot(forward_new),
+                    origin_old.distance(origin_new));
+
+        if (forward_old.dot(forward_new) < 0.9) needsUpdate = true;
         if (origin_old.distance(origin_new) > 0.1) needsUpdate = true;
 
         if (needsUpdate) {
@@ -287,7 +298,7 @@ void WPlayer::serializeUnreliable(net::BitStream& stream) {
 void WPlayer::deserializeUnreliable(net::BitStream& stream) {
   {
     std::scoped_lock lock(getWorld()->getPhysicsWorld()->mutex);
-    controller->deserialize(stream);
+    controller->deserialize(stream, getManager()->isBackend());
   }
 
   if (!isLocalPlayer()) {
