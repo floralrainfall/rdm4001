@@ -114,6 +114,17 @@ WPlayer::WPlayer(net::NetworkManager* manager, net::EntityId id)
         btVector3 origin = transform.getOrigin();
         ImGui::Text("Position: %0.2f, %0.2f, %0.2f", origin.x(), origin.y(),
                     origin.z());
+
+        ImGui::Separator();
+
+        network::Peer& peer = getManager()->getLocalPeer();
+        ImGui::Text("Round trip time: %i ±%ims", peer.peer->roundTripTime,
+                    peer.peer->roundTripTimeVariance);
+        ImGui::Text("Packet loss: %i ±%i", peer.peer->packetLoss,
+                    peer.peer->packetLossVariance);
+        ImGui::Text("Packets sent: %i, lost: %i", peer.peer->packetsSent,
+                    peer.peer->packetsLost);
+
         ImGui::End();
       }
 
@@ -170,6 +181,7 @@ WPlayer::~WPlayer() {
 void WPlayer::giveWeapon(Weapon* weapon) {
   if (getManager()->isBackend()) {
     weapon->setOwnerRef(this);
+    heldWeaponIndex = ownedWeapons.size();
     ownedWeapons.push_back(weapon);
     getManager()->addPendingUpdate(getEntityId());
   }
@@ -181,43 +193,43 @@ void WPlayer::tick() {
 
   bool needsUpdate = false;
 
-  if (!isLocalPlayer()) {
-    if (heldWeaponRef) {
-      if (firingState[0])
-        heldWeaponRef->primaryFire();
-      else if (firingState[1])
-        heldWeaponRef->secondaryFire();
-    }
-  }
-
-  if (!getManager()->isBackend()) {
-    if (isLocalPlayer()) {
-      for (int i = 0; i < 9; i++) {
-        if (rdm::Input::singleton()->isKeyDown(SDLK_1 + i)) {
-          Log::printf(LOG_DEBUG, "%i", i);
-          auto it = weaponIds.find(i + 1);
-          if (it != weaponIds.end()) {
-            wantedWeaponId = i + 1;
-            getManager()->addPendingUpdate(getEntityId());
-          }
-          break;
-        }
-      }
-
-      if (rdm::Input::singleton()->isMouseButtonDown(1)) {
-        if (heldWeaponRef) {
-          if (!firingState[0]) needsUpdate = true;
-          firingState[0] = true;
-          heldWeaponRef->primaryFire();
-        }
-      } else {
-        if (firingState[0]) needsUpdate = true;
-        firingState[0] = false;
-      }
-    }
-  }
-
   if (worldspawn && worldspawn->getFile()) {
+    if (!isLocalPlayer()) {
+      if (heldWeaponRef) {
+        if (firingState[0])
+          heldWeaponRef->primaryFire();
+        else if (firingState[1])
+          heldWeaponRef->secondaryFire();
+      }
+    }
+
+    if (!getManager()->isBackend()) {
+      if (isLocalPlayer()) {
+        for (int i = 0; i < 9; i++) {
+          if (rdm::Input::singleton()->isKeyDown(SDLK_1 + i)) {
+            Log::printf(LOG_DEBUG, "%i", i);
+            auto it = weaponIds.find(i + 1);
+            if (it != weaponIds.end()) {
+              wantedWeaponId = i + 1;
+              getManager()->addPendingUpdate(getEntityId());
+            }
+            break;
+          }
+        }
+
+        if (rdm::Input::singleton()->isMouseButtonDown(1)) {
+          if (heldWeaponRef) {
+            if (!firingState[0]) needsUpdate = true;
+            firingState[0] = true;
+            heldWeaponRef->primaryFire();
+          }
+        } else {
+          if (firingState[0]) needsUpdate = true;
+          firingState[0] = false;
+        }
+      }
+    }
+
     controller->setEnable(true);
     if (!getManager()->isBackend() && isLocalPlayer()) {
       btTransform transform = controller->getTransform();
@@ -228,8 +240,8 @@ void WPlayer::tick() {
 
       if (worldspawn && worldspawn->getFile()) {
         btVector3 forward = btVector3(0, 0, 1);
-        btVector3 forward_old = forward * transform.getBasis();
-        btVector3 forward_new = forward * oldTransform.getBasis();
+        btVector3 forward_old = transform.getBasis() * forward;
+        btVector3 forward_new = oldTransform.getBasis() * forward;
         btVector3 origin_old = transform.getOrigin();
         btVector3 origin_new = oldTransform.getOrigin();
         // Log::printf(LOG_DEBUG, "%f, %f", forward_old.dot(forward_new),
@@ -300,6 +312,7 @@ void WPlayer::deserialize(net::BitStream& stream) {
     }
   } else {
     wantedWeaponId = stream.read<unsigned char>();
+    if (wantedWeaponId > ownedWeapons.size()) wantedWeaponId = 0;
     heldWeaponIndex = wantedWeaponId;
     ownedWeapons.clear();
     int numWeapons = stream.read<int>();

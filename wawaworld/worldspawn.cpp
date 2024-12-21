@@ -4,9 +4,11 @@
 #include <cstdio>
 #include <format>
 
+#include "fun.hpp"
 #include "game.hpp"
 #include "map.hpp"
 #include "network/bitstream.hpp"
+#include "physics.hpp"
 #include "putil/fpscontroller.hpp"
 #include "settings.hpp"
 #include "world.hpp"
@@ -29,8 +31,21 @@ Worldspawn::Worldspawn(net::NetworkManager* manager, net::EntityId id)
       std::scoped_lock lock(mutex);
       if (file) file->updatePosition(getGfxEngine()->getCamera().getPosition());
     });
-    gfxJob = getGfxEngine()->renderStepped.listen([this] {});
-    emitter = getGame()->getSoundManager()->newEmitter();
+    gfxJob = getGfxEngine()->renderStepped.listen([this] {
+      if (currentStatus == RoundBeginning) {
+        ImGui::Begin("Round");
+        ImGui::Text("Time until round start: %0.1f",
+                    roundStartTime - getManager()->getDistributedTime());
+        for (auto& peer : getManager()->getPeers()) {
+          if (!peer.second.playerEntity) continue;
+          ImGui::Text("%s (%ims, %i loss)",
+                      peer.second.playerEntity->displayName.get().c_str(),
+                      peer.second.roundTripTime, peer.second.packetLoss);
+        }
+        ImGui::End();
+      }
+    });
+    emitter.reset(getGame()->getSoundManager()->newEmitter());
   } else {
     setStatus(WaitingForPlayer);
   }
@@ -42,6 +57,8 @@ Worldspawn::~Worldspawn() {
     getWorld()->stepped.removeListener(worldJob);
     getGfxEngine()->renderStepped.removeListener(gfxJob);
   }
+
+  if (file) destroyFile();
 }
 
 void Worldspawn::loadFile(const char* _file) {
@@ -69,10 +86,16 @@ void Worldspawn::loadFile(const char* _file) {
 
 void Worldspawn::destroyFile() {
   if (getWorld()->getRunning()) {
-    getWorld()->getPhysicsWorld()->physicsStepping.addClosure([this] {
-      file->removeFromPhysicsWorld(getWorld()->getPhysicsWorld());
-      if (getManager()->isBackend())
-        getGfxEngine()->renderStepped.addClosure([this] { delete file; });
+    PhysicsWorld* world =
+        getWorld()->getPhysicsWorld();  // by the time physicsStepping or
+                                        // renderStepped is called getManager()
+                                        // is unusable
+    gfx::Engine* gfxEngine = getGfxEngine();
+    bool backend = getManager()->isBackend();
+    world->physicsStepping.addClosure([this, world, backend, gfxEngine] {
+      file->removeFromPhysicsWorld(world);
+      if (!backend)
+        gfxEngine->renderStepped.addClosure([this] { delete file; });
     });
   } else {
     delete file;
@@ -110,8 +133,6 @@ void Worldspawn::tick() {
                             ->getSoundCache()
                             ->get("dat5/mus/round_lobby.mp3", Sound::Stream)
                             .value());
-        Log::printf(LOG_DEBUG, "%f",
-                    roundStartTime - getManager()->getDistributedTime());
       } else {
         getWorld()->setTitle("RDM: Lobby");
 

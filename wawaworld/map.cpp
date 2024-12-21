@@ -7,8 +7,10 @@
 #include <stdexcept>
 
 #include "filesystem.hpp"
+#include "fun.hpp"
 #include "gfx/base_device.hpp"
 #include "gfx/base_types.hpp"
+#include "gfx/camera.hpp"
 #include "gfx/engine.hpp"
 #include "gfx/entity.hpp"
 #include "gfx/rendercommand.hpp"
@@ -114,8 +116,8 @@ void BSPFile::addLeafFaces(BSPLeaf* leaf, bool brushen, bool leaffaceen) {
 
   // DEV_MSG("leaf %p cluster %i area %i n_leaffaces %i", leaf, leaf->cluster,
   // leaf->area, leaf->n_leaffaces);
-  Log::printf(LOG_DEBUG, "Leaf %p Cluster %i Area %i Leaffaces %i", leaf,
-              leaf->cluster, leaf->area, leaf->n_leaffaces);
+  // Log::printf(LOG_DEBUG, "Leaf %p Cluster %i Area %i Leaffaces %i", leaf,
+  //            leaf->cluster, leaf->area, leaf->n_leaffaces);
   int* leaffaces = (int*)direntData[BSP_LEAFFACES];
   int* leafbrushes = (int*)direntData[BSP_LEAFBRUSHES];
   BSPFace* faces = (BSPFace*)direntData[BSP_FACES];
@@ -377,16 +379,18 @@ void BSPFile::draw() {
                              .value()
                              ->prepareDevice(engine->getDevice(), 0),
                          NULL, settings);
+
   gfx::BaseProgram* sky =
       engine->getMaterialCache()->getOrLoad("BspSky").value()->prepareDevice(
           engine->getDevice(), 0);
   sky->setParameter("skybox", gfx::DtSampler,
-                    gfx::BaseProgram::Parameter{
-                        .texture.slot = 0, .texture.texture = m_skybox.get()});
+                    gfx::BaseProgram::Parameter{.texture.slot = 0,
+                                                .texture.texture = m_skybox});
   gfx::RenderListSettings skySettings;
   skySettings.cull = rdm::gfx::BaseDevice::BackCCW;
   skySettings.state = rdm::gfx::BaseDevice::Disabled;
   gfx::RenderList skybox(sky, NULL, skySettings);
+
   gfx::RenderList transparent(engine->getMaterialCache()
                                   ->getOrLoad("BspBrush")
                                   .value()
@@ -395,6 +399,8 @@ void BSPFile::draw() {
 
   m_facesRendered = 0;
   m_leafsRendered = 0;
+  gfx::Frustrum frustrum = engine->getCamera().computeFrustrum();
+
   if (true) {  // TODO: use Settings or bring back matrix style ConVar system
     for (int i = 0; i < m_leafs.size(); i++) {
       BSPLeafModel& leaf = m_leafs.at(i);
@@ -405,6 +411,11 @@ void BSPFile::draw() {
       int x = leaf.m_cluster;
 
       if (!canSeeCluster(x, y)) continue;
+
+      gfx::Frustrum::TestResult result =
+          frustrum.test(glm::vec3(leaf.mins[0], leaf.mins[1], leaf.mins[2]),
+                        glm::vec3(leaf.maxs[0], leaf.maxs[1], leaf.maxs[2]));
+      if (result == gfx::Frustrum::Outside) continue;
 
       for (int j = 0; j < leaf.m_models.size(); j++) {
         BSPFaceModel& model = leaf.m_models[j];
@@ -513,7 +524,6 @@ int BSPFile::getCluster(glm::vec3 p) {
   // glm::ivec3 posi =
   //     glm::ivec3((int)roundf(p.x), (int)roundf(p.y), (int)roundf(p.z));
   int leaf = findLeaf(p);
-  Log::printf(LOG_DEBUG, "%i", leaf);
   return ((BSPLeaf*)direntData[BSP_LEAFS])[leaf].cluster;
   /*for (BSPLeafModel& model : m_leafs) {
     if (posi.x >= model.mins[0] && posi.x <= model.maxs[0] &&
@@ -556,52 +566,68 @@ void BSPFile::initGfx(gfx::Engine* engine) {
   };
   m_skybox->loadCubemap(cubemap_textures);*/
 
-  try {
-    std::vector<void*> cubemap_textures = {
-        engine->getTextureCache()
-            ->getOrLoad2d("dat5/baseq3/textures/skies/null_plainsky512_rt.jpg",
-                          true)
-            .value()
-            .first.data,
-        engine->getTextureCache()
-            ->getOrLoad2d("dat5/baseq3/textures/skies/null_plainsky512_lf.jpg",
-                          true)
-            .value()
-            .first.data,
-        engine->getTextureCache()
-            ->getOrLoad2d("dat5/baseq3/textures/skies/null_plainsky512_dn.jpg",
-                          true)
-            .value()
-            .first.data,
-        engine->getTextureCache()
-            ->getOrLoad2d("dat5/baseq3/textures/skies/null_plainsky512_up.jpg",
-                          true)
-            .value()
-            .first.data,
-        engine->getTextureCache()
-            ->getOrLoad2d("dat5/baseq3/textures/skies/null_plainsky512_bk.jpg",
-                          true)
-            .value()
-            .first.data,
-        engine->getTextureCache()
-            ->getOrLoad2d("dat5/baseq3/textures/skies/null_plainsky512_ft.jpg",
-                          true)
-            .value()
-            .first.data,
-    };
-    m_skybox = engine->getDevice()->createTexture();
-    m_skybox->uploadCubeMap(
-        engine->getTextureCache()
-            ->getOrLoad2d("dat5/baseq3/textures/skies/null_plainsky512_lf.jpg")
-            .value()
-            .first.width,
-        engine->getTextureCache()
-            ->getOrLoad2d("dat5/baseq3/textures/skies/null_plainsky512_lf.jpg")
-            .value()
-            .first.height,
-        cubemap_textures);
-  } catch (std::exception& e) {
-    Log::printf(LOG_ERROR, "error loading skybox, %s", e.what());
+  auto _skybox = engine->getTextureCache()->get("null_plainsky512");
+  if (_skybox) {
+    m_skybox = _skybox.value().second;
+  } else {
+    try {
+      std::vector<void*> cubemap_textures = {
+          engine->getTextureCache()
+              ->getOrLoad2d(
+                  "dat5/baseq3/textures/skies/null_plainsky512_rt.jpg", true)
+              .value()
+              .first.data,
+          engine->getTextureCache()
+              ->getOrLoad2d(
+                  "dat5/baseq3/textures/skies/null_plainsky512_lf.jpg", true)
+              .value()
+              .first.data,
+          engine->getTextureCache()
+              ->getOrLoad2d(
+                  "dat5/baseq3/textures/skies/null_plainsky512_dn.jpg", true)
+              .value()
+              .first.data,
+          engine->getTextureCache()
+              ->getOrLoad2d(
+                  "dat5/baseq3/textures/skies/null_plainsky512_up.jpg", true)
+              .value()
+              .first.data,
+          engine->getTextureCache()
+              ->getOrLoad2d(
+                  "dat5/baseq3/textures/skies/null_plainsky512_bk.jpg", true)
+              .value()
+              .first.data,
+          engine->getTextureCache()
+              ->getOrLoad2d(
+                  "dat5/baseq3/textures/skies/null_plainsky512_ft.jpg", true)
+              .value()
+              .first.data,
+      };
+      std::unique_ptr<gfx::BaseTexture> skybox =
+          engine->getDevice()->createTexture();
+      skybox->uploadCubeMap(
+          engine->getTextureCache()
+              ->getOrLoad2d(
+                  "dat5/baseq3/textures/skies/null_plainsky512_lf.jpg")
+              .value()
+              .first.width,
+          engine->getTextureCache()
+              ->getOrLoad2d(
+                  "dat5/baseq3/textures/skies/null_plainsky512_lf.jpg")
+              .value()
+              .first.height,
+          cubemap_textures);
+      gfx::TextureCache::Info info;
+      info.channels = 3;
+      info.data = NULL;
+      info.width = 256;
+      info.height = 256;
+      m_skybox = skybox.get();
+      engine->getTextureCache()->cacheExistingTexture("null_plainsky512",
+                                                      skybox, info);
+    } catch (std::exception& e) {
+      Log::printf(LOG_ERROR, "error loading skybox, %s", e.what());
+    }
   }
 
   BSPNode* root = (BSPNode*)direntData[BSP_NODES];

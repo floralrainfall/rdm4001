@@ -20,7 +20,7 @@ uniform sampler2D texture0;
 uniform sampler2D texture1;
 // uniform samplerCube skybox;
 uniform float shininess = 0.0;
-uniform float gamma = 4.4;
+uniform float gamma = 4.0;
 uniform vec3 camera_position;
 
 vec4 cubic(float v) {
@@ -68,7 +68,8 @@ void main() {
   vec3 r = reflect(i, normalize(v_fnormal));
 
   vec4 samplet = texture2D(texture0, vec2(v_fuv.x, -v_fuv.y));
-  vec4 samplel = textureBicubic(texture1, v_flm_uv) * gamma;
+  // vec4 samplel = textureBicubic(texture1, v_flm_uv) * gamma;
+  vec4 samplel = texture2D(texture1, v_flm_uv) * gamma;
   //  vec4 samples = texture(skybox, vec3(r.x, -r.z, r.y)) * shininess;
 
   // float intensity = dot(v_fnormal, normalize(vec3(0.5, 0.5, 0.5)));

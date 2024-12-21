@@ -16,7 +16,7 @@ class Worldspawn : public net::Entity {
   std::string mapName;
   std::string nextMapName;
   float roundStartTime;
-  rdm::SoundEmitter* emitter;
+  std::unique_ptr<rdm::SoundEmitter> emitter;
   std::vector<glm::vec3> mapSpawnLocations;
   int nextSpawnLocation;
 

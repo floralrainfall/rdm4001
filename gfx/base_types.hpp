@@ -68,10 +68,10 @@ class BaseTexture {
   // int mipmapLevels = 0) = 0;
 
   virtual void reserve2d(int width, int height, InternalFormat format,
-                         int mipmapLevels = 0) = 0;
+                         int mipmapLevels = 0, bool renderbuffer = false) = 0;
   virtual void reserve2dMultisampled(int width, int height,
-                                     InternalFormat format,
-                                     int samples = 2) = 0;
+                                     InternalFormat format, int samples = 2,
+                                     bool renderbuffer = false) = 0;
   virtual void upload2d(int width, int height, DataType type, Format format,
                         void* data, int mipmapLevels = 0) = 0;
 

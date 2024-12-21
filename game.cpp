@@ -100,6 +100,8 @@ void Game::startGameState(GameStateConstructorFunction f) {
   gameState.reset(f(this));
 }
 
+static CVar fullscreen("fullscreen", "0", CVARF_SAVE | CVARF_GLOBAL);
+
 void Game::startClient() {
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0) {
     if (!window)
@@ -131,8 +133,11 @@ void Game::startClient() {
     wpos = cl_savedwindowpos.getVec2();
   }
   Log::printf(LOG_DEBUG, "saved pos: %ix%i", wpos.x, wpos.y);
+  Uint32 flags = SDL_WINDOW_OPENGL;
+  flags |= fullscreen.getBool() ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_RESIZABLE;
+
   window = SDL_CreateWindow("A rdm presentation", wpos.x, wpos.y, wsize.x,
-                            wsize.y, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+                            wsize.y, flags);
 
 #ifndef DISABLE_OBZ
   obz::ObzFileSystemAPI* obzFsApi = 0;

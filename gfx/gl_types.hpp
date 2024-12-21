@@ -8,6 +8,8 @@ GLenum fromDataType(DataType t);
 
 class GLTexture : public BaseTexture {
   GLuint texture;
+  GLuint renderbuffer;
+  bool isRenderBuffer;
 
  public:
   GLTexture();
@@ -15,14 +17,19 @@ class GLTexture : public BaseTexture {
 
   GLuint getId() { return texture; }
 
+  GLuint getRbId() { return renderbuffer; }
+
+  bool getIsRenderBuffer() { return isRenderBuffer; }
+
   static GLenum texType(Type type);
   static GLenum texFormat(Format format);
   static GLenum texInternalFormat(InternalFormat format);
 
   virtual void reserve2d(int width, int height, InternalFormat format,
-                         int mipmapLevels);
+                         int mipmapLevels, bool renderbuffer);
   virtual void reserve2dMultisampled(int width, int height,
-                                     InternalFormat format, int samples);
+                                     InternalFormat format, int samples,
+                                     bool renderbuffer);
   virtual void upload2d(int width, int height, DataType type, Format format,
                         void* data, int mipmapLevels);
   virtual void uploadCubeMap(int width, int height, std::vector<void*> data);

@@ -183,7 +183,7 @@ class BSPFile {
   int m_facesRendered;
   int m_leafsRendered;
 
-  std::unique_ptr<gfx::BaseTexture> m_skybox;
+  gfx::BaseTexture* m_skybox;
   std::vector<BSPEntity> entities;
 
   void readEntitesLump(BSPDirentry* dirent);

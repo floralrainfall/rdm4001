@@ -1,8 +1,18 @@
 #pragma once
 #include <glm/glm.hpp>
 
-#include "fun.hpp"
+#include "gfx/gui/gui.hpp"
+
 namespace rdm::gfx {
+struct Frustrum {
+  enum Plane { Back, Front, Right, Left, Top, Bottom, _Max };
+  glm::vec4 planes[_Max];
+
+  enum TestResult { Outside, Intersect, Inside };
+
+  TestResult test(glm::vec3 min, glm::vec3 max);
+};
+
 class Camera {
   bool pdirty, vdirty;
 
@@ -10,6 +20,8 @@ class Camera {
   enum Projection { Orthographic, Perspective };
 
   Camera();
+
+  Frustrum computeFrustrum();
 
   void updateCamera(glm::vec2 framebufferSize);
   void setPosition(glm::vec3 pos) {

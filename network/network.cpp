@@ -206,6 +206,16 @@ void NetworkManager::service() {
                   remotePeer->playerEntity->remotePeerId.set(
                       remotePeer->peerId);
                   remotePeer->playerEntity->displayName.set(username);
+
+                  BitStream newPeerPacket;
+                  newPeerPacket.write<PacketId>(NewPeerPacket);
+                  newPeerPacket.write<int>(remotePeer->peerId);
+                  newPeerPacket.write<EntityId>(
+                      remotePeer->playerEntity->getEntityId());
+                  enet_host_broadcast(
+                      host, NETWORK_STREAM_META,
+                      newPeerPacket.createPacket(ENET_PACKET_FLAG_RELIABLE));
+
                   for (auto& e : entities)
                     remotePeer->pendingNewIds.push_back(e.first);
                 } else {
@@ -242,10 +252,11 @@ void NetworkManager::service() {
               case DeltaIdPacket: {
                 int numEntities = stream.read<int>();
                 int i;
+                Entity* ent;
                 try {
                   for (i = 0; i < numEntities; i++) {
                     EntityId id = stream.read<EntityId>();
-                    Entity* ent = entities[id].get();
+                    ent = entities[id].get();
                     if (!ent) {
                       Log::printf(LOG_DEBUG, "%i == NULL", id);
                       throw std::runtime_error("ent == NULL");
@@ -278,8 +289,15 @@ void NetworkManager::service() {
                     }
                   }
                 } catch (std::exception& e) {
-                  Log::printf(LOG_ERROR, "Error decoding entity %i: (%s)", i,
-                              e.what());
+                  if (!ent) {
+                    Log::printf(LOG_ERROR, "Error decoding entity %i: (%s)", i,
+                                e.what());
+                  } else {
+                    Log::printf(
+                        LOG_ERROR,
+                        "Error decoding entity %s:%i (num: %i, what: %s)",
+                        ent->getTypeName(), ent->getEntityId(), i, e.what());
+                  }
                 }
               } break;
               case NewPeerPacket:
@@ -289,8 +307,10 @@ void NetworkManager::service() {
                   int peerId = stream.read<int>();
                   Peer np;
                   np.peer = NULL;
-                  np.playerEntity = NULL;
+                  np.playerEntity = dynamic_cast<Player*>(
+                      getEntityById(stream.read<EntityId>()));
                   np.peerId = peerId;
+                  Log::printf(LOG_DEBUG, "NewPeerPacket peerId %i", np.peerId);
                   peers[np.peerId] = np;
                 }
                 break;
@@ -346,6 +366,19 @@ void NetworkManager::service() {
                     distributedTime = newTime;
                     latency = diff;
                   }
+                  int numPeers = stream.read<int>();
+                  for (int i = 0; i < numPeers; i++) {
+                    int peer = stream.read<int>();
+                    int rtt = stream.read<int>();
+                    int ploss = stream.read<int>();
+
+                    Log::printf(LOG_DEBUG, "%i %i", peer, rtt);
+                    auto it = peers.find(peer);
+                    if (it != peers.end()) {
+                      it->second.roundTripTime = rtt;
+                      it->second.packetLoss = ploss;
+                    }
+                  }
                 }
                 break;
               default:
@@ -372,14 +405,22 @@ void NetworkManager::service() {
             Log::printf(LOG_INFO, "Peer disconnecting (reason: %s)",
                         disconnectReasons[event.data]);
 
-            BitStream peerRemoving;
-            peerRemoving.write<PacketId>(DelPeerPacket);
-            peerRemoving.write<int>(peer->peerId);
-            deleteEntity(peer->playerEntity->getEntityId());
+            if (peer->playerEntity) {
+              BitStream peerRemoving;
+              peerRemoving.write<PacketId>(DelPeerPacket);
+              peerRemoving.write<int>(peer->peerId);
+              deleteEntity(peer->playerEntity->getEntityId());
+              for (auto _peer : peers) {
+                if (!_peer.second.playerEntity ||
+                    peer->peerId == _peer.second.peerId)
+                  continue;
+                enet_peer_send(
+                    _peer.second.peer, NETWORK_STREAM_META,
+                    peerRemoving.createPacket(ENET_PACKET_FLAG_RELIABLE));
+              }
+            }
 
             peers.erase(peer->peerId);
-            enet_host_broadcast(
-                host, 0, peerRemoving.createPacket(ENET_PACKET_FLAG_RELIABLE));
           } else {
           }
         } else {
@@ -403,15 +444,7 @@ void NetworkManager::service() {
           np.peer = event.peer;
           np.peerId = lastPeerId++;
           np.playerEntity = NULL;
-
-          BitStream newPeerPacketStream;
-          newPeerPacketStream.write<PacketId>(NewPeerPacket);
-          newPeerPacketStream.write<int>(np.peerId);
-          ENetPacket* packet =
-              newPeerPacketStream.createPacket(ENET_PACKET_FLAG_RELIABLE);
-          for (auto& peer : peers) {
-            enet_peer_send(peer.second.peer, 0, packet);
-          }
+          np.noob = true;
 
           peers[np.peerId] = np;
           event.peer->data = &peers[np.peerId];
@@ -447,7 +480,12 @@ void NetworkManager::service() {
   EASY_BLOCK("Network Tick");
 #endif
   for (auto& entity : entities) {
-    entity.second->tick();
+    try {
+      entity.second->tick();
+    } catch (std::exception& e) {
+      Log::printf(LOG_ERROR, "Error ticking entity %s:%i: %s",
+                  entity.second->getTypeName(), entity.first, e.what());
+    }
   }
 #ifndef DISABLE_EASY_PROFILER
   EASY_END_BLOCK;
@@ -510,6 +548,25 @@ void NetworkManager::service() {
                        packetUnreliable);
         // need not be cleared because std::vector will clean itself up
       }
+
+      if (peer.second.noob && peer.second.playerEntity) {
+        for (auto& _peer : peers) {
+          if (!_peer.second.playerEntity || peer.first == _peer.first) continue;
+          BitStream newPeerPacket;
+          newPeerPacket.write<PacketId>(NewPeerPacket);
+          newPeerPacket.write<int>(_peer.first);
+          newPeerPacket.write<EntityId>(
+              _peer.second.playerEntity->getEntityId());
+          enet_peer_send(
+              peer.second.peer,
+              NETWORK_STREAM_ENTITY,  // even though this is technically a meta
+                                      // packet it needs to be in the entity
+                                      // stream so the other entities can be
+                                      // read by the remote peer in time
+              newPeerPacket.createPacket(ENET_PACKET_FLAG_RELIABLE));
+        }
+        peer.second.noob = false;
+      }
     }
 
     if (int _pendingUpdates = pendingUpdates.size()) {
@@ -547,14 +604,21 @@ void NetworkManager::service() {
       pendingUpdatesUnreliable.clear();
     }
 
-    if (distributedTime < nextDtPacket) {
+    if (distributedTime > nextDtPacket) {
       nextDtPacket += distributedTime + sv_dtrate.getFloat();
 
       BitStream timeStream;
       timeStream.write<PacketId>(DistributedTimePacket);
       timeStream.write<float>(distributedTime);
+
+      timeStream.write<int>(peers.size());
+      for (auto peer : peers) {
+        timeStream.write<int>(peer.first);
+        timeStream.write<int>(peer.second.peer->roundTripTime);
+        timeStream.write<int>(peer.second.peer->packetLoss);
+      }
       enet_host_broadcast(host, NETWORK_STREAM_META,
-                          timeStream.createPacket(ENET_PACKET_FLAG_RELIABLE));
+                          timeStream.createPacket(0));
     }
   } else {
 #ifndef DISABLE_EASY_PROFILER
@@ -576,6 +640,24 @@ void NetworkManager::service() {
                 playerEntity->displayName.get().c_str());
             localPeer.playerEntity = playerEntity;
           }
+        }
+      }
+    }
+
+    for (auto& peer : peers) {
+      if (!peer.second.playerEntity) {
+        std::vector<Entity*> ents = findEntitiesByType(playerType);
+        for (auto ent : ents) {
+          Player* player = dynamic_cast<Player*>(ent);
+          if (player->remotePeerId.get() == peer.second.peerId) {
+            peer.second.playerEntity = player;
+            break;
+          }
+        }
+      } else {
+        if (peer.second.playerEntity->remotePeerId.get() !=
+            peer.second.peerId) {
+          peer.second.playerEntity = NULL;
         }
       }
     }

@@ -25,6 +25,7 @@ class CVar {
   std::string name;
   std::string value;
   unsigned long flags;
+  bool dirty;
 
  public:
   CVar(const char* name, const char* defaultVar, unsigned long flags = 0);

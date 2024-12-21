@@ -37,6 +37,10 @@ struct Peer {
   int peerId;
   Player* playerEntity;
   Type type;
+  bool noob;
+
+  int roundTripTime;
+  int packetLoss;
 
   std::vector<EntityId> pendingNewIds;
   std::vector<EntityId> pendingDelIds;
@@ -126,6 +130,8 @@ class NetworkManager {
                            std::string typeName);
   Entity* findEntityByType(std::string typeName);
   std::vector<Entity*> findEntitiesByType(std::string typeName);
+
+  std::map<int, Peer> getPeers() { return peers; }
 
   Entity* getEntityById(EntityId id);
 

@@ -1,6 +1,7 @@
 #include "rendercommand.hpp"
 
 #include <format>
+#include <glm/ext/matrix_transform.hpp>
 
 #include "engine.hpp"
 #include "gfx/base_device.hpp"
@@ -49,11 +50,13 @@ void RenderList::render(gfx::Engine* engine) {
   if (program) program->bind();
   if (pointers) pointers->bind();
   BaseTexture* oldTextures[NR_MAX_TEXTURES] = {0};
+  glm::mat4 lastModel = glm::identity<glm::mat4>();
   for (int i = 0; i < commands.size(); i++) {
+    RenderCommand command = commands[i];
     if (program) {
       bool needsRebind = false;
       for (int j = 0; j < NR_MAX_TEXTURES; j++) {
-        BaseTexture* texture = commands[i].getTexture(j);
+        BaseTexture* texture = command.getTexture(j);
         if (texture && oldTextures[j] != texture) {
           program->setParameter(
               std::format("texture{}", j), DtSampler,
@@ -62,9 +65,17 @@ void RenderList::render(gfx::Engine* engine) {
           needsRebind = true;
         }
       }
+      if (command.getModel()) {
+        glm::mat4 model = command.getModel().value();
+        if (lastModel != model) {
+          program->setParameter("model", DtMat4, {.matrix4x4 = model});
+          lastModel = model;
+          needsRebind = true;
+        }
+      }
       if (needsRebind) program->bind();
     }
-    DirtyFields df = commands[i].render(engine);
+    DirtyFields df = command.render(engine);
     if (df.program && program) program->bind();
     if (df.pointers && pointers) pointers->bind();
   }

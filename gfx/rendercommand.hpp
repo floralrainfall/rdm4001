@@ -1,5 +1,6 @@
 #pragma once
 #include <algorithm>
+#include <optional>
 #include <vector>
 
 #include "gfx/base_device.hpp"
@@ -20,6 +21,7 @@ class RenderCommand {
   gfx::BaseBuffer* elements;
   gfx::BaseDevice::DrawType type;
   gfx::BaseTexture* texture[NR_MAX_TEXTURES];
+  std::optional<glm::mat4> model;
   size_t count;
 
  public:
@@ -30,7 +32,9 @@ class RenderCommand {
   void setTexture(int id, gfx::BaseTexture* texture) {
     this->texture[id] = texture;
   }
+  void setModel(std::optional<glm::mat4> model) { this->model = model; }
   gfx::BaseTexture* getTexture(int id) const { return texture[id]; }
+  std::optional<glm::mat4> getModel() { return model; };
 
   DirtyFields render(gfx::Engine* engine);
 };

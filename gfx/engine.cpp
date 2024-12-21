@@ -46,7 +46,7 @@ TextureCache::getOrLoad2d(const char* path, bool keepData) {
         }
 
         std::unique_ptr<BaseTexture> tx = device->createTexture();
-        tx->upload2d(i.width, i.height, DtUnsignedByte, i.format, uc);
+        tx->upload2d(i.width, i.height, DtUnsignedByte, i.format, uc, 4);
         textures[path] =
             std::pair<TextureCache::Info, std::unique_ptr<BaseTexture>>(
                 i, std::move(tx));
@@ -302,8 +302,10 @@ class RenderJob : public SchedulerJob {
   }
 };
 
+static CVar r_samples("r_samples", "1", CVARF_GLOBAL | CVARF_SAVE);
+
 Engine::Engine(World* world, void* hwnd) {
-  fullscreenSamples = 4;
+  fullscreenSamples = r_samples.getInt();
   maxFbScale = 1.0;
   forcedAspect = 0.0;
   context.reset(new gl::GLContext(hwnd));
@@ -398,16 +400,18 @@ void Engine::initializeBuffers(glm::vec2 res, bool reset) {
     postProcessFrameBuffer->setTarget(fullscreenTexture.get());
 
     fullscreenTextureDepth->reserve2dMultisampled(
-        fbSizeF.x, fbSizeF.y, BaseTexture::D24S8, fullscreenSamples);
+        fbSizeF.x, fbSizeF.y, BaseTexture::D24S8, fullscreenSamples, true);
 
     postProcessFrameBuffer->setTarget(fullscreenTextureDepth.get(),
                                       BaseFrameBuffer::DepthStencil);
 
-    fullscreenTextureBloom->reserve2dMultisampled(
-        fbSizeF.x, fbSizeF.y, BaseTexture::RGBAF32, fullscreenSamples);
+    if (r_bloom.getBool()) {
+      fullscreenTextureBloom->reserve2dMultisampled(
+          fbSizeF.x, fbSizeF.y, BaseTexture::RGBAF32, fullscreenSamples);
 
-    postProcessFrameBuffer->setTarget(fullscreenTextureBloom.get(),
-                                      BaseFrameBuffer::Color1);
+      postProcessFrameBuffer->setTarget(fullscreenTextureBloom.get(),
+                                        BaseFrameBuffer::Color1);
+    }
 
     // set up ping pong buffers for gaussian blur
     for (int i = 0; i < 2; i++) {
@@ -419,9 +423,11 @@ void Engine::initializeBuffers(glm::vec2 res, bool reset) {
         pingpongTexture[i]->destroyAndCreate();
       }
 
-      pingpongTexture[i]->reserve2dMultisampled(
-          fbSizeF.x, fbSizeF.y, BaseTexture::RGBAF32, fullscreenSamples);
-      pingpongFramebuffer[i]->setTarget(pingpongTexture[i].get());
+      if (r_bloom.getBool()) {
+        pingpongTexture[i]->reserve2dMultisampled(
+            fbSizeF.x, fbSizeF.y, BaseTexture::RGBAF32, fullscreenSamples);
+        pingpongFramebuffer[i]->setTarget(pingpongTexture[i].get());
+      }
     }
 
     if (postProcessFrameBuffer->getStatus() != BaseFrameBuffer::Complete) {

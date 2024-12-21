@@ -28,7 +28,7 @@ FpsControllerSettings::FpsControllerSettings() {
   capsuleRadius = 16.f;
   capsuleMass = 1.f;
   maxSpeed = 160.f;
-  maxAccel = 10.f;
+  maxAccel = 20.f;
   friction = 4.0f;
   stopSpeed = 40.f;
 }
@@ -66,6 +66,7 @@ FpsController::FpsController(PhysicsWorld* world,
 }
 
 FpsController::~FpsController() {
+  world->getWorld()->removeRigidBody(rigidBody.get());
   world->physicsStepping.removeListener(stepJob);
 }
 
@@ -178,9 +179,6 @@ void FpsController::physicsStep() {
   btDynamicsWorld::ClosestRayResultCallback callback(start, end);
   world->getWorld()->rayTest(start, end, callback);
 
-  grounded = (callback.m_collisionObject != NULL);
-  if (grounded) jumping = false;
-
   btVector3 vel = rigidBody->getLinearVelocity();
 
   if (grounded && (vel.length() > 5.0)) {
@@ -223,6 +221,9 @@ void FpsController::physicsStep() {
 
     transform.setBasis(BulletHelpers::toMat3(moveView));
   }
+
+  grounded = (callback.m_collisionObject != NULL);
+  if (grounded) jumping = false;
 }
 
 void FpsController::serialize(network::BitStream& stream) {
@@ -277,7 +278,7 @@ void FpsController::deserialize(network::BitStream& stream, bool backend) {
     btTransform& ourTransform = rigidBody->getWorldTransform();
     float dist = glm::distance(
         networkPosition, BulletHelpers::fromVector3(ourTransform.getOrigin()));
-    if (dist > 100.f) ourTransform.setOrigin(origin);
+    if (dist > velocity.length() * 2.f) ourTransform.setOrigin(origin);
   }
 }
 

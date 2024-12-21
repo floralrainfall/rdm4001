@@ -31,7 +31,10 @@ GLenum fromDataType(DataType t) {
   }
 }
 
-GLTexture::GLTexture() { glGenTextures(1, &texture); }
+GLTexture::GLTexture() {
+  glGenTextures(1, &texture);
+  isRenderBuffer = false;
+}
 
 GLTexture::~GLTexture() { glDeleteTextures(1, &texture); }
 
@@ -80,29 +83,48 @@ GLenum GLTexture::texInternalFormat(InternalFormat format) {
 }
 
 void GLTexture::reserve2d(int width, int height, InternalFormat format,
-                          int mipmapLevels) {
+                          int mipmapLevels, bool renderbuffer) {
   textureType = Texture2D;
   textureFormat = format;
 
-  GLenum target = texType(textureType);
-  glBindTexture(target, texture);
-  glTexStorage2D(target, 0, texInternalFormat(textureFormat), width, height);
-  if (mipmapLevels != 0) {
-    glGenerateMipmap(target);
+  if (renderbuffer) {
+    glGenRenderbuffers(1, &this->renderbuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, this->renderbuffer);
+    glRenderbufferStorage(GL_RENDERBUFFER, texInternalFormat(format), width,
+                          height);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    isRenderBuffer = true;
+  } else {
+    GLenum target = texType(textureType);
+    glBindTexture(target, texture);
+    glTexStorage2D(target, 0, texInternalFormat(textureFormat), width, height);
+    if (mipmapLevels != 0) {
+      glGenerateMipmap(target);
+    }
+    glBindTexture(target, 0);
   }
-  glBindTexture(target, 0);
 }
 
 void GLTexture::reserve2dMultisampled(int width, int height,
-                                      InternalFormat format, int samples) {
+                                      InternalFormat format, int samples,
+                                      bool renderbuffer) {
   textureType = Texture2D_MultiSample;
   textureFormat = format;
 
-  GLenum target = texType(textureType);
-  glBindTexture(target, texture);
-  glTexImage2DMultisample(target, samples, texInternalFormat(textureFormat),
-                          width, height, GL_TRUE);
-  glBindTexture(target, 0);
+  if (renderbuffer) {
+    glGenRenderbuffers(1, &this->renderbuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, this->renderbuffer);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples,
+                                     texInternalFormat(format), width, height);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    isRenderBuffer = true;
+  } else {
+    GLenum target = texType(textureType);
+    glBindTexture(target, texture);
+    glTexImage2DMultisample(target, samples, texInternalFormat(textureFormat),
+                            width, height, GL_TRUE);
+    glBindTexture(target, 0);
+  }
 }
 
 void GLTexture::upload2d(int width, int height, DataType type,
@@ -179,6 +201,10 @@ void GLTexture::setFiltering(Filtering min, Filtering max) {
 void GLTexture::destroyAndCreate() {
   glDeleteTextures(1, &texture);
   glGenTextures(1, &texture);
+  if (isRenderBuffer) {
+    glDeleteRenderbuffers(1, &renderbuffer);
+    isRenderBuffer = false;
+  }
 }
 
 void GLTexture::bind() {
@@ -395,7 +421,11 @@ void GLFrameBuffer::setTarget(BaseTexture* texture, AttachmentPoint point) {
       atpnam = std::format("Color attachment {}", (int)point);
       break;
   }
-  glFramebufferTexture(GL_FRAMEBUFFER, atp, _gltexture->getId(), 0);
+  if (_gltexture->getIsRenderBuffer())
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, atp, GL_RENDERBUFFER,
+                              _gltexture->getRbId());
+  else
+    glFramebufferTexture(GL_FRAMEBUFFER, atp, _gltexture->getId(), 0);
   GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
   if (status != GL_FRAMEBUFFER_COMPLETE) {
     const char* msgs[] = {"Missing attachment", "Bad dimensions",

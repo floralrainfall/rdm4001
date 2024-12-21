@@ -28,6 +28,7 @@ Settings::Settings() {
 CVar::CVar(const char* name, const char* defaultVar, unsigned long flags) {
   this->name = name;
   this->flags = flags;
+  dirty = true;
   value = defaultVar;
   Settings::singleton()->addCvar(name, this);
 }
