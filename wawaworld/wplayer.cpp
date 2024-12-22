@@ -103,7 +103,8 @@ WPlayer::WPlayer(net::NetworkManager* manager, net::EntityId id)
           btVector3 vel = controller->getRigidBody()->getLinearVelocity();
           ImGui::Text("Velocity: %0.2f, %0.2f, %0.2f", vel.x(), vel.y(),
                       vel.z());
-          ImGui::Text("Velocity Length: %0.2f", vel.length());
+          ImGui::Text("Velocity Length: %0.2f (%0.2f)", vel.length(),
+                      glm::length((glm::vec2){vel.x(), vel.y()}));
           glm::vec2 accel = controller->getWishDir();
           ImGui::Text("Wish Dir: %0.2f, %0.2f", accel.x, accel.y);
         } else {

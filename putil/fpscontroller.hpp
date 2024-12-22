@@ -42,6 +42,7 @@ class FpsController {
 
   void moveGround(btVector3& vel, glm::vec2 wishdir);
   void moveAir(btVector3& vel, glm::vec2 wishdir);
+  void detectGrounded();
 
  public:
   enum Animation { Idle, Walk, Run, Jump, Fall };

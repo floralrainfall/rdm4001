@@ -100,15 +100,16 @@ void FpsController::moveGround(btVector3& vel, glm::vec2 wishdir) {
   float control = speed < settings.stopSpeed ? settings.stopSpeed : speed;
   float newspeed = speed - PHYSICS_FRAMERATE * settings.friction * control;
 
+  if (Input::singleton()->isKeyDown(' ')) {
+    vel += btVector3(0, 0, 50);
+    jumping = true;
+    return;
+  }
+
   if (newspeed >= 0) {
     newspeed /= speed;
 
     vel *= newspeed;
-  }
-
-  if (Input::singleton()->isKeyDown(' ')) {
-    vel += btVector3(0, 0, 50);
-    jumping = true;
   }
 
   float currentSpeed = vel.dot(btVector3(wishdir.x, wishdir.y, 0.0));
@@ -154,6 +155,18 @@ void FpsController::updateCamera(gfx::Camera& camera) {
   camera.setFar(65535.f);
 }
 
+void FpsController::detectGrounded() {
+  btTransform& transform = rigidBody->getWorldTransform();
+  btVector3 start =
+      transform.getOrigin() + btVector3(0, 0, -settings.capsuleHeight / 2.0);
+  btVector3 end = start + btVector3(0, 0, -19);
+  btDynamicsWorld::ClosestRayResultCallback callback(start, end);
+  world->getWorld()->rayTest(start, end, callback);
+
+  grounded = (callback.m_collisionObject != NULL);
+  if (grounded) jumping = false;
+}
+
 void FpsController::physicsStep() {
 #ifndef DISABLE_EASY_PROFILER
   EASY_FUNCTION("FpsController::physicsStep");
@@ -172,12 +185,6 @@ void FpsController::physicsStep() {
   float dist = glm::distance(networkPosition,
                              BulletHelpers::fromVector3(transform.getOrigin()));
   //  Log::printf(LOG_DEBUG, "%f", dist);
-
-  btVector3 start =
-      transform.getOrigin() + btVector3(0, 0, -settings.capsuleHeight / 2.0);
-  btVector3 end = start + btVector3(0, 0, -19);
-  btDynamicsWorld::ClosestRayResultCallback callback(start, end);
-  world->getWorld()->rayTest(start, end, callback);
 
   btVector3 vel = rigidBody->getLinearVelocity();
 
@@ -222,8 +229,7 @@ void FpsController::physicsStep() {
     transform.setBasis(BulletHelpers::toMat3(moveView));
   }
 
-  grounded = (callback.m_collisionObject != NULL);
-  if (grounded) jumping = false;
+  detectGrounded();
 }
 
 void FpsController::serialize(network::BitStream& stream) {

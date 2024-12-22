@@ -91,10 +91,8 @@ void WGame::initializeClient() {
 
   std::scoped_lock lock(world->worldLock);
   world->stepped.listen([this] {
-    if (!game->worldspawn)
-      game->worldspawn =
-          (Worldspawn*)world->getNetworkManager()->findEntityByType(
-              "Worldspawn");
+    game->worldspawn =
+        (Worldspawn*)world->getNetworkManager()->findEntityByType("Worldspawn");
   });
 
   Input::singleton()->keyDownSignals[SDLK_TAB].listen([] {
