@@ -30,6 +30,8 @@ Entity::Entity(NetworkManager* manager, EntityId id) {
   this->manager = manager;
 }
 
+std::string Entity::getEntityInfo() { return ""; }
+
 Entity::~Entity() {}
 
 World* Entity::getWorld() { return this->manager->getWorld(); }

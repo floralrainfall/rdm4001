@@ -93,6 +93,8 @@ class Entity {
 
   virtual bool dirty() { return false; }
   virtual const char* getTypeName() { return "Entity"; };
+
+  virtual std::string getEntityInfo();
 };
 
 template <typename T>

@@ -80,6 +80,7 @@ class NetworkManager {
 
   std::vector<EntityId> pendingUpdates;
   std::vector<EntityId> pendingUpdatesUnreliable;
+  std::vector<std::pair<std::string, std::string>> pendingRconCommands;
 
   std::chrono::time_point<std::chrono::steady_clock> lastTick;
 
@@ -115,6 +116,7 @@ class NetworkManager {
     DeltaIdPacket,          // S -> C, C -> S
     SignalPacket,           // S -> C, C -> S
     DistributedTimePacket,  // S -> C
+    RconPacket,             // C -> S
   };
 
   void service();
@@ -132,6 +134,7 @@ class NetworkManager {
   std::vector<Entity*> findEntitiesByType(std::string typeName);
 
   std::map<int, Peer> getPeers() { return peers; }
+  Peer* getPeerById(int id);
 
   Entity* getEntityById(EntityId id);
 
@@ -143,10 +146,16 @@ class NetworkManager {
   gfx::Engine* getGfxEngine() { return gfxEngine; }
 
   void setPlayerType(std::string type) { playerType = type; };
+  std::string getPlayerType() { return playerType; }
   Peer& getLocalPeer() { return localPeer; }
   bool isBackend() { return backend; }
 
   void setUsername(std::string username) { this->username = username; };
+  void listEntities();
+
+  void sendRconCommand(std::string password, std::string command) {
+    pendingRconCommands.push_back({password, command});
+  }
 
   static void initialize();
   static void deinitialize();

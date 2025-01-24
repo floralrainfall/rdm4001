@@ -85,6 +85,7 @@ class SoundManager {
 
   SoundEmitter* newEmitter();
   void delEmitter(SoundEmitter* emitter);
+  void stopAll();
 
   SoundCache* getSoundCache() { return cache.get(); };
 

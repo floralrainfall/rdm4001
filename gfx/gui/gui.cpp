@@ -76,12 +76,25 @@ static std::map<std::string, glm::vec3> definedColors = {
     {"textarea_edit", glm::vec3(0.1)},
     {"pinkish", glm::vec3(0.84, 0.48, 0.72)}};
 
+bool Component::isVisible() {
+  if (parentComponent.empty()) {
+    return domRoot.visible;
+  } else {
+    auto c = manager->getComponentByName(parentComponent);
+    if (c) {
+      return domRoot.visible && c.value()->isVisible();
+    } else {
+      return domRoot.visible;
+    }
+  }
+}
+
 void Component::render(GuiManager* manager, gfx::Engine* engine) {
-  if (!domRoot.visible) return;
+  if (!isVisible()) return;
 
   glm::vec2 offset = glm::vec2(0);
   glm::ivec2 inc_factor;
-  glm::vec2 fbSize = engine->getWindowResolution();
+  glm::vec2 fbSize = engine->getTargetResolution();
   bool alignRight = false;
   bool alignTop = false;
 
@@ -386,7 +399,7 @@ static void parseXmlNode(GuiManager* manager, Component* component,
   }
 }
 
-void GuiManager::parseXml(const char* file) {
+Component* GuiManager::parseXml(const char* file) {
   auto d = common::FileSystem::singleton()->getFileIO(file, "r");
   if (d) {
     size_t fileSize = d.value()->fileSize();
@@ -395,6 +408,8 @@ void GuiManager::parseXml(const char* file) {
     size_t rd = d.value()->read(xmld, fileSize);
     try {
       Component component;
+
+      component.manager = this;
 
       rapidxml::xml_document<> doc;
       doc.parse<rapidxml::parse_full>(xmld);
@@ -406,7 +421,7 @@ void GuiManager::parseXml(const char* file) {
       if (rootName) {
         auto it = components.find(rootName->value());
         if (it != components.end()) {
-          return;  // already exists
+          return NULL;  // already exists
         }
       } else {
         throw std::runtime_error("XML root entry has no name attribute");
@@ -423,6 +438,7 @@ void GuiManager::parseXml(const char* file) {
       growModes["Vertical"] = Component::Horizontal;
 
       component.variablesDirty = true;
+      component.name = rootName->value();
 
       rapidxml::xml_attribute<>* anchor = node->first_attribute("anchor");
       if (anchor) {
@@ -443,7 +459,13 @@ void GuiManager::parseXml(const char* file) {
         std::string name = child->name();
         if (name == "component") {
           std::string src = child->first_attribute("src")->value();
-          parseXml(src.c_str());
+          Component* newComponent = parseXml(src.c_str());
+          if (newComponent) {
+            newComponent->parentComponent = component.name;
+            Log::printf(LOG_DEBUG, "Parented %s to %s",
+                        newComponent->name.c_str(),
+                        newComponent->parentComponent.c_str());
+          }
         } else if (name == "script") {
           script::Script s(engine->getWorld()->getScriptContext());
           std::string contents;
@@ -516,6 +538,8 @@ void GuiManager::parseXml(const char* file) {
 
       components[name] = component;
       Log::printf(LOG_DEBUG, "Loaded XML %s", file);
+
+      return &components[name];
     } catch (rapidxml::parse_error& e) {
       Log::printf(LOG_ERROR, "XML parse error: %s (%s, \"%s\")", file, e.what(),
                   e.where<char>());
@@ -531,6 +555,8 @@ void GuiManager::parseXml(const char* file) {
   } else {
     Log::printf(LOG_ERROR, "Error loading XML: %s", file);
   }
+
+  return NULL;
 }
 
 void GuiManager::render() {

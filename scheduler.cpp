@@ -196,7 +196,7 @@ void SchedulerJob::stopBlocking() {
     state = StopPlease;
     if (stopOnCancel) killMutex.unlock();
     while (state != Stopped) {
-      std::this_thread::yield();
+      std::this_thread::sleep_for(std::chrono::milliseconds(2));
     }
     thread.join();
   }

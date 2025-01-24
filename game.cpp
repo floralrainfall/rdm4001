@@ -76,7 +76,7 @@ size_t Game::getVersion() { return ENGINE_VERSION; }
 
 const char* Game::copyright() {
   return R"a(RDM4001, a 3D game engine
-Copyright (C) 2024-2025 Entropy Interactive
+Copyright (C) 2024-2026 Entropy Interactive
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -165,7 +165,7 @@ void Game::startClient() {
   ImGui::SetCurrentContext(ImGui::CreateContext());
   ImGui_ImplSDL2_InitForOpenGL(
       window, ((gfx::gl::GLContext*)gfxEngine->getContext())->getContext());
-  gfxEngine->getContext()->unsetCurrent();
+  ImGui::GetIO().DisplaySize = ImVec2(wsize.x, wsize.y);
 
   world->getScriptContext()->setGfxEngine(gfxEngine.get());
 
@@ -175,6 +175,10 @@ void Game::startClient() {
   }
   world->changingTitle.listen(
       [this](std::string title) { SDL_SetWindowTitle(window, title.c_str()); });
+
+  console.reset(new Console(this));
+
+  gfxEngine->getContext()->unsetCurrent();
 }
 
 void Game::startServer() {
@@ -184,6 +188,7 @@ void Game::startServer() {
 
   worldServer.reset(new World(worldSettings));
   if (worldSettings.network) worldServer->getNetworkManager()->setGame(this);
+  if (!console) console.reset(new Console(this));
 }
 
 void Game::lateInitServer() {
@@ -239,6 +244,8 @@ void Game::stopServer() { worldServer.reset(); }
 
 static CVar input_userelativemode("input_userelativemode", "0",
                                   CVARF_SAVE | CVARF_GLOBAL);
+static CVar input_enableimgui("input_enableimgui", "0",
+                              CVARF_SAVE | CVARF_GLOBAL);
 
 void Game::pollEvents() {
 #ifndef DISABLE_EASY_PROFILER
@@ -250,8 +257,10 @@ void Game::pollEvents() {
   bool ignoreMouse = false;
   SDL_ShowCursor(!Input::singleton()->getMouseLocked());
   while (SDL_PollEvent(&event)) {
-    ImGui_ImplSDL2_NewFrame();
-    ImGui_ImplSDL2_ProcessEvent(&event);
+    if (input_enableimgui.getBool()) {
+      ImGui_ImplSDL2_NewFrame();
+      ImGui_ImplSDL2_ProcessEvent(&event);
+    }
     InputObject object;
 
     switch (event.type) {
@@ -260,6 +269,8 @@ void Game::pollEvents() {
           case SDL_WINDOWEVENT_RESIZED:
             cl_savedwindowsize.setVec2(
                 glm::vec2(event.window.data1, event.window.data2));
+            ImGui::GetIO().DisplaySize =
+                ImVec2(event.window.data1, event.window.data2);
             break;
           case SDL_WINDOWEVENT_MOVED:
             cl_savedwindowpos.setVec2(
@@ -369,7 +380,7 @@ void Game::mainLoop() {
 
   if (world) {
     while (world->getRunning()) {
-      std::this_thread::yield();
+      std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
   }
 

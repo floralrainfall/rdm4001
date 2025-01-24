@@ -54,6 +54,54 @@ OutFontTexture FontRender::render(Font* font, const char* text) {
   return t;
 }
 
+OutFontTexture FontRender::renderWrapped(Font* font, const char* text,
+                                         int wraplength) {
+  OutFontTexture t;
+
+  SDL_Surface* surf;
+  SDL_Color color;
+  color.r = 255;
+  color.g = 255;
+  color.b = 255;
+  color.a = 255;
+  surf = TTF_RenderUTF8_Blended_Wrapped(font->font, text, color, wraplength);
+  if (!surf) {
+    Log::printf(LOG_ERROR, "TTF render returned null, %s", SDL_GetError());
+    t.data = NULL;
+    return t;
+  }
+
+  SDL_Surface* conv =
+      SDL_ConvertSurfaceFormat(surf, SDL_PIXELFORMAT_ABGR8888, 0);
+  SDL_LockSurface(conv);
+  size_t size = conv->w * conv->h * 4;
+  t.data = new char[size];
+  t.w = conv->w;
+  t.h = conv->h;
+
+  // https://stackoverflow.com/questions/65815332/flipping-a-surface-vertically-in-sdl2
+  int pitch = conv->pitch;
+  char* temp = new char[pitch];
+  char* pixels = (char*)conv->pixels;
+  for (int i = 0; i < conv->h / 2; ++i) {
+    // get pointers to the two rows to swap
+    char* row1 = pixels + i * pitch;
+    char* row2 = pixels + (surf->h - i - 1) * pitch;
+
+    // swap rows
+    memcpy(temp, row1, pitch);
+    memcpy(row1, row2, pitch);
+    memcpy(row2, temp, pitch);
+  }
+
+  memcpy(t.data, conv->pixels, size);
+  SDL_UnlockSurface(conv);
+  SDL_FreeSurface(conv);
+  SDL_FreeSurface(surf);
+
+  return t;
+}
+
 OutFontTexture::~OutFontTexture() { delete data; }
 
 Font::~Font() {}

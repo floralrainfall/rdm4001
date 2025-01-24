@@ -23,7 +23,14 @@ class Worldspawn : public net::Entity {
   std::string mapPath(std::string name);
 
  public:
-  enum Status { InGame, RoundBeginning, WaitingForPlayer, Unknown };
+  enum Status {
+    InGame,
+    RoundBeginning,
+    WaitingForPlayer,
+    RoundEnding,
+    RoundEnded,
+    Unknown
+  };
 
   void destroyFile();
   glm::vec3 spawnLocation();
@@ -33,6 +40,7 @@ class Worldspawn : public net::Entity {
 
   virtual void tick();
   void setNextMap(std::string name) { nextMapName = name; };
+  void endRound();
 
   virtual const char* getTypeName() { return "Worldspawn"; };
 

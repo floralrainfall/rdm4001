@@ -144,6 +144,7 @@ GameState::GameState(Game* game) {
     auto menuOnlinePlay =
         game->getGfxEngine()->getGuiManager()->getComponentByName(
             "MenuOnlinePlay");
+    auto hud = game->getGfxEngine()->getGuiManager()->getComponentByName("HUD");
     if (!mainMenu) {
       Log::printf(LOG_ERROR,
                   "Define component MainMenu in the file for dat3/%s.xml",
@@ -151,10 +152,10 @@ GameState::GameState(Game* game) {
       return;
     }
     if (!mainMenuButtons) {
-      Log::printf(
-          LOG_ERROR,
-          "Define component MainMenuButtons in the file for dat3/%s.xml",
-          Fun::getModuleName().c_str());
+      Log::printf(LOG_ERROR,
+                  "Define component MainMenuButtons in the file for "
+                  "dat3/%s.xml",
+                  Fun::getModuleName().c_str());
       return;
     }
     switch (state) {
@@ -165,21 +166,25 @@ GameState::GameState(Game* game) {
         if (menuOnlinePlay) menuOnlinePlay.value()->domRoot.visible = false;
         mainMenuButtons.value()->domRoot.visible = false;
         mainMenu.value()->domRoot.visible = false;
+        hud.value()->domRoot.visible = true;
         break;
       case MenuOnlinePlay:
         menuOnlinePlay.value()->domRoot.visible = true;
         mainMenuButtons.value()->domRoot.visible = false;
         mainMenu.value()->domRoot.visible = false;
+        hud.value()->domRoot.visible = false;
         break;
       case MainMenu: {
         game->getGfxEngine()->setClearColor(glm::vec3(1.f));
         mainMenuButtons.value()->domRoot.visible = true;
         mainMenu.value()->domRoot.visible = true;
         if (menuOnlinePlay) menuOnlinePlay.value()->domRoot.visible = false;
+        hud.value()->domRoot.visible = false;
       } break;
       case Intro: {
         mainMenuButtons.value()->domRoot.visible = false;
         mainMenu.value()->domRoot.visible = false;
+        hud.value()->domRoot.visible = false;
         if (menuOnlinePlay) menuOnlinePlay.value()->domRoot.visible = false;
         Graph::Node node;
         node.basis = glm::identity<glm::mat3>();

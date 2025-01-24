@@ -27,6 +27,28 @@ namespace rdm::gfx::gl {
 // we expect SDL's gl context
 static CVar r_gldebug("r_gldebug", "0", CVARF_SAVE | CVARF_GLOBAL);
 static CVar r_glvsync("r_glvsync", "0", CVARF_SAVE | CVARF_GLOBAL);
+static CVar r_gladaptivevsync("r_gladaptivevsync", "1",
+                              CVARF_SAVE | CVARF_GLOBAL);
+
+void GLContext::updateVsync() {
+  if (r_glvsync.getBool()) {
+    Log::printf(LOG_INFO, "enabling %s vsync",
+                r_gladaptivevsync.getBool() ? "adaptive" : "synchronized");
+
+    bool success = SDL_GL_SetSwapInterval(r_gladaptivevsync.getBool() ? -1 : 1);
+
+    if (!success) {
+      if (r_gladaptivevsync.getBool()) {
+        Log::printf(LOG_WARN,
+                    "adaptive vsync unsupported, using synchronized vsync");
+        SDL_GL_SetSwapInterval(1);
+      }
+    }
+  } else {
+    Log::printf(LOG_INFO, "disabling vsync");
+    SDL_GL_SetSwapInterval(0);
+  }
+}
 
 GLContext::GLContext(void* hwnd) : BaseContext(hwnd) {
   context = SDL_GL_CreateContext((SDL_Window*)hwnd);
@@ -37,10 +59,8 @@ GLContext::GLContext(void* hwnd) : BaseContext(hwnd) {
   if (!gladLoadGLLoader(SDL_GL_GetProcAddress)) {
     Log::printf(LOG_FATAL, "Unable to initialize GLAD");
   }
-  SDL_GL_SetSwapInterval(r_glvsync.getBool());
-  r_glvsync.changing.listen(
-      [] { SDL_GL_SetSwapInterval(r_glvsync.getBool()); });
-
+  updateVsync();
+  r_glvsync.changing.listen([this] { updateVsync(); });
   if (r_gldebug.getBool()) {
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);

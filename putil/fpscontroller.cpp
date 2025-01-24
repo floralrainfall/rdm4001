@@ -39,6 +39,7 @@ FpsController::FpsController(PhysicsWorld* world,
   this->settings = settings;
   btCapsuleShape* shape =
       new btCapsuleShapeZ(settings.capsuleRadius, settings.capsuleHeight);
+
   btTransform transform = btTransform::getIdentity();
   transform.setOrigin(btVector3(-30.0, 30.0, 200.0));
   motionState = new btDefaultMotionState(transform);
@@ -52,6 +53,12 @@ FpsController::FpsController(PhysicsWorld* world,
     world->getWorld()->addRigidBody(rigidBody.get());
     stepJob = world->physicsStepping.listen([this] { physicsStep(); });
   }
+
+  rigidBody->setUserPointer(this);
+  rigidBody->setUserIndex(PHYSICS_INDEX_PLAYER);
+
+  shape->setUserPointer(this);
+  shape->setUserIndex(PHYSICS_INDEX_PLAYER);
 
   cameraPitch = 0.f;
   cameraYaw = 0.f;
@@ -260,7 +267,7 @@ void FpsController::deserialize(network::BitStream& stream, bool backend) {
     float dist =
         glm::distance(BulletHelpers::fromVector3(bodyTransform.getOrigin()),
                       BulletHelpers::fromVector3(origin));
-    Log::printf(LOG_DEBUG, "Prediction diff: %f", dist);
+    // Log::printf(LOG_DEBUG, "Prediction diff: %f", dist);
     if (dist > velocity.length() * 2.f) {
       Log::printf(LOG_DEBUG, "Resetting position");
       networkPosition = BulletHelpers::fromVector3(bodyTransform.getOrigin());

@@ -23,6 +23,7 @@ class FpsController {
   FpsControllerSettings settings;
   bool localPlayer;
   bool enable;
+  void* user;
 
   ClosureId stepJob;
 
@@ -69,11 +70,14 @@ class FpsController {
   btTransform getTransform() { return rigidBody->getWorldTransform(); }
   bool isGrounded() { return grounded; }
 
-  btRigidBody* getRigidBody() { return rigidBody.get(); };
-  btMotionState* getMotionState() { return motionState; };
+  btRigidBody* getRigidBody() const { return rigidBody.get(); };
+  btMotionState* getMotionState() const { return motionState; };
   FpsControllerSettings& getSettings() { return settings; }
 
-  Animation getAnimation() { return anim; }
+  Animation getAnimation() const { return anim; }
+
+  void setUser(void* user) { this->user = user; }
+  void* getUser() const { return this->user; }
 
  private:
   Animation anim;

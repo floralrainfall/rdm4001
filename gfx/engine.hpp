@@ -116,6 +116,8 @@ class Engine {
    * post-process framebuffer.
    */
   Signal<> renderStepped;
+  Signal<> afterRenderStepped;
+  Signal<> afterGuiRenderStepped;
   Signal<> initialized;
 
   void setMaxFbScale(double d) { maxFbScale = d; }

@@ -77,11 +77,17 @@ class Settings {
  public:
   static Settings* singleton();
 
-  CVar* getCvar(const char* name) { return cvars[name]; };
+  CVar* getCvar(const char* name) {
+    auto it = cvars.find(name);
+    if (it != cvars.end()) return cvars[name];
+    return NULL;
+  };
 
   void parseCommandLine(char* argv[], int argc);
   void load();
   void save();
+
+  void listCvars();
 
   Signal<std::string> cvarChanging;
 

@@ -6,7 +6,9 @@
 
 #include "al.h"
 #include "alc.h"
+#include "console.hpp"
 #include "filesystem.hpp"
+#include "game.hpp"
 #include "glad/glad.h"
 #include "scheduler.hpp"
 
@@ -336,4 +338,14 @@ void SoundManager::service() {
 
   for (auto emitter : emitters) emitter->service();
 }
+
+void SoundManager::stopAll() {
+  for (auto emitter : emitters) emitter->stop();
+}
+
+static ConsoleCommand sound_stopall("sound_stopall", "sound_stopall",
+                                    "stops all sounds",
+                                    [](Game* game, ConsoleArgReader r) {
+                                      game->getSoundManager()->stopAll();
+                                    });
 }  // namespace rdm

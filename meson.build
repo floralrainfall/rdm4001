@@ -6,6 +6,10 @@ if get_option('vcpkg').enabled()
                                 '--x-manifest-root=' + meson.current_source_dir())
 endif
 
+if get_option('buildtype').startswith('release')
+   add_project_arguments('-Ofast', language:['cpp'])
+endif
+
 sdl2 = dependency('sdl2')
 sdl2_ttf = dependency('sdl2_ttf')
 glm = dependency('glm')
@@ -37,6 +41,8 @@ glad_dep = glad_proj.get_variable('libglad_dep')
 inc = include_directories(['.', 'gfx/imgui', '/usr/include/bullet', 'subprojects/common'])
 
 gamelib = static_library('game', [
+  'console.cpp',
+  'console.hpp',
   'game.cpp',
   'game.hpp',
   'graph.cpp',

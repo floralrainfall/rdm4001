@@ -39,5 +39,8 @@ class GLDevice : public BaseDevice {
 
   virtual void startImGui();
   virtual void stopImGui();
+
+  virtual void dbgPushGroup(std::string message);
+  virtual void dbgPopGroup();
 };
 };  // namespace rdm::gfx::gl

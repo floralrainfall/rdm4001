@@ -23,6 +23,7 @@ struct OutFontTexture {
 class FontRender {
  public:
   static OutFontTexture render(Font* font, const char* text);
+  static OutFontTexture renderWrapped(Font* font, const char* text, int width);
 };
 
 class FontCache {

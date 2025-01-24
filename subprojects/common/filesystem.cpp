@@ -28,7 +28,6 @@ OptionalData FileSystem::readFile(const char* path) {
     }
   }
 
-  rdm::Log::printf(rdm::LOG_EXTERNAL, "Unable to load file %s", path);
   return {};
 }
 

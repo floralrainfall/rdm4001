@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <format>
 
+#include "console.hpp"
 #include "fun.hpp"
 #include "game.hpp"
 #include "map.hpp"
@@ -16,6 +17,18 @@
 namespace ww {
 static rdm::CVar sv_nextmap("sv_nextmap", "ffa_naamda",
                             CVARF_NOTIFY | CVARF_SAVE | CVARF_REPLICATE);
+
+static rdm::ConsoleCommand changelevel(
+    "changelevel", "changelevel [map]", "changes level to map",
+    [](Game* game, ConsoleArgReader r) {
+      Worldspawn* worldspawn = dynamic_cast<Worldspawn*>(
+          game->getServerWorld()->getNetworkManager()->findEntityByType(
+              "Worldspawn"));
+      if (worldspawn) {
+        worldspawn->setNextMap(r.next());
+        worldspawn->endRound();
+      }
+    });
 
 Worldspawn::Worldspawn(net::NetworkManager* manager, net::EntityId id)
     : net::Entity(manager, id) {
@@ -32,9 +45,10 @@ Worldspawn::Worldspawn(net::NetworkManager* manager, net::EntityId id)
       if (file) file->updatePosition(getGfxEngine()->getCamera().getPosition());
     });
     gfxJob = getGfxEngine()->renderStepped.listen([this] {
-      if (currentStatus == RoundBeginning) {
+      if (currentStatus == RoundBeginning || currentStatus == RoundEnding) {
         ImGui::Begin("Round");
-        ImGui::Text("Time until round start: %0.1f",
+        ImGui::Text("Time until round %s: %0.1f",
+                    currentStatus == RoundEnding ? "ending" : "starting",
                     roundStartTime - getManager()->getDistributedTime());
         for (auto& peer : getManager()->getPeers()) {
           if (!peer.second.playerEntity) continue;
@@ -94,8 +108,13 @@ void Worldspawn::destroyFile() {
     bool backend = getManager()->isBackend();
     world->physicsStepping.addClosure([this, world, backend, gfxEngine] {
       file->removeFromPhysicsWorld(world);
-      if (!backend)
-        gfxEngine->renderStepped.addClosure([this] { delete file; });
+      if (!backend) {
+        gfxEngine->deleteEntity(entity);
+        gfxEngine->renderStepped.addClosure([this] {
+          delete file;
+          file = NULL;
+        });
+      }
     });
   } else {
     delete file;
@@ -111,8 +130,14 @@ void Worldspawn::setStatus(Status s) {
       roundStartTime =
           getManager()->getDistributedTime() + sv_roundstarttime.getFloat();
       break;
+    case RoundEnding:
+      roundStartTime = getManager()->getDistributedTime() + 1.0;
+      break;
     case InGame:
       loadFile(mapName.c_str());
+      break;
+    case RoundEnded:
+      destroyFile();
       break;
     default:
       break;
@@ -121,10 +146,14 @@ void Worldspawn::setStatus(Status s) {
   getManager()->addPendingUpdate(getEntityId());
 }
 
+void Worldspawn::endRound() { setStatus(RoundEnding); }
+
 void Worldspawn::tick() {
   if (getManager()->isBackend())
     if (nextMapName.empty()) nextMapName = sv_nextmap.getValue();
   switch (currentStatus) {
+    default:
+      break;
     case RoundBeginning:
       if (!getManager()->isBackend()) {
         if (!emitter->isPlaying())
@@ -171,6 +200,20 @@ void Worldspawn::tick() {
         getWorld()->setTitle("RDM: " + mapName);
       }
       break;
+    case RoundEnding:
+      if (getManager()->isBackend()) {
+        getWorld()->setTitle("RDM: Finishing up...");
+
+        if (roundStartTime < getManager()->getDistributedTime()) {
+          setStatus(RoundEnded);
+        }
+      }
+      break;
+    case RoundEnded:
+      if (getManager()->isBackend()) {
+        setStatus(RoundBeginning);
+      }
+      break;
   }
 }
 
@@ -182,6 +225,7 @@ void Worldspawn::serialize(net::BitStream& stream) {
     case InGame:
       stream.writeString(mapName);
       break;
+    case RoundEnding:
     case RoundBeginning:
       stream.write<float>(roundStartTime);
       break;
@@ -230,9 +274,12 @@ void Worldspawn::deserialize(net::BitStream& stream) {
         pendingAddToGfx = true;
       }
     } break;
+    case RoundEnding:
     case RoundBeginning:
       roundStartTime = stream.read<float>();
       break;
+    case RoundEnded:
+      destroyFile();
     default:
       break;
   }

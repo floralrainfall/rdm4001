@@ -7,8 +7,21 @@
 #include <fstream>
 #include <iostream>
 
+#include "filesystem.hpp"
 #include "logging.hpp"
 #include "settings.hpp"
+
+#ifdef __linux
+#include <dirent.h>
+#include <errno.h>
+#include <pwd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#endif
+
+#include <string.h>
+
 namespace rdm {
 bool Fun::preFlightChecks() {
 #ifdef __linux
@@ -24,6 +37,32 @@ bool Fun::preFlightChecks() {
 }
 
 static CVar cl_username("cl_username", "", CVARF_GLOBAL | CVARF_SAVE);
+
+std::string Fun::getLocalDataDirectory() {
+#ifdef __linux
+
+  struct passwd* pw = getpwuid(getuid());
+  std::string home = pw->pw_dir;
+  std::string path = home + "/.local/share/rdm4001/";
+  DIR* configDir = opendir(path.c_str());
+  if (configDir) {
+    // yay
+  } else if (ENOENT == errno) {
+    mkdir((home + "/.local").c_str(), 0777);
+    mkdir((home + "/.local/share").c_str(), 0777);
+    if (mkdir(path.c_str(), 0777)) {
+      Log::printf(LOG_FATAL, "creating data dir error %s", strerror(errno));
+      throw std::runtime_error("getLocalDataDirectory");
+    }
+  } else {
+    Log::printf(LOG_FATAL, "opening data dir error %s", strerror(errno));
+    throw std::runtime_error("getLocalDataDirectory");
+  }
+  return path;
+#else
+#error getLocalDataDirectory unimplemented on current platform
+#endif
+}
 
 std::string Fun::getSystemUsername() {
   std::string username;

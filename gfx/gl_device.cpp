@@ -4,6 +4,7 @@
 
 #include <stdexcept>
 
+#include "gfx/base_device.hpp"
 #include "gfx/base_types.hpp"
 #include "gl_types.hpp"
 #include "imgui/backends/imgui_impl_opengl3.h"
@@ -98,6 +99,8 @@ void GLDevice::viewport(int x, int y, int w, int h) { glViewport(x, y, w, h); }
 
 GLenum GLDevice::drawType(DrawType type) {
   switch (type) {
+    case BaseDevice::Lines:
+      return GL_LINES;
     default:
       return GL_TRIANGLES;
   }
@@ -191,4 +194,11 @@ void GLDevice::stopImGui() {
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
   ImGui::EndFrame();
 }
+
+void GLDevice::dbgPushGroup(std::string message) {
+  glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, message.size(),
+                   message.c_str());
+}
+
+void GLDevice::dbgPopGroup() { glPopDebugGroup(); }
 }  // namespace rdm::gfx::gl

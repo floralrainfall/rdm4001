@@ -16,6 +16,8 @@
 #include "gfx/rendercommand.hpp"
 #include "gfx/renderpass.hpp"
 #include "logging.hpp"
+#include "physics.hpp"
+#include "wgame.hpp"
 
 #ifndef DISABLE_EASY_PROFILER
 #include <easy/profiler.h>
@@ -426,6 +428,9 @@ void BSPFile::draw() {
           case BSPFaceModel::Sky:
             renderFaceModel(skybox, &model, NULL);
             break;
+          case BSPFaceModel::Transparent:
+            renderFaceModel(transparent, &model, NULL);
+            break;
         }
         m_facesRendered++;
       }
@@ -440,6 +445,8 @@ void BSPFile::draw() {
           break;
         case BSPFaceModel::Sky:
           renderFaceModel(skybox, &model, NULL);
+          break;
+        default:
           break;
       }
       m_facesRendered++;
@@ -500,6 +507,9 @@ void BSPFile::addToPhysicsWorld(PhysicsWorld* world) {
           (btScalar*)intermediate.data(), intermediate.size());
       btRigidBody* brushbody = new btRigidBody(0.0, NULL, brushshape);
       brushbody->setUserPointer(this);
+      brushbody->setUserIndex(PHYSICS_INDEX_WORLD);
+      brushshape->setUserPointer(this);
+      brushshape->setUserIndex(PHYSICS_INDEX_WORLD);
       world->getWorld()->addRigidBody(brushbody);
       m_brushBodies.push_back(brushbody);
       rb_added++;

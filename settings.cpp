@@ -21,7 +21,11 @@ struct SettingsPrivate {
 };
 
 Settings::Settings() {
-  settingsPath = "settings.json";
+#ifdef NDEBUG
+  settingsPath = Fun::getLocalDataDirectory() + "settings.json";
+#else
+  settingsPath = Fun::getLocalDataDirectory() + "settings_DEBUG.json";
+#endif
   p = new SettingsPrivate;
 }
 
@@ -80,6 +84,13 @@ static Settings* _singleton = 0;
 Settings* Settings::singleton() {
   if (!_singleton) _singleton = new Settings();
   return _singleton;
+}
+
+void Settings::listCvars() {
+  for (auto& var : cvars) {
+    Log::printf(LOG_INFO, "%s = %s (%x)", var.first.c_str(),
+                var.second->getValue().c_str(), var.second->getFlags());
+  }
 }
 
 void Settings::parseCommandLine(char* argv[], int argc) {
@@ -184,7 +195,8 @@ void Settings::load() {
 }
 
 void Settings::save() {
-  FILE* sj = fopen("settings.json", "w");
+  Log::printf(LOG_INFO, "writing settings to %s", settingsPath.c_str());
+  FILE* sj = fopen(settingsPath.c_str(), "w");
   if (sj) {
     json j = p->oldSettings;
     json _cvars = {};

@@ -13,7 +13,7 @@ struct DirtyFields {
   bool pointers;
 };
 
-#define NR_MAX_TEXTURES 10
+#define NR_MAX_TEXTURES 4
 
 class RenderCommand {
   gfx::BaseProgram* program;
@@ -23,18 +23,19 @@ class RenderCommand {
   gfx::BaseTexture* texture[NR_MAX_TEXTURES];
   std::optional<glm::mat4> model;
   size_t count;
+  void* first;
 
  public:
   RenderCommand(gfx::BaseDevice::DrawType type, gfx::BaseBuffer* elements,
                 size_t count, gfx::BaseArrayPointers* pointers = 0,
-                gfx::BaseProgram* program = 0);
+                gfx::BaseProgram* program = 0, void* first = 0);
 
   void setTexture(int id, gfx::BaseTexture* texture) {
     this->texture[id] = texture;
   }
   void setModel(std::optional<glm::mat4> model) { this->model = model; }
   gfx::BaseTexture* getTexture(int id) const { return texture[id]; }
-  std::optional<glm::mat4> getModel() { return model; };
+  std::optional<glm::mat4> getModel() const { return model; };
 
   DirtyFields render(gfx::Engine* engine);
 };
@@ -61,7 +62,7 @@ class RenderList {
              RenderListSettings settings = RenderListSettings());
 
   void clear() { commands.clear(); }
-  void add(RenderCommand command);
+  void add(RenderCommand& command);
   void render(gfx::Engine* engine);
 
   template <typename T>

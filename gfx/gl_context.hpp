@@ -9,6 +9,8 @@ namespace rdm::gfx::gl {
 class GLContext : public BaseContext {
   SDL_GLContext context;
 
+  void updateVsync();
+
  public:
   GLContext(void* hwnd);
 

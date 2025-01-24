@@ -115,6 +115,8 @@ void RGame::initialize() {
     glm::mat3 vm = glm::toMat3(pitchQuat * yawQuat);
     glm::vec3 forward = glm::vec3(0, 0, 1);
     gfx::Camera& cam = gfxEngine->getCamera();
+    cam.setUp(glm::vec3(0, 1, 0));
+
     float speed = 10.0;
 
     // FIXME: for some reason i had these flipped but the ray marcher glsl still
@@ -174,6 +176,10 @@ void RGame::initialize() {
             REntity& e = game->entities[i];
 
             if (e.motionType == REntity::DYNAMIC) {
+              if (!e.body->isActive()) {
+                continue;
+              }
+
               // update entity positioning
               btTransform trans;
               e.state->getWorldTransform(trans);

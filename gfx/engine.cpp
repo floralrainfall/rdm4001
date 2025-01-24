@@ -3,6 +3,7 @@
 #include <stdexcept>
 
 #include "filesystem.hpp"
+#include "gfx/base_device.hpp"
 #include "gfx/base_types.hpp"
 #include "gl_device.hpp"
 #include "logging.hpp"
@@ -115,6 +116,7 @@ BaseTexture* TextureCache::createCacheTexture(const char* path, Info info) {
 static CVar r_bloomamount("r_bloomamount", "10", CVARF_SAVE | CVARF_GLOBAL);
 static CVar r_rate("r_rate", "60.0", CVARF_SAVE | CVARF_GLOBAL);
 static CVar r_bloom("r_bloom", "1", CVARF_SAVE | CVARF_GLOBAL);
+static CVar r_scale("r_scale", "1.0", CVARF_SAVE | CVARF_GLOBAL);
 
 class RenderJob : public SchedulerJob {
   Engine* engine;
@@ -138,11 +140,18 @@ class RenderJob : public SchedulerJob {
 #endif
     BaseDevice* device = engine->device.get();
 
+    bool bloomEnabled = r_bloom.getBool();
+
     try {
       engine->time = getStats().time;
 
       glm::ivec2 bufSize = engine->getContext()->getBufferSize();
-      if (engine->windowResolution != bufSize) {
+      static bool lastBloom = false;
+      static float lastScale = 1.0;
+      if (engine->windowResolution != bufSize ||
+          lastScale != r_scale.getFloat() || lastBloom != r_bloom.getBool()) {
+        lastBloom = r_bloom.getBool();
+        lastScale = r_scale.getFloat();
         engine->windowResolution = bufSize;
         engine->initializeBuffers(bufSize, true);
       }
@@ -163,7 +172,7 @@ class RenderJob : public SchedulerJob {
         device->targetAttachments(&drawBuffers[0], 1);
         device->clear(engine->clearColor.x, engine->clearColor.y,
                       engine->clearColor.z, 0.0);
-        if (r_bloom.getBool()) {
+        if (bloomEnabled) {
           device->targetAttachments(&drawBuffers[1], 1);
           device->clear(0.0, 0.0, 0.0, 0.0);
 
@@ -203,7 +212,7 @@ class RenderJob : public SchedulerJob {
       device->setDepthState(BaseDevice::Always);
       device->setCullState(BaseDevice::None);
 
-      if (r_bloom.getBool()) {
+      if (bloomEnabled) {
 #ifndef DISABLE_EASY_PROFILER
         EASY_BLOCK("Bloom");
 #endif
@@ -290,6 +299,8 @@ class RenderJob : public SchedulerJob {
     EASY_END_BLOCK;
 #endif
 
+    engine->afterGuiRenderStepped.fire();
+
 #ifndef DISABLE_EASY_PROFILER
     EASY_BLOCK("Swap Buffers");
 #endif
@@ -355,8 +366,6 @@ void Engine::renderFullscreenQuad(
 void Engine::setFullscreenMaterial(const char* name) {
   fullscreenMaterial = materialCache->getOrLoad(name).value_or(nullptr);
 }
-
-static CVar r_scale("r_scale", "1.0", CVARF_SAVE | CVARF_GLOBAL);
 
 void Engine::initializeBuffers(glm::vec2 res, bool reset) {
 #ifndef DISABLE_EASY_PROFILER
@@ -464,9 +473,31 @@ void Engine::render() {
     }
   }
 
+  const char* passName[] = {
+      "Opaque",
+      "Transparent",
+  };
   for (int i = 0; i < RenderPass::_Max; i++) {
+    device->dbgPushGroup(passName[i]);
     passes[i].render(this);
+    device->dbgPopGroup();
   }
+
+  device->setDepthState(BaseDevice::Disabled);
+  device->setCullState(BaseDevice::None);
+
+  if (getWorld()->getPhysicsWorld())
+    if (getWorld()->getPhysicsWorld()->isDebugDrawEnabled()) {
+      if (!getWorld()->getPhysicsWorld()->isDebugDrawInitialized()) {
+        getWorld()->getPhysicsWorld()->initializeDebugDraw(this);
+      }
+      getWorld()->getPhysicsWorld()->getWorld()->debugDrawWorld();
+    }
+
+  afterRenderStepped.fire();
+
+  device->setDepthState(BaseDevice::LEqual);
+  device->setCullState(BaseDevice::FrontCW);
 }
 
 void Engine::initialize() {

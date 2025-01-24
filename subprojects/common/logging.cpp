@@ -3,6 +3,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#include <chrono>
+
 namespace rdm {
 Log::Log() { level = LOG_DEBUG; }
 
@@ -17,6 +19,7 @@ void Log::print(LogType t, const char* s) {
   LogMessage m;
   m.t = t;
   m.message = std::string(s);
+  m.time = std::chrono::steady_clock::now();
   singleton()->addLogMessage(m);
 }
 #else
@@ -25,6 +28,7 @@ void Log::print(LogType t, const char* s, const std::source_location loc) {
   m.t = t;
   m.message = std::string(s);
   m.loc = loc;
+  m.time = std::chrono::steady_clock::now();
   singleton()->addLogMessage(m);
 }
 #endif

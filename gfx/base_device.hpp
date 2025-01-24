@@ -59,7 +59,7 @@ class BaseDevice {
   enum CullState {
     FrontCCW,
     BackCCW,
-    FrontCW,
+    FrontCW,  // DEFAULT
     BackCW,
     None,
   };
@@ -204,5 +204,8 @@ class BaseDevice {
    */
   virtual void startImGui() = 0;
   virtual void stopImGui() = 0;
+
+  virtual void dbgPushGroup(std::string message) = 0;
+  virtual void dbgPopGroup() = 0;
 };
 };  // namespace rdm::gfx

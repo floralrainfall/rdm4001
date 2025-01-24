@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "SDL_keycode.h"
+#include "console.hpp"
 #include "gfx/base_types.hpp"
 #include "gfx/engine.hpp"
 #include "gfx/imgui/imgui.h"
@@ -48,10 +49,55 @@ std::map<int, std::string> WPlayer::weaponIds = {
     {2, "WeaponMagnum"},
 };
 
+void WPlayer::listWeapons() {
+  for (auto weapon : ownedWeapons) {
+    Log::printf(LOG_INFO, "Weapon %s", weapon->getTypeName());
+  }
+}
+
+std::string WPlayer::getEntityInfo() {
+  std::string r = Player::getEntityInfo();
+  r += "\nWeapons:\n";
+  for (auto weapon : ownedWeapons) {
+    r += std::string(weapon->getTypeName()) + " " +
+         std::to_string(weapon->getEntityId()) + "\n";
+  }
+  return r;
+}
+
+static ConsoleCommand player_weapons(
+    "player_weapons", "player_weapons", "list all weapons",
+    [](Game* game, ConsoleArgReader reader) {
+      if (!game->getWorld()) throw std::runtime_error("No local world");
+      WPlayer* player = dynamic_cast<WPlayer*>(
+          game->getWorld()->getNetworkManager()->getLocalPeer().playerEntity);
+      if (player) {
+        player->listWeapons();
+      }
+    });
+
+static ConsoleCommand player_give_weapon(
+    "player_give_weapon", "player_give_weapon [peer_id] [class]",
+    "give weapon to player with peer_id",
+    [](Game* game, ConsoleArgReader reader) {
+      if (!game->getServerWorld()) throw std::runtime_error("Must be hosting");
+      int peerId = std::atoi(reader.next().c_str());
+      net::Peer* peer =
+          game->getServerWorld()->getNetworkManager()->getPeerById(peerId);
+      if (!peer) throw std::runtime_error("Invalid peer_id");
+      std::string className = reader.next();
+      WPlayer* player = dynamic_cast<WPlayer*>(peer->playerEntity);
+      Weapon* weapon = dynamic_cast<Weapon*>(
+          game->getServerWorld()->getNetworkManager()->instantiate(className));
+      if (!weapon) throw std::runtime_error("Invalid class");
+      player->giveWeapon(weapon);
+    });
+
 WPlayer::WPlayer(net::NetworkManager* manager, net::EntityId id)
     : Player(manager, id) {
   controller.reset(
       new rdm::putil::FpsController(manager->getWorld()->getPhysicsWorld()));
+  controller->setUser(this);
   controller->setLocalPlayer(false);
   entityNode = new rdm::Graph::Node();
   entityNode->scale = glm::vec3(6.f);
@@ -145,10 +191,10 @@ WPlayer::WPlayer(net::NetworkManager* manager, net::EntityId id)
                                 .value();
         model->render(getGfxEngine()->getDevice());
 
-        // if (heldWeaponRef) heldWeaponRef->renderWorld();
+        if (heldWeaponRef) heldWeaponRef->renderWorld();
       } else {
         getGame()->getSoundManager()->listenerNode = entityNode;
-        // if (heldWeaponRef) heldWeaponRef->renderView();
+        if (heldWeaponRef) heldWeaponRef->renderView();
       }
     });
     /*getGfxEngine()->renderStepped.addClosure([this] {

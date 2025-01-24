@@ -9,5 +9,8 @@ uniform vec4 bgcolor;
 
 void main() {
   vec4 o_color = texture(texture0, f_uv) * vec4(color, 1.0);
-  diffuseColor = mix(bgcolor, vec4(o_color), o_color.a);
+  if (length(bgcolor) == 0.0)
+    diffuseColor = o_color;
+  else
+    diffuseColor = mix(bgcolor, vec4(o_color), o_color.a);
 }

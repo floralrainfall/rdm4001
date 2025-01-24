@@ -17,6 +17,8 @@ class Player : public Entity {
 
   bool isLocalPlayer();
 
+  virtual std::string getEntityInfo();
+
   virtual bool isDirty() { return remotePeerId.isDirty(); }
   virtual void serialize(BitStream& stream);
   virtual void deserialize(BitStream& stream);

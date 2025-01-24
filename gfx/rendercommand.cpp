@@ -11,12 +11,13 @@ namespace rdm::gfx {
 RenderCommand::RenderCommand(gfx::BaseDevice::DrawType type,
                              gfx::BaseBuffer* elements, size_t count,
                              gfx::BaseArrayPointers* pointers,
-                             gfx::BaseProgram* program) {
+                             gfx::BaseProgram* program, void* first) {
   this->type = type;
   this->pointers = pointers;
   this->program = program;
   this->elements = elements;
   this->count = count;
+  this->first = first;
   for (int i = 0; i < NR_MAX_TEXTURES; i++) texture[i] = NULL;
 }
 
@@ -30,7 +31,7 @@ DirtyFields RenderCommand::render(gfx::Engine* engine) {
     pointers->bind();
     df.pointers = true;
   }
-  engine->getDevice()->draw(elements, DtUnsignedInt, this->type, count);
+  engine->getDevice()->draw(elements, DtUnsignedInt, this->type, count, first);
   return df;
 }
 
@@ -42,7 +43,7 @@ RenderList::RenderList(gfx::BaseProgram* program,
   this->settings = settings;
 }
 
-void RenderList::add(RenderCommand command) { commands.push_back(command); }
+void RenderList::add(RenderCommand& command) { commands.push_back(command); }
 
 void RenderList::render(gfx::Engine* engine) {
   engine->getDevice()->setCullState(settings.cull);

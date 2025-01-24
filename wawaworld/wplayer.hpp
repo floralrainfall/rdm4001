@@ -40,12 +40,16 @@ class WPlayer : public net::Player {
   WPlayer(net::NetworkManager* manager, net::EntityId id);
   virtual ~WPlayer();
 
+  void listWeapons();
+
   void giveWeapon(Weapon* weapon);
 
   rdm::Graph::Node* getNode() { return entityNode; }
 
   virtual void tick();
   rdm::putil::FpsController* getController() { return controller.get(); }
+
+  virtual std::string getEntityInfo();
 
   virtual void serialize(net::BitStream& stream);
   virtual void deserialize(net::BitStream& stream);

@@ -1,4 +1,5 @@
 #pragma once
+#include <chrono>
 #include <deque>
 #include <mutex>
 #include <source_location>
@@ -93,6 +94,7 @@ struct LogMessage {
 #ifndef NDEBUG
   std::source_location loc;
 #endif
+  std::chrono::time_point<std::chrono::steady_clock> time;
 };
 
 class Log {
@@ -104,6 +106,8 @@ class Log {
 
  public:
   static Log* singleton();
+
+  const std::deque<LogMessage>& getLogMessages() { return log; }
 
 #ifdef NDEBUG
   template <typename... Args>

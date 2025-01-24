@@ -290,7 +290,14 @@ void GLProgram::link() {
 
 void GLProgram::bindParameters() {
   for (auto& [name, pair] : parameters) {
-    GLuint object = glGetUniformLocation(program, name.c_str());
+    GLuint object;
+    if (locations.find(name) != locations.end()) {
+      object = locations[name];
+    } else {
+      object = glGetUniformLocation(program, name.c_str());
+      locations[name] = object;
+    }
+
     if (!pair.first.dirty) continue;
     switch (pair.first.type) {
       case DtInt:

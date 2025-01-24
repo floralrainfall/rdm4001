@@ -5,7 +5,9 @@
 #include <chrono>
 #include <stdexcept>
 
+#include "console.hpp"
 #include "fun.hpp"
+#include "game.hpp"
 #include "logging.hpp"
 #include "network/entity.hpp"
 #include "scheduler.hpp"
@@ -34,6 +36,72 @@ static CVar net_rate("net_rate", "60.0",
                      CVARF_SAVE | CVARF_NOTIFY | CVARF_REPLICATE |
                          CVARF_GLOBAL);
 static CVar net_service("net_service", "1", CVARF_SAVE | CVARF_GLOBAL);
+
+#ifdef NDEBUG
+static CVar rcon_password("rcon_password", "", CVARF_SAVE | CVARF_GLOBAL);
+#else
+static CVar rcon_password("rcon_password", "RCON_DEBUG",
+                          CVARF_SAVE | CVARF_GLOBAL);
+#endif
+
+static ConsoleCommand rcon(
+    "rcon", "rcon [password] [command]",
+    "send remote console command to server, requires that server has "
+    "rcon_password set and you have the same value",
+    [](Game* game, ConsoleArgReader reader) {
+      if (!game->getWorldConstructorSettings().network)
+        throw std::runtime_error("network disabled");
+      if (!game->getWorld()) throw std::runtime_error("Must be client");
+      game->getWorld()->getNetworkManager()->sendRconCommand(reader.next(),
+                                                             reader.rest());
+    });
+
+static ConsoleCommand spawn(
+    "spawn", "spawn [entity]", "spawns entity of class",
+    [](Game* game, ConsoleArgReader reader) {
+      if (!game->getWorldConstructorSettings().network)
+        throw std::runtime_error("network disabled");
+      if (!game->getServerWorld())
+        throw std::runtime_error("Must be hosting server");
+      Entity* entity = game->getServerWorld()->getNetworkManager()->instantiate(
+          reader.next());
+      if (!entity)
+        throw std::runtime_error("entity == NULL, type may not exist");
+      Log::printf(LOG_INFO, "%i", entity->getEntityId());
+    });
+
+static ConsoleCommand entity(
+    "entity", "entity [id]", "gets info of entity id",
+    [](Game* game, ConsoleArgReader reader) {
+      if (!game->getWorldConstructorSettings().network)
+        throw std::runtime_error("network disabled");
+      if (!game->getServerWorld())
+        throw std::runtime_error("Must be hosting server");
+      EntityId entityid = std::atoi(reader.next().c_str());
+      Entity* entity =
+          game->getServerWorld()->getNetworkManager()->getEntityById(entityid);
+      if (!entity) throw std::runtime_error("entity == NULL, id may not exist");
+      Log::printf(LOG_INFO, "info of entity %i", entityid);
+      Log::printf(LOG_INFO, "%s", entity->getEntityInfo().c_str());
+      if (game->getWorld()) {
+        entity = game->getWorld()->getNetworkManager()->getEntityById(entityid);
+        if (entity) {
+          Log::printf(LOG_INFO, "client info of entity %i", entityid);
+          Log::printf(LOG_INFO, "%s", entity->getEntityInfo().c_str());
+        }
+      }
+    });
+
+static ConsoleCommand entities(
+    "entities", "entities", "lists all entities",
+    [](Game* game, ConsoleArgReader reader) {
+      if (!game->getWorldConstructorSettings().network)
+        throw std::runtime_error("network disabled");
+      if (!game->getServerWorld())
+        throw std::runtime_error("Must be hosting server");
+
+      game->getServerWorld()->getNetworkManager()->listEntities();
+    });
 
 class NetworkJob : public SchedulerJob {
   NetworkManager* netmanager;
@@ -74,6 +142,13 @@ NetworkManager::NetworkManager(World* world) {
 
   password = "RDMRDMRDM";
   userPassword = "";
+}
+
+void NetworkManager::listEntities() {
+  for (auto& entity : entities) {
+    Log::printf(LOG_INFO, "%i - %s", entity.first,
+                entity.second->getTypeName());
+  }
 }
 
 void NetworkManager::requestDisconnect() {
@@ -379,6 +454,26 @@ void NetworkManager::service() {
                       it->second.packetLoss = ploss;
                     }
                   }
+                }
+                break;
+              case RconPacket:
+                if (!backend) {
+                  throw std::runtime_error("RconPacket on frontend");
+                } else {
+                  if (rcon_password.getValue().empty()) break;
+
+                  std::string password = stream.readString();
+                  std::string command = stream.readString();
+
+                  if (password != rcon_password.getValue()) {
+                    Log::printf(LOG_ERROR, "Player attempted password %s",
+                                password.c_str());
+                    throw std::runtime_error("Bad password");
+                  }
+
+                  Log::printf(LOG_INFO, "peer %i] %s", remotePeer->peerId,
+                              command.c_str());
+                  game->getConsole()->command(command);
                 }
                 break;
               default:
@@ -690,6 +785,18 @@ void NetworkManager::service() {
       enet_peer_send(localPeer.peer, 0, packet);
       pendingUpdatesUnreliable.clear();
     }
+
+    if (int _pendingRconCommands = pendingRconCommands.size()) {
+      for (auto command : pendingRconCommands) {
+        BitStream rconStream;
+        rconStream.write<PacketId>(RconPacket);
+        rconStream.writeString(command.first);
+        rconStream.writeString(command.second);
+        enet_peer_send(localPeer.peer, 0,
+                       rconStream.createPacket(ENET_PACKET_FLAG_RELIABLE));
+      }
+      pendingRconCommands.clear();
+    }
   }
 
   ticks++;
@@ -743,6 +850,14 @@ void NetworkManager::connect(std::string address, int port) {
 
   localPeer.type = Peer::Undifferentiated;
   Log::printf(LOG_INFO, "Connecting to %s:%i", address.c_str(), port);
+}
+
+Peer* NetworkManager::getPeerById(int id) {
+  auto it = peers.find(id);
+  if (it != peers.end()) {
+    return &peers[id];
+  }
+  return NULL;
 }
 
 void NetworkManager::handleDisconnect() {

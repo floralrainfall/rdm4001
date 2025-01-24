@@ -9,6 +9,7 @@ class Fun {
   static bool preFlightChecks();
   static std::string getModuleName();
   static std::string getSystemUsername();
+  static std::string getLocalDataDirectory();
 };
 
 class Math {

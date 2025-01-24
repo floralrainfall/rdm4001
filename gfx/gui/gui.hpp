@@ -67,8 +67,12 @@ struct Component {
   bool variablesDirty;
 
   Element* selectedElement;
+  GuiManager* manager;
 
   Signal<> variableChanged;
+
+  std::string parentComponent;
+  std::string name;
 
   std::map<std::string, Var> inVars;
 
@@ -77,6 +81,8 @@ struct Component {
   TreeNode domRoot;
 
   std::vector<script::Script> scripts;
+
+  bool isVisible();
 
   void layoutUpdate(TreeNode* root);
   void render(GuiManager* manager, gfx::Engine* engine);
@@ -87,6 +93,7 @@ class GuiManager {
   friend struct Component;
 
   gfx::Engine* engine;
+
   std::shared_ptr<gfx::Material> panel;
   std::shared_ptr<gfx::Material> image;
   std::shared_ptr<gfx::Material> text;
@@ -99,10 +106,15 @@ class GuiManager {
   std::map<std::string, Component> components;
   std::vector<std::unique_ptr<BaseTexture>> textures;
 
-  void parseXml(const char* file);
+  Component* parseXml(const char* file);
 
  public:
   GuiManager(gfx::Engine* engine);
+
+  gfx::Material* getImageMaterial() { return image.get(); }
+  BaseBuffer* getSArrayBuf() { return squareArrayBuffer.get(); }
+  BaseBuffer* getSElementBuf() { return squareElementBuffer.get(); }
+  BaseArrayPointers* getSArrayPointers() { return squareArrayPointers.get(); }
 
   // FML
   std::map<std::string, std::unique_ptr<BaseTexture>> namedTextures;

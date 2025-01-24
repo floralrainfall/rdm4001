@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include "console.hpp"
 #include "gfx/engine.hpp"
 #include "sound.hpp"
 #include "state.hpp"
@@ -13,6 +14,7 @@
 namespace rdm {
 class Game {
  protected:
+  std::unique_ptr<Console> console;
   std::unique_ptr<World> worldServer;
   std::unique_ptr<World> world;
   std::unique_ptr<gfx::Engine> gfxEngine;
@@ -56,6 +58,8 @@ class Game {
   void pollEvents();
 
   void mainLoop();
+
+  Console* getConsole() { return console.get(); }
 
   World* getWorld() { return world.get(); }
   World* getServerWorld() { return worldServer.get(); }

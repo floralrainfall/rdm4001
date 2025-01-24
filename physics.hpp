@@ -16,7 +16,15 @@
 
 #define PHYSICS_FRAMERATE (1.0 / 60.0)
 
+#define PHYSICS_INDEX_WORLD 1
+#define PHYSICS_INDEX_PLAYER 2
+#define PHYSICS_INDEX_PROP 4
+
 namespace rdm {
+namespace gfx {
+class Engine;
+}
+
 class World;
 class PhysicsWorld {
   std::unique_ptr<btSequentialImpulseConstraintSolver> solver;
@@ -26,11 +34,19 @@ class PhysicsWorld {
   btAlignedObjectArray<std::unique_ptr<btCollisionShape>> collisionShapes;
   std::unique_ptr<btDiscreteDynamicsWorld> dynamicsWorld;
 
+  std::unique_ptr<btIDebugDraw> debugDraw;
+  bool debugDrawEnabled;
+  bool debugDrawInit;
+
  public:
   PhysicsWorld(World* world);
 
   Signal<> physicsStepping;
   void stepWorld();
+
+  bool isDebugDrawEnabled() { return debugDrawEnabled; }
+  bool isDebugDrawInitialized() { return debugDrawInit; }
+  void initializeDebugDraw(rdm::gfx::Engine* engine);
 
   btDiscreteDynamicsWorld* getWorld() { return dynamicsWorld.get(); }
   std::mutex mutex;
