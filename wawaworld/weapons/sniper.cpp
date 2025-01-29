@@ -42,8 +42,7 @@ void WeaponSniper::primaryFire() {
 
   btTransform ownerTransform = getOwnerRef()->getController()->getTransform();
   btVector3 from = ownerTransform.getOrigin();
-  btVector3 to =
-      from + (btVector3(1, 0, 0) * ownerTransform.getBasis()) * 100.0;
+  btVector3 to = from + (btVector3(1, 0, 0)) * 100.0;
   btCollisionWorld::AllHitsRayResultCallback callback(from, to);
   getWorld()->getPhysicsWorld()->getWorld()->rayTest(from, to, callback);
   rdm::Log::printf(rdm::LOG_DEBUG, "Hit %i, travelled %f%%",

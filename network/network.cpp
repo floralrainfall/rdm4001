@@ -460,6 +460,9 @@ void NetworkManager::service() {
                 if (!backend) {
                   throw std::runtime_error("RconPacket on frontend");
                 } else {
+                  if (game->getWorld())
+                    throw std::runtime_error(
+                        "RconPacket on self hosted server");
                   if (rcon_password.getValue().empty()) break;
 
                   std::string password = stream.readString();

@@ -99,6 +99,12 @@ void Worldspawn::loadFile(const char* _file) {
 }
 
 void Worldspawn::destroyFile() {
+  if (!getManager()->isBackend()) {
+    getGfxEngine()->deleteEntity(entity);
+  }
+
+  BSPFile* file = this->file;
+  this->file = NULL;
   if (getWorld()->getRunning()) {
     PhysicsWorld* world =
         getWorld()->getPhysicsWorld();  // by the time physicsStepping or
@@ -106,19 +112,14 @@ void Worldspawn::destroyFile() {
                                         // is unusable
     gfx::Engine* gfxEngine = getGfxEngine();
     bool backend = getManager()->isBackend();
-    world->physicsStepping.addClosure([this, world, backend, gfxEngine] {
+    world->physicsStepping.addClosure([this, file, world, backend, gfxEngine] {
       file->removeFromPhysicsWorld(world);
       if (!backend) {
-        gfxEngine->deleteEntity(entity);
-        gfxEngine->renderStepped.addClosure([this] {
-          delete file;
-          file = NULL;
-        });
+        gfxEngine->renderStepped.addClosure([this, file] { delete file; });
       }
     });
   } else {
     delete file;
-    file = NULL;
   }
 }
 

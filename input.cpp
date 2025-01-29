@@ -1,12 +1,21 @@
 #include "input.hpp"
 
+#include <pthread.h>
+
+#include <csignal>
+
 #include "SDL.h"
 #include "SDL_keyboard.h"
 #include "logging.hpp"
 #include "settings.hpp"
 
 #ifdef __linux
+#include <pthread.h>
 #include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <unistd.h>
 #endif
 
 namespace rdm {
@@ -17,6 +26,53 @@ static void intHandler(int) {
   InputObject quit;
   quit.type = InputObject::Quit;
   Input::singleton()->postEvent(quit);
+}
+
+static void sigHandler(int) {
+  Log::printf(LOG_FATAL, "Received SIGSEGV");
+#ifndef NDEBUG
+  bool allowed = false;
+  FILE* perm = fopen("/proc/sys/kernel/yama/ptrace_scope", "r");
+  char pms = 'X';
+  fread(&pms, 1, 1, perm);
+  switch (pms) {
+    case '0':
+      allowed = true;
+      break;
+    default:
+      Log::printf(LOG_ERROR,
+                  "/proc/sys/kernel/yama/ptrace_scope returns %c, please set "
+                  "it to 0 in order to use automatic gdb attach",
+                  pms);
+      break;
+  }
+
+  if (allowed) {
+    char name[128];
+    pthread_getname_np(pthread_self(), name, 128);
+    pthread_setname_np(pthread_self(),
+                       (name + std::string("[SIGSEGV]")).c_str());
+
+    const char* path = getenv("PATH");
+    std::stringstream ss(path);
+    std::string item;
+    while (std::getline(ss, item, ':')) {
+      std::string path = (item + "/gdb");
+      FILE* gdb = fopen(path.c_str(), "r");
+      if (gdb) {
+        std::string pids = std::to_string(getpid());
+        std::string tids = std::to_string(pthread_self());
+        std::string exec =
+            path + " -q -p " + pids + " -ex 'thread " + tids + "'";
+        Log::printf(LOG_INFO, "Starting gdb `%s`", exec.c_str());
+        system(exec.c_str());
+        break;
+      }
+    }
+  }
+#endif
+  Log::printf(LOG_FATAL, "Emergency exit, nothing will be saved");
+  exit(-1);
 }
 #endif
 
@@ -32,6 +88,7 @@ Input::Input() {
 
 #ifdef __linux
   signal(SIGINT, intHandler);
+  signal(SIGSEGV, sigHandler);
 #endif
 }
 

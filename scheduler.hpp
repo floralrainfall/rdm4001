@@ -54,6 +54,8 @@ class SchedulerJob {
   SchedulerJob(const char* name, bool stopOnCancel = true);
   virtual ~SchedulerJob();
 
+  bool isCurrentThread();
+
   /**
    * @brief Step result.
    *
@@ -133,6 +135,8 @@ class Scheduler {
    * over the lifetime of the job pointer.
    */
   SchedulerJob* addJob(SchedulerJob* job);
+
+  SchedulerJob* currentJob();
 
   size_t getId() { return id; }
 
