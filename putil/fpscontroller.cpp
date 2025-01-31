@@ -22,6 +22,8 @@
 #include <easy/profiler.h>
 #endif
 
+#define FPS_CONTROLLER_FRONT -1, 0, 0
+
 namespace rdm::putil {
 FpsControllerSettings::FpsControllerSettings() {
   capsuleHeight = 46.f;
@@ -214,6 +216,10 @@ void FpsController::physicsStep() {
     Input::Axis* fbA = Input::singleton()->getAxis("ForwardBackward");
     Input::Axis* lrA = Input::singleton()->getAxis("LeftRight");
 
+    front =
+        (btVector3(FPS_CONTROLLER_FRONT) * BulletHelpers::toMat3(cameraView))
+            .normalize();
+
     glm::vec2 wishdir =
         glm::vec2(moveView * glm::vec3(-fbA->value, -lrA->value, 0.0));
     accel = wishdir;
@@ -250,6 +256,8 @@ void FpsController::serialize(network::BitStream& stream) {
   stream.write<btMatrix3x3FloatData>(matrixData);
   rigidBody->getLinearVelocity().serialize(vectorData);
   stream.write<btVector3FloatData>(vectorData);
+  stream.write<float>(cameraYaw);
+  stream.write<float>(cameraPitch);
 }
 
 void FpsController::deserialize(network::BitStream& stream, bool backend) {
@@ -261,6 +269,9 @@ void FpsController::deserialize(network::BitStream& stream, bool backend) {
 
   btVector3 velocity;
   velocity.deSerialize(stream.read<btVector3FloatData>());
+
+  float cameraYaw = stream.read<float>();
+  float cameraPitch = stream.read<float>();
 
   if (backend) {
     btTransform& bodyTransform = rigidBody->getWorldTransform();
@@ -287,6 +298,15 @@ void FpsController::deserialize(network::BitStream& stream, bool backend) {
     rigidBody->setAngularVelocity(btVector3(0.0, 0.0, 0.0));
     if (enable) rigidBody->activate(true);
     rigidBody->setWorldTransform(bodyTransform);
+
+    glm::quat yawQuat = glm::angleAxis(cameraYaw, glm::vec3(0.f, 1.f, 0.f));
+    glm::quat pitchQuat = glm::angleAxis(cameraPitch, glm::vec3(0.f, 0.f, 1.f));
+    glm::mat3 frontMat3 = glm::toMat3(pitchQuat * yawQuat);
+    glm::vec3 front = frontMat3 * glm::vec3(FPS_CONTROLLER_FRONT);
+
+    this->cameraYaw = cameraYaw;
+    this->cameraPitch = cameraPitch;
+    this->front = BulletHelpers::toVector3(front);
   } else {
     btTransform& ourTransform = rigidBody->getWorldTransform();
     float dist = glm::distance(

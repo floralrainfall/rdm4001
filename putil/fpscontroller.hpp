@@ -39,6 +39,8 @@ class FpsController {
 
   std::mutex m;
 
+  btVector3 front;
+
   void physicsStep();
 
   void moveGround(btVector3& vel, glm::vec2 wishdir);
@@ -66,6 +68,8 @@ class FpsController {
 
   glm::vec3 getNetworkPosition() { return networkPosition; }
   glm::vec2 getWishDir() { return accel; }
+
+  btVector3 getFront() { return front; }
 
   btTransform getTransform() { return rigidBody->getWorldTransform(); }
   bool isGrounded() { return grounded; }

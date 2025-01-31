@@ -2,6 +2,7 @@
 
 #include <format>
 
+#include <string.h>
 #include "SDL_error.h"
 #include "filesystem.hpp"
 #include "logging.hpp"

@@ -365,12 +365,14 @@ void NetworkManager::service() {
                   }
                 } catch (std::exception& e) {
                   if (!ent) {
-                    Log::printf(LOG_ERROR, "Error decoding entity %i: (%s)", i,
+                    Log::printf(LOG_ERROR, "%s Error decoding entity %i: (%s)",
+                                isBackend() ? "Backend" : "Frontend", i,
                                 e.what());
                   } else {
                     Log::printf(
                         LOG_ERROR,
-                        "Error decoding entity %s:%i (num: %i, what: %s)",
+                        "%s Error decoding entity %s:%i (num: %i, what: %s)",
+                        isBackend() ? "Backend" : "Frontend",
                         ent->getTypeName(), ent->getEntityId(), i, e.what());
                   }
                 }

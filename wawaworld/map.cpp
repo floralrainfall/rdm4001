@@ -662,9 +662,6 @@ MapEntity::~MapEntity() {}
 void MapEntity::initialize() {}
 
 void MapEntity::renderTechnique(gfx::BaseDevice* device, int id) {
-  uint8_t* err = 0x0;
-  *err = 1;
-
   if (!f) return;
   f->draw();
 }

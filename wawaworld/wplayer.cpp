@@ -1,6 +1,7 @@
 #include "wplayer.hpp"
 
 #include <cmath>
+#include <cstdio>
 #include <memory>
 
 #include "SDL_keycode.h"
@@ -286,19 +287,20 @@ void WPlayer::tick() {
           controller->isGrounded() ? ((vel.length() < 1) ? 0.0 : 1.f) : 0.f);
 
       if (worldspawn && worldspawn->getFile()) {
-        btVector3 forward = btVector3(0, 0, 1);
-        btVector3 forward_old = transform.getBasis() * forward;
-        btVector3 forward_new = oldTransform.getBasis() * forward;
         btVector3 origin_old = transform.getOrigin();
         btVector3 origin_new = oldTransform.getOrigin();
         // Log::printf(LOG_DEBUG, "%f, %f", forward_old.dot(forward_new),
         //            origin_old.distance(origin_new));
 
-        if (forward_old.dot(forward_new) < 0.9) needsUpdate = true;
         if (origin_old.distance(origin_new) > 0.1) needsUpdate = true;
+        Log::printf(LOG_DEBUG, "%f",
+                    oldFront.distance(getController()->getFront()));
+        if (oldFront.distance(getController()->getFront()) > 0.1)
+          needsUpdate = true;
 
         if (needsUpdate) {
           oldTransform = transform;
+          oldFront = getController()->getFront();
 
           getManager()->addPendingUpdateUnreliable(getEntityId());
         }

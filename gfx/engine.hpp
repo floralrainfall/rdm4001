@@ -118,6 +118,7 @@ class Engine {
   Signal<> renderStepped;
   Signal<> afterRenderStepped;
   Signal<> afterGuiRenderStepped;
+  Signal<> afterDebugDrawRenderStepped;
   Signal<> initialized;
 
   void setMaxFbScale(double d) { maxFbScale = d; }

@@ -20,6 +20,7 @@ class WPlayer : public net::Player {
   rdm::ClosureId worldJob;
   rdm::ClosureId gfxJob;
   btTransform oldTransform;
+  btVector3 oldFront;
   int wantedWeaponId;
   Weapon* heldWeaponRef;
   int heldWeaponIndex;
@@ -47,6 +48,7 @@ class WPlayer : public net::Player {
   rdm::Graph::Node* getNode() { return entityNode; }
 
   virtual void tick();
+
   rdm::putil::FpsController* getController() { return controller.get(); }
 
   virtual std::string getEntityInfo();

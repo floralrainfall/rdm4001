@@ -492,6 +492,7 @@ void Engine::render() {
         getWorld()->getPhysicsWorld()->initializeDebugDraw(this);
       }
       getWorld()->getPhysicsWorld()->getWorld()->debugDrawWorld();
+      afterDebugDrawRenderStepped.fire();
     }
 
   afterRenderStepped.fire();
