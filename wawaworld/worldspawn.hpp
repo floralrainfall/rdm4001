@@ -32,6 +32,11 @@ class Worldspawn : public net::Entity {
     Unknown
   };
 
+  enum GameMode {
+    Deathmatch,
+    Murder,
+  };
+
   void destroyFile();
   glm::vec3 spawnLocation();
 
@@ -52,8 +57,11 @@ class Worldspawn : public net::Entity {
   virtual void serialize(net::BitStream& stream);
   virtual void deserialize(net::BitStream& stream);
 
+  GameMode getGameMode() { return gameMode; }
+
  private:
   Status currentStatus;
+  GameMode gameMode;
 
   void setStatus(Status s);
 };

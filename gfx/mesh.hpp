@@ -45,6 +45,7 @@ struct Mesh {
 struct Model {
   int boneCounter;
   std::vector<Mesh> meshes;
+  std::vector<std::string> textures;
   aiMesh* mesh;
   const aiScene* scene;
   std::string directory;
@@ -52,6 +53,8 @@ struct Model {
 
   void process(Engine* engine);
   void render(BaseDevice* device);
+
+  ~Model();
 
  private:
   Engine* engine;
@@ -90,5 +93,6 @@ class MeshCache {
 
   std::optional<Model*> get(const char* path);
   Primitive* get(Primitive::Type type);
+  void del(const char* path);
 };
 }  // namespace rdm::gfx

@@ -4,19 +4,42 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <logging.hpp>
 #include <string>
 #include <typeinfo>
 #include <vector>
 namespace rdm::network {
+class BitStreamException : public std::runtime_error {
+  friend class BitStream;
+
+  BitStreamException(const char* msg) : std::runtime_error(msg) {}
+};
+
 class BitStream {
   char* data;
   size_t size;
   size_t c;
 
-  void isSpaceFor(size_t s);
+  bool isSpaceFor(size_t s);
   void makeSpaceFor(size_t s);
 
  public:
+  enum Context {
+    Generic,
+
+    ToClient,
+    ToServer,
+
+    FromClient,
+    FromServer,
+
+    ToServerLocal,
+    ToClientLocal,
+
+    FromServerLocal,
+    FromClientLocal,
+  };
+
   BitStream();
   ~BitStream();
 
@@ -34,18 +57,37 @@ class BitStream {
   }
 
   template <typename T>
-  T read() {
-    isSpaceFor(sizeof(T));
+  T read(
+#ifndef NDEBUG
+      const std::source_location location = std::source_location::current()
+#endif
+  ) {
+    if (!isSpaceFor(sizeof(T))) {
+      rdm::Log::printf(LOG_ERROR, "No space for type %s", typeid(T).name());
+#ifndef NDEBUG
+      rdm::Log::printf(LOG_ERROR, "Location: %s:%i", location.file_name(),
+                       location.line());
+#endif
+      throw BitStreamException("Out of space on bitstream");
+    }
     T t;
     memcpy(&t, &data[c], sizeof(T));
     c += sizeof(T);
     return t;
   }
 
+  void writeStream(const BitStream& stream);
+
   void writeString(std::string s);
   std::string readString();
 
   ENetPacket* createPacket(enet_uint32 flags);
   std::vector<unsigned char> getDataVec();
-};
+
+  Context getContext() { return ctxt; }
+  void setContext(Context ctxt) { this->ctxt = ctxt; }
+
+ private:
+  Context ctxt;
+};  // namespace rdm::network
 }  // namespace rdm::network

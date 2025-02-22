@@ -38,6 +38,8 @@ std::string Player::getEntityInfo() {
 static ConsoleCommand players(
     "players", "players", "list players connected to server",
     [](Game* game, ConsoleArgReader reader) {
+      if (!game->getWorldConstructorSettings().network)
+        throw std::runtime_error("network disabled");
       if (game->getWorld()) {
         for (auto entity :
              game->getWorld()->getNetworkManager()->findEntitiesByType(

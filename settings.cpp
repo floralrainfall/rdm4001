@@ -38,9 +38,11 @@ CVar::CVar(const char* name, const char* defaultVar, unsigned long flags) {
 }
 
 void CVar::setValue(std::string s) {
-  this->value = s;
-  if (flags & CVARF_NOTIFY) Settings::singleton()->cvarChanging.fire(name);
-  changing.fire();
+  if (s != this->value) {
+    this->value = s;
+    if (flags & CVARF_NOTIFY) Settings::singleton()->cvarChanging.fire(name);
+    changing.fire();
+  }
 }
 
 int CVar::getInt() { return std::stoi(value); }
@@ -192,6 +194,14 @@ void Settings::load() {
   } else {
     Log::printf(LOG_ERROR, "Couldn't open %s", settingsPath.c_str());
   }
+}
+
+std::vector<CVar*> Settings::getWithFlag(unsigned long mask) {
+  std::vector<CVar*> var;
+  for (auto cvar : cvars) {
+    if (cvar.second->flags & mask) var.push_back(cvar.second);
+  }
+  return var;
 }
 
 void Settings::save() {

@@ -38,6 +38,7 @@ Worldspawn::Worldspawn(net::NetworkManager* manager, net::EntityId id)
   mapName = "";
   nextMapName = sv_nextmap.getValue();
   currentStatus = Unknown;
+  gameMode = Murder;
   nextSpawnLocation = 0;
   if (!getManager()->isBackend()) {
     worldJob = getWorld()->stepped.listen([this] {
@@ -161,7 +162,7 @@ void Worldspawn::tick() {
           emitter->play(getGame()
                             ->getSoundManager()
                             ->getSoundCache()
-                            ->get("dat5/mus/round_lobby.mp3", Sound::Stream)
+                            ->get("dat5/mus/stef45.ogg", Sound::Stream)
                             .value());
       } else {
         getWorld()->setTitle("RDM: Lobby");
@@ -221,6 +222,7 @@ void Worldspawn::tick() {
 void Worldspawn::serialize(net::BitStream& stream) {
   std::scoped_lock lock(mutex);
 
+  stream.write<GameMode>(gameMode);
   stream.write<Status>(currentStatus);
   switch (currentStatus) {
     case InGame:
@@ -254,6 +256,7 @@ std::string Worldspawn::mapPath(std::string name) {
 void Worldspawn::deserialize(net::BitStream& stream) {
   std::scoped_lock lock(mutex);
 
+  gameMode = stream.read<GameMode>();
   currentStatus = stream.read<Status>();
   switch (currentStatus) {
     case InGame: {

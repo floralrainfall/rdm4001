@@ -24,6 +24,12 @@ void Model::processNode(Engine* engine, aiNode* node) {
   }
 }
 
+Model::~Model() {
+  for (auto texture : textures) {
+    engine->getTextureCache()->deleteTexture(texture.c_str());
+  }
+}
+
 void Mesh::render(BaseDevice* device) {
   arrayPointers->bind();
   device->draw(element.get(), DtUnsignedInt, BaseDevice::Triangles,
@@ -264,6 +270,8 @@ MeshCache::MeshCache(Engine* engine) {
 }
 
 Primitive* MeshCache::get(Primitive::Type type) { return &primitives[type]; }
+
+void MeshCache::del(const char* path) { models.erase(path); }
 
 std::optional<Model*> MeshCache::get(const char* path) {
   auto it = models.find(path);

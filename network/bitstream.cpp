@@ -25,6 +25,7 @@ BitStream::BitStream(void* data, size_t size) {
   this->data = (char*)malloc(size);
   this->c = 0;
   this->size = size;
+  this->ctxt = Generic;
   memcpy(this->data, data, size);
 }
 
@@ -45,10 +46,16 @@ void BitStream::makeSpaceFor(size_t s) {
   }
 }
 
-void BitStream::isSpaceFor(size_t s) {
+bool BitStream::isSpaceFor(size_t s) {
   if (s + c > size) {
-    throw std::runtime_error("Out of space on BitStream");
+    return false;
+    // throw std::runtime_error("Out of space on BitStream");
   }
+  return true;
+}
+
+void BitStream::writeStream(const BitStream& stream) {
+  for (int i = 0; i < stream.size - stream.c; i++) write<char>(stream.data[i]);
 }
 
 void BitStream::writeString(std::string s) {

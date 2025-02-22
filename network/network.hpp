@@ -10,10 +10,12 @@
 #include "crc_hash.hpp"
 #include "entity.hpp"
 #include "player.hpp"
+#include "signal.hpp"
 
 #define NETWORK_STREAM_META 0
 #define NETWORK_STREAM_ENTITY 1
-#define NETWORK_STREAM_MAX 2
+#define NETWORK_STREAM_EVENT 3
+#define NETWORK_STREAM_MAX 4
 
 #define NETWORK_DISCONNECT_FORCED 0
 #define NETWORK_DISCONNECT_USER 1
@@ -25,6 +27,9 @@ class Game;
 }  // namespace rdm
 
 namespace rdm::network {
+typedef uint16_t CustomEventID;
+typedef std::vector<std::pair<CustomEventID, BitStream*>> CustomEventList;
+
 struct Peer {
   enum Type {
     ConnectedPlayer,
@@ -42,11 +47,15 @@ struct Peer {
   int roundTripTime;
   int packetLoss;
 
+  CustomEventList queuedEvents;
   std::vector<EntityId> pendingNewIds;
   std::vector<EntityId> pendingDelIds;
+  std::map<std::string, std::string> localCvarValues;
 
   Peer();
 };
+
+typedef Signal<NetworkManager*, CustomEventID, BitStream> CustomEventSignal;
 
 typedef std::function<Entity*(NetworkManager*, EntityId)>
     EntityConstructorFunction;
@@ -78,11 +87,16 @@ class NetworkManager {
   std::map<std::string, EntityConstructorFunction> constructors;
   std::unordered_map<EntityId, std::unique_ptr<Entity>> entities;
 
+  std::unordered_map<CustomEventID, CustomEventSignal> customSignals;
+
+  CustomEventList queuedEvents;
+  std::vector<std::string> pendingCvars;
   std::vector<EntityId> pendingUpdates;
   std::vector<EntityId> pendingUpdatesUnreliable;
   std::vector<std::pair<std::string, std::string>> pendingRconCommands;
 
   std::chrono::time_point<std::chrono::steady_clock> lastTick;
+  ClosureId cvarChangingUpdate;
 
  public:
   NetworkManager(World* world);
@@ -117,6 +131,8 @@ class NetworkManager {
     SignalPacket,           // S -> C, C -> S
     DistributedTimePacket,  // S -> C
     RconPacket,             // C -> S
+    CvarPacket,             // S -> C, C -> S
+    EventPacket,            // S -> C, C -> S
   };
 
   void service();
@@ -156,6 +172,14 @@ class NetworkManager {
   void sendRconCommand(std::string password, std::string command) {
     pendingRconCommands.push_back({password, command});
   }
+
+  void sendCustomEvent(CustomEventID id, BitStream stream);
+  // server only, send to player
+  void sendCustomEvent(int peerId, CustomEventID id, BitStream stream);
+
+  ClosureId addCustomEventListener(CustomEventID id,
+                                   CustomEventSignal::Function);
+  void removeCustomEvent(CustomEventID id, ClosureId cId);
 
   static void initialize();
   static void deinitialize();

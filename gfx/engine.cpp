@@ -113,6 +113,8 @@ BaseTexture* TextureCache::createCacheTexture(const char* path, Info info) {
   }
 }
 
+void TextureCache::deleteTexture(const char* path) { textures.erase(path); }
+
 static CVar r_bloomamount("r_bloomamount", "10", CVARF_SAVE | CVARF_GLOBAL);
 static CVar r_rate("r_rate", "60.0", CVARF_SAVE | CVARF_GLOBAL);
 static CVar r_bloom("r_bloom", "1", CVARF_SAVE | CVARF_GLOBAL);

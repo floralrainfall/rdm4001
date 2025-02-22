@@ -16,6 +16,7 @@ class Engine;
 }  // namespace rdm
 
 namespace rdm::network {
+struct Peer;
 typedef uint16_t EntityId;
 
 enum ReplicateReliability {
@@ -90,6 +91,8 @@ class Entity {
 
   virtual void serializeUnreliable(BitStream& stream) {};
   virtual void deserializeUnreliable(BitStream& stream) {};
+
+  virtual bool getOwnership(Peer* peer) { return false; }
 
   virtual bool dirty() { return false; }
   virtual const char* getTypeName() { return "Entity"; };

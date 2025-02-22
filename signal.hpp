@@ -25,11 +25,9 @@ ClosureId __newClosureId();
  */
 template <typename... Args>
 class Signal {
-  typedef std::function<void(Args...)> Function;
-  std::map<ClosureId, Function> listeners;
-  std::vector<Function> pendingClosures;
-
  public:
+  typedef std::function<void(Args...)> Function;
+
   /**
    * @brief Fires the signal.
    *
@@ -98,5 +96,11 @@ class Signal {
     else
       throw std::runtime_error("Removing invalid closure id");
   }
+
+  size_t size() { return listeners.size(); }
+
+ private:
+  std::map<ClosureId, Function> listeners;
+  std::vector<Function> pendingClosures;
 };
 }  // namespace rdm

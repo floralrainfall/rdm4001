@@ -12,9 +12,11 @@
 #include "gfx/base_types.hpp"
 #include "gfx/gui/gui.hpp"
 #include "gfx/mesh.hpp"
+#include "gfx/video.hpp"
 #include "renderpass.hpp"
 #include "scheduler.hpp"
 #include "signal.hpp"
+#include "video.hpp"
 
 namespace rdm {
 class World;
@@ -44,6 +46,7 @@ class TextureCache {
                                     std::unique_ptr<BaseTexture>& texture,
                                     Info info);
   BaseTexture* createCacheTexture(const char* path, Info info);
+  void deleteTexture(const char* path);
 
  private:
   std::map<std::string, std::pair<Info, std::unique_ptr<BaseTexture>>> textures;
@@ -56,6 +59,7 @@ class Engine {
   std::unique_ptr<BaseContext> context;
   std::unique_ptr<BaseDevice> device;
   std::unique_ptr<gui::GuiManager> gui;
+  std::unique_ptr<VideoRenderer> videoRenderer;
   std::vector<std::unique_ptr<Entity>> entities;
 
   std::unique_ptr<BaseTexture> fullscreenTexture;
@@ -150,6 +154,7 @@ class Engine {
   MaterialCache* getMaterialCache() { return materialCache.get(); }
   TextureCache* getTextureCache() { return textureCache.get(); }
   MeshCache* getMeshCache() { return meshCache.get(); }
+  VideoRenderer* getVideoRenderer() { return videoRenderer.get(); }
   gui::GuiManager* getGuiManager() { return gui.get(); }
 
   float getTime() { return time; }

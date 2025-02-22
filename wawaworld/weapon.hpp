@@ -20,6 +20,8 @@ class Weapon : public net::Entity {
   virtual void primaryFire();
   virtual void secondaryFire();
 
+  virtual bool getOwnership(rdm::network::Peer* peer);
+
   int getAmmoPrimary() { return ammoPrimary; }
   void setOwnerRef(WPlayer* player) { ownerRef = player; };
   WPlayer* getOwnerRef() { return ownerRef; }

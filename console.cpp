@@ -29,7 +29,7 @@ ConsoleData* getCData() {
 }
 
 #define CONSOLE_FONT "dat3/monospace.ttf"
-#define CONSOLE_SIZE 12
+#define CONSOLE_SIZE 18
 
 Console::Console(Game* game) {
   this->game = game;
@@ -76,7 +76,9 @@ void Console::render() {
   const std::deque<LogMessage>& log = Log::singleton()->getLogMessages();
   std::vector<LogMessage> toLog;
   bool dirty = false;
-  for (int i = 0; i < std::min(log.size(), (size_t)100); i++) {
+  glm::vec2 tres = engine->getTargetResolution();
+  for (int i = 0; i < std::min(log.size(), (size_t)(tres.y / CONSOLE_SIZE));
+       i++) {
     const LogMessage& m = log[i];
     if (i == 0) {
       if (m.time != last_message) {
@@ -93,7 +95,6 @@ void Console::render() {
     toLog.push_back(m);
   }
 
-  glm::vec2 tres = engine->getTargetResolution();
   if (Input::singleton()->isEditingText()) {
     if (lastText != Input::singleton()->getEditedText()) {
       dirty = true;

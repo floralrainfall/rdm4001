@@ -2,6 +2,7 @@
 
 #include "gfx/engine.hpp"
 #include "gfx/mesh.hpp"
+#include "network/network.hpp"
 #include "wplayer.hpp"
 namespace ww {
 Weapon::Weapon(net::NetworkManager* manager, net::EntityId id)
@@ -12,6 +13,10 @@ Weapon::Weapon(net::NetworkManager* manager, net::EntityId id)
 void Weapon::primaryFire() {}
 
 void Weapon::secondaryFire() {}
+
+bool Weapon::getOwnership(rdm::network::Peer* peer) {
+  return peer->playerEntity == getOwnerRef();
+}
 
 void Weapon::renderView() {
   if (viewModel.empty()) return;

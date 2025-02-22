@@ -34,6 +34,7 @@ class World {
   std::unique_ptr<network::NetworkManager> networkManager;
   std::unique_ptr<Scheduler> scheduler;
   std::unique_ptr<script::Context> scriptContext;
+  void* user;
   Game* game;
   std::string title;
   bool running;
@@ -59,6 +60,9 @@ class World {
   PhysicsWorld* getPhysicsWorld() { return physics.get(); }
   network::NetworkManager* getNetworkManager() { return networkManager.get(); }
   double getTime() { return time; };
+
+  void setUser(void* p) { user = p; }
+  void* getUser() { return user; }
 
   void setRunning(bool running) { this->running = running; }
   bool getRunning() { return running; };

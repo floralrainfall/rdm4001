@@ -123,6 +123,8 @@ gamelib = static_library('game', [
   'gfx/material.hpp',
   'gfx/mesh.cpp',
   'gfx/mesh.hpp',
+  'gfx/video.cpp',
+  'gfx/video.hpp',
   'gfx/stb_image.h',
 
   'gfx/base_context.cpp',

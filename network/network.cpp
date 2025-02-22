@@ -9,6 +9,7 @@
 #include "fun.hpp"
 #include "game.hpp"
 #include "logging.hpp"
+#include "network/bitstream.hpp"
 #include "network/entity.hpp"
 #include "scheduler.hpp"
 #include "settings.hpp"
@@ -68,6 +69,21 @@ static ConsoleCommand spawn(
       if (!entity)
         throw std::runtime_error("entity == NULL, type may not exist");
       Log::printf(LOG_INFO, "%i", entity->getEntityId());
+    });
+
+static ConsoleCommand bot(
+    "bot", "bot", "creates bot", [](Game* game, ConsoleArgReader reader) {
+      if (!game->getWorldConstructorSettings().network)
+        throw std::runtime_error("network disabled");
+      if (!game->getServerWorld())
+        throw std::runtime_error("Must be hosting server");
+      Player* player = dynamic_cast<Player*>(
+          game->getServerWorld()->getNetworkManager()->instantiate(
+              game->getServerWorld()->getNetworkManager()->getPlayerType()));
+      if (!player) throw std::runtime_error("player == NULL");
+      player->remotePeerId.set(-1);
+      player->displayName.set(std::format("Bot{}", rand() % 100));
+      Log::printf(LOG_INFO, "%i", player->getEntityId());
     });
 
 static ConsoleCommand entity(
@@ -140,6 +156,17 @@ NetworkManager::NetworkManager(World* world) {
   username = Fun::getSystemUsername();
   nextDtPacket = 0.0;
 
+  cvarChangingUpdate =
+      Settings::singleton()->cvarChanging.listen([this](std::string name) {
+        CVar* cvar = Settings::singleton()->getCvar(name.c_str());
+        if (isBackend()) {
+          if (cvar->getFlags() & CVARF_REPLICATE) {
+            pendingCvars.push_back(name);
+          }
+        } else {
+        }
+      });
+
   password = "RDMRDMRDM";
   userPassword = "";
 }
@@ -160,6 +187,8 @@ void NetworkManager::requestDisconnect() {
 }
 
 NetworkManager::~NetworkManager() {
+  Settings::singleton()->cvarChanging.removeListener(cvarChangingUpdate);
+
   if (host) {
     ENetEvent event;
     if (backend) {
@@ -337,23 +366,40 @@ void NetworkManager::service() {
                       throw std::runtime_error("ent == NULL");
                     }
 
+                    BitStream::Context context = BitStream::Generic;
                     if (backend) {
                       bool allowed = false;
                       if (Player* player = dynamic_cast<Player*>(ent)) {
                         if (player->remotePeerId.get() == remotePeer->peerId) {
                           allowed = true;
+                          context = BitStream::FromClientLocal;
                         }
+                      } else if (ent->getOwnership(remotePeer)) {
+                        allowed = true;
                       }
 
                       if (!allowed) {
-                        Log::printf(LOG_ERROR,
-                                    "Peer %i attempted to modify %s (%i)",
-                                    remotePeer->peerId, ent->getTypeName(),
-                                    ent->getEntityId());
+                        Log::printf(
+                            LOG_ERROR,
+                            "Peer %i attempted to modify %s (%i, reliable: %s)",
+                            remotePeer->peerId, ent->getTypeName(),
+                            ent->getEntityId(),
+                            event.packet->flags & ENET_PACKET_FLAG_RELIABLE
+                                ? "yes"
+                                : "no");
                         throw std::runtime_error(
                             "Peer not allowed to modify entity");
+                      } else {
+                        context = BitStream::FromClientLocal;
+                      }
+                    } else {
+                      if (ent->getOwnership(&localPeer)) {
+                        context = BitStream::FromServerLocal;
+                      } else {
+                        context = BitStream::FromServer;
                       }
                     }
+                    stream.setContext(context);
 
                     if (event.packet->flags & ENET_PACKET_FLAG_RELIABLE) {
                       ent->deserialize(stream);
@@ -479,6 +525,35 @@ void NetworkManager::service() {
                   Log::printf(LOG_INFO, "peer %i] %s", remotePeer->peerId,
                               command.c_str());
                   game->getConsole()->command(command);
+                }
+                break;
+              case EventPacket: {
+                CustomEventID id = stream.read<CustomEventID>();
+                auto it = customSignals.find(id);
+                if (it != customSignals.end()) {
+                  if (customSignals[id].size() == 0) {
+                    throw std::runtime_error("customSignals[id].size() == 0");
+                  }
+
+                  customSignals[id].fire(this, id, stream);
+                }
+              } break;
+              case CvarPacket:
+                if (backend) {
+                  throw std::runtime_error("CvarPacket on backend");
+                } else {
+                  int num = stream.read<int>();
+                  for (int i = 0; i < num; i++) {
+                    std::string name = stream.readString();
+                    std::string value = stream.readString();
+
+                    CVar* var = Settings::singleton()->getCvar(name.c_str());
+                    if (var && var->getFlags() & CVARF_REPLICATE) {
+                      Log::printf(LOG_INFO, "%s -> %s", name.c_str(),
+                                  value.c_str());
+                      var->setValue(value);
+                    }
+                  }
                 }
                 break;
               default:
@@ -637,6 +712,12 @@ void NetworkManager::service() {
           deltaIdStreamUnreliable.write<EntityId>(id);
 
           Entity* ent = entities[id].get();
+
+          BitStream::Context ctxt = BitStream::ToClient;
+          if (ent->getOwnership(&peer.second)) ctxt = BitStream::ToClientLocal;
+          deltaIdStream.setContext(ctxt);
+          deltaIdStreamUnreliable.setContext(ctxt);
+
           ent->serialize(deltaIdStream);
           ent->serializeUnreliable(deltaIdStreamUnreliable);
         }
@@ -650,6 +731,22 @@ void NetworkManager::service() {
       }
 
       if (peer.second.noob && peer.second.playerEntity) {
+        {
+          std::vector<CVar*> cvars =
+              Settings::singleton()->getWithFlag(CVARF_REPLICATE);
+
+          BitStream cvarsPacket;
+          cvarsPacket.write<PacketId>(CvarPacket);
+          cvarsPacket.write<int>(cvars.size());
+          for (auto cvar : cvars) {
+            cvarsPacket.writeString(cvar->getName());
+            cvarsPacket.writeString(cvar->getValue());
+          }
+
+          enet_peer_send(peer.second.peer, NETWORK_STREAM_META,
+                         cvarsPacket.createPacket(ENET_PACKET_FLAG_RELIABLE));
+        }
+
         for (auto& _peer : peers) {
           if (!_peer.second.playerEntity || peer.first == _peer.first) continue;
           BitStream newPeerPacket;
@@ -667,39 +764,72 @@ void NetworkManager::service() {
         }
         peer.second.noob = false;
       }
+
+      if (int queuedEvents = peer.second.queuedEvents.size()) {
+        for (int i = 0; i < queuedEvents; i++) {
+          BitStream eventPacket;
+          eventPacket.write<PacketId>(EventPacket);
+          eventPacket.write<CustomEventID>(peer.second.queuedEvents[i].first);
+          eventPacket.writeStream(*peer.second.queuedEvents[i].second);
+        }
+      }
+    }
+
+    if (int _pendingCvarUpdates = pendingCvars.size()) {
+      BitStream cvarUpdateStream;
+      cvarUpdateStream.write<PacketId>(CvarPacket);
+      cvarUpdateStream.write<int>(_pendingCvarUpdates);
+      for (auto var : pendingCvars) {
+        CVar* cvar = Settings::singleton()->getCvar(var.c_str());
+        if (!cvar) {
+          cvarUpdateStream.writeString("");
+          cvarUpdateStream.writeString("");
+          continue;
+        }
+
+        cvarUpdateStream.writeString(cvar->getName());
+        cvarUpdateStream.writeString(cvar->getValue());
+      }
+      pendingCvars.clear();
     }
 
     if (int _pendingUpdates = pendingUpdates.size()) {
-      BitStream deltaIdStream;
-      deltaIdStream.write<PacketId>(DeltaIdPacket);
-      deltaIdStream.write<int>(_pendingUpdates);
-      for (auto id : pendingUpdates) {
-        deltaIdStream.write<EntityId>(id);
-        Entity* ent = entities[id].get();
-        ent->serialize(deltaIdStream);
-      }
-      ENetPacket* packet =
-          deltaIdStream.createPacket(ENET_PACKET_FLAG_RELIABLE);
       for (auto& peer : peers) {
-        if (peer.second.type == Peer::ConnectedPlayer)
-          enet_peer_send(peer.second.peer, NETWORK_STREAM_ENTITY, packet);
+        if (peer.second.type != Peer::ConnectedPlayer) continue;
+        BitStream deltaIdStream;
+        deltaIdStream.write<PacketId>(DeltaIdPacket);
+        deltaIdStream.write<int>(_pendingUpdates);
+        for (auto id : pendingUpdates) {
+          deltaIdStream.write<EntityId>(id);
+          Entity* ent = entities[id].get();
+          BitStream::Context ctxt = BitStream::ToClient;
+          if (ent->getOwnership(&peer.second)) ctxt = BitStream::ToClientLocal;
+          deltaIdStream.setContext(ctxt);
+          ent->serialize(deltaIdStream);
+        }
+        ENetPacket* packet =
+            deltaIdStream.createPacket(ENET_PACKET_FLAG_RELIABLE);
+        enet_peer_send(peer.second.peer, NETWORK_STREAM_ENTITY, packet);
       }
       pendingUpdates.clear();
     }
 
     if (int _pendingUpdatesUnreliable = pendingUpdatesUnreliable.size()) {
-      BitStream deltaIdStream;
-      deltaIdStream.write<PacketId>(DeltaIdPacket);
-      deltaIdStream.write<int>(_pendingUpdatesUnreliable);
-      for (auto id : pendingUpdatesUnreliable) {
-        deltaIdStream.write<EntityId>(id);
-        Entity* ent = entities[id].get();
-        ent->serializeUnreliable(deltaIdStream);
-      }
-      ENetPacket* packet = deltaIdStream.createPacket(0);
       for (auto& peer : peers) {
-        if (peer.second.type == Peer::ConnectedPlayer)
-          enet_peer_send(peer.second.peer, NETWORK_STREAM_ENTITY, packet);
+        if (peer.second.type != Peer::ConnectedPlayer) continue;
+        BitStream deltaIdStream;
+        deltaIdStream.write<PacketId>(DeltaIdPacket);
+        deltaIdStream.write<int>(_pendingUpdatesUnreliable);
+        for (auto id : pendingUpdatesUnreliable) {
+          deltaIdStream.write<EntityId>(id);
+          Entity* ent = entities[id].get();
+          BitStream::Context ctxt = BitStream::ToClient;
+          if (ent->getOwnership(&peer.second)) ctxt = BitStream::ToClientLocal;
+          deltaIdStream.setContext(ctxt);
+          ent->serializeUnreliable(deltaIdStream);
+        }
+        ENetPacket* packet = deltaIdStream.createPacket(0);
+        enet_peer_send(peer.second.peer, NETWORK_STREAM_ENTITY, packet);
       }
       pendingUpdatesUnreliable.clear();
     }
@@ -769,6 +899,9 @@ void NetworkManager::service() {
       for (auto id : pendingUpdates) {
         deltaIdStream.write<EntityId>(id);
         Entity* ent = entities[id].get();
+        BitStream::Context ctxt = BitStream::ToServer;
+        if (ent->getOwnership(&localPeer)) ctxt = BitStream::ToServerLocal;
+        deltaIdStream.setContext(ctxt);
         ent->serialize(deltaIdStream);
       }
       ENetPacket* packet =
@@ -784,6 +917,9 @@ void NetworkManager::service() {
       for (auto id : pendingUpdatesUnreliable) {
         deltaIdStream.write<EntityId>(id);
         Entity* ent = entities[id].get();
+        BitStream::Context ctxt = BitStream::ToServer;
+        if (ent->getOwnership(&localPeer)) ctxt = BitStream::ToServerLocal;
+        deltaIdStream.setContext(ctxt);
         ent->serializeUnreliable(deltaIdStream);
       }
       ENetPacket* packet = deltaIdStream.createPacket(0);

@@ -87,6 +87,8 @@ class Settings {
   void load();
   void save();
 
+  std::vector<CVar*> getWithFlag(unsigned long mask = UINT64_MAX);
+
   void listCvars();
 
   Signal<std::string> cvarChanging;

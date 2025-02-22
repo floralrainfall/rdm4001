@@ -11,6 +11,10 @@ FileSystem* FileSystem::singleton() {
 
 FileSystem::FileSystem() {
   addApi(std::unique_ptr<FileSystemAPI>(new DataFolderAPI()));
+#ifndef NDEBUG
+  addApi(std::unique_ptr<FileSystemAPI>(
+      new DataFolderAPI("../subprojects/rdm4001/data/")));
+#endif
 }
 
 FileSystemAPI* FileSystem::addApi(std::unique_ptr<FileSystemAPI> fapi,
@@ -44,12 +48,16 @@ std::optional<FileIO*> FileSystem::getFileIO(const char* path,
   return {};
 }
 
-DataFolderAPI::DataFolderAPI() {
+DataFolderAPI::DataFolderAPI(std::string basedir) {
+  if (basedir.empty()) {
 #ifndef NDEBUG
-  basedir = "../data/";
+    this->basedir = "../data/";
 #else
-  basedir = "data/";
+    this->basedir = "data/";
 #endif
+  } else {
+    this->basedir = basedir;
+  }
 }
 
 bool DataFolderAPI::getFileExists(const char* path) {

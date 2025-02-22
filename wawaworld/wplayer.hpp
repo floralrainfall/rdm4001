@@ -38,6 +38,8 @@ class WPlayer : public net::Player {
   std::unique_ptr<rdm::SoundEmitter> soundEmitter;
 
  public:
+  enum Status { Spectator, InGame };
+
   WPlayer(net::NetworkManager* manager, net::EntityId id);
   virtual ~WPlayer();
 
@@ -59,5 +61,14 @@ class WPlayer : public net::Player {
   virtual void serializeUnreliable(net::BitStream& stream);
   virtual void deserializeUnreliable(net::BitStream& stream);
   virtual const char* getTypeName() { return "WPlayer"; };
+
+  void setStatus(Status status) {
+    this->status = status;
+    getManager()->addPendingUpdate(getEntityId());
+  };
+  Status getStatus() { return status; };
+
+ private:
+  Status status;
 };
 };  // namespace ww

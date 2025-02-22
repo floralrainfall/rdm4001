@@ -118,7 +118,7 @@ WPlayer::WPlayer(net::NetworkManager* manager, net::EntityId id)
     soundEmitter->setPitch(0.f);
     soundEmitter->setLooping(true);
 
-    getManager()->addPendingUpdate(getEntityId());
+    if (isLocalPlayer()) getManager()->addPendingUpdate(getEntityId());
 
     worldJob = getWorld()->stepped.listen([this] {
       if (isLocalPlayer()) {
@@ -213,9 +213,6 @@ WPlayer::WPlayer(net::NetworkManager* manager, net::EntityId id)
       controller->teleport(worldspawn->spawnLocation());
       getManager()->addPendingUpdateUnreliable(getEntityId());
     }
-
-    giveWeapon(
-        dynamic_cast<Weapon*>(getManager()->instantiate("WeaponSniper")));
   }
 }
 
@@ -276,6 +273,27 @@ void WPlayer::tick() {
           firingState[0] = false;
         }
       }
+    } else {
+      if (isBot()) {
+        btTransform transform = controller->getTransform();
+        if (worldspawn && worldspawn->getFile()) {
+          btVector3 origin_old = transform.getOrigin();
+          btVector3 origin_new = oldTransform.getOrigin();
+          // Log::printf(LOG_DEBUG, "%f, %f", forward_old.dot(forward_new),
+          //            origin_old.distance(origin_new));
+
+          if (origin_old.distance(origin_new) > 0.1) needsUpdate = true;
+          if (oldFront.distance(getController()->getFront()) > 0.1)
+            needsUpdate = true;
+
+          if (needsUpdate) {
+            oldTransform = transform;
+            oldFront = getController()->getFront();
+
+            getManager()->addPendingUpdateUnreliable(getEntityId());
+          }
+        }
+      }
     }
 
     controller->setEnable(true);
@@ -293,8 +311,6 @@ void WPlayer::tick() {
         //            origin_old.distance(origin_new));
 
         if (origin_old.distance(origin_new) > 0.1) needsUpdate = true;
-        Log::printf(LOG_DEBUG, "%f",
-                    oldFront.distance(getController()->getFront()));
         if (oldFront.distance(getController()->getFront()) > 0.1)
           needsUpdate = true;
 
