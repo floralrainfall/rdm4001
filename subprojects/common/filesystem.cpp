@@ -10,11 +10,11 @@ FileSystem* FileSystem::singleton() {
 }
 
 FileSystem::FileSystem() {
-  addApi(std::unique_ptr<FileSystemAPI>(new DataFolderAPI()));
 #ifndef NDEBUG
   addApi(std::unique_ptr<FileSystemAPI>(
       new DataFolderAPI("../subprojects/rdm4001/data/")));
 #endif
+  addApi(std::unique_ptr<FileSystemAPI>(new DataFolderAPI()));
 }
 
 FileSystemAPI* FileSystem::addApi(std::unique_ptr<FileSystemAPI> fapi,
