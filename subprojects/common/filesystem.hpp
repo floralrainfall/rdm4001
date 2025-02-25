@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 #include <memory>
 #include <optional>
 #include <vector>
@@ -21,6 +22,9 @@ class FileIO {
 
 class FileSystemAPI {
  public:
+  // override this to return false if you don't want the engine to test if files
+  // exist here, useful for HTTP or web retrevial fs apis
+  virtual bool generalFSApi() { return true; }
   virtual bool getFileExists(const char* path) = 0;
   virtual OptionalData getFileData(const char* path) = 0;
   virtual std::optional<FileIO*> getFileIO(const char* path,
@@ -54,15 +58,23 @@ class DataFolderAPI : public FileSystemAPI {
 
 // abstraction
 class FileSystem {
-  std::vector<std::unique_ptr<FileSystemAPI>> fsApis;
+  struct FSApiInfo {
+    std::unique_ptr<FileSystemAPI> api;
+    int precedence;
+  };
 
+  std::map<std::string, FSApiInfo> fsApis;
+
+  FileSystemAPI* getOwningApi(const char* path);
+  std::string sanitizePath(const char* path);
   FileSystem();
 
  public:
   static FileSystem* singleton();
 
-  FileSystemAPI* addApi(std::unique_ptr<FileSystemAPI> api,
-                        bool exclusive = false);
+  // higher numbers take precedence
+  void addApi(FileSystemAPI* api, std::string uri, int precedence = 0,
+              bool exclusive = false);
 
   OptionalData readFile(const char* path);
   std::optional<FileIO*> getFileIO(const char* path, const char* mode);

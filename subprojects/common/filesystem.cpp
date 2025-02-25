@@ -1,5 +1,7 @@
 #include "filesystem.hpp"
 
+#include <algorithm>
+
 #include "logging.hpp"
 
 namespace common {
@@ -11,38 +13,67 @@ FileSystem* FileSystem::singleton() {
 
 FileSystem::FileSystem() {
 #ifndef NDEBUG
-  addApi(std::unique_ptr<FileSystemAPI>(
-      new DataFolderAPI("../subprojects/rdm4001/data/")));
+  addApi(new DataFolderAPI("../subprojects/rdm4001/data/"), "data_rdm4001");
+#else
+  addApi(new DataFolderAPI(), "data_rdm4001");
 #endif
-  addApi(std::unique_ptr<FileSystemAPI>(new DataFolderAPI()));
+  addApi(new DataFolderAPI(), "data_local");
 }
 
-FileSystemAPI* FileSystem::addApi(std::unique_ptr<FileSystemAPI> fapi,
-                                  bool exclusive) {
+void FileSystem::addApi(FileSystemAPI* fapi, std::string uri, int precedence,
+                        bool exclusive) {
   if (exclusive) fsApis.clear();
-  fsApis.push_back(std::move(fapi));
-  return fsApis.back().get();
+  FSApiInfo& info = fsApis[uri];
+  info.precedence = precedence;
+  info.api = std::unique_ptr<FileSystemAPI>(fapi);
 };
 
-OptionalData FileSystem::readFile(const char* path) {
-  for (int i = fsApis.size() - 1; i >= 0; i--) {
-    FileSystemAPI* api = fsApis[i].get();
-    if (api->getFileExists(path)) {
-      return api->getFileData(path);
+FileSystemAPI* FileSystem::getOwningApi(const char* _path) {
+  std::string path(_path);
+  auto urisep = path.find("://");
+  if (urisep != std::string::npos) {
+    std::string uri = path.substr(0, urisep);
+    auto api = fsApis.find(uri);
+    if (api != fsApis.end()) {
+      return api->second.api.get();
+    }
+  } else {
+    std::vector<FSApiInfo*> infos;
+    for (auto& api : fsApis) {
+      if (api.second.api->generalFSApi()) infos.push_back(&api.second);
+    }
+    std::sort(infos.begin(), infos.end(), [](FSApiInfo* a, FSApiInfo* b) {
+      return a->precedence > b->precedence;
+    });
+    for (auto info : infos) {
+      if (info->api->getFileExists(_path)) {
+        return info->api.get();
+      }
     }
   }
+  return NULL;
+}
+
+std::string FileSystem::sanitizePath(const char* _path) {
+  std::string path(_path);
+  auto urisep = path.find("://");
+  if (urisep != std::string::npos) {
+    return path.substr(urisep + 3);
+  } else
+    return path;
+}
+
+OptionalData FileSystem::readFile(const char* path) {
+  if (FileSystemAPI* api = getOwningApi(path))
+    return api->getFileData(sanitizePath(path).c_str());
 
   return {};
 }
 
 std::optional<FileIO*> FileSystem::getFileIO(const char* path,
                                              const char* mode) {
-  for (int i = fsApis.size() - 1; i >= 0; i--) {
-    FileSystemAPI* api = fsApis[i].get();
-    if (api->getFileExists(path)) {
-      return api->getFileIO(path, mode);
-    }
-  }
+  if (FileSystemAPI* api = getOwningApi(path))
+    return api->getFileIO(sanitizePath(path).c_str(), mode);
 
   rdm::Log::printf(rdm::LOG_EXTERNAL, "Unable to load file %s", path);
   return {};

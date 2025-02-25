@@ -142,11 +142,8 @@ void Game::startClient() {
 #ifndef DISABLE_OBZ
   obz::ObzFileSystemAPI* obzFsApi = 0;
   try {
-    obzFsApi = dynamic_cast<obz::ObzFileSystemAPI*>(
-        common::FileSystem::singleton()->addApi(
-            std::unique_ptr<obz::ObzFileSystemAPI>(
-                new obz::ObzFileSystemAPI("game")),
-            true));
+    obzFsApi = new obz::ObzFileSystemAPI("game");
+    common::FileSystem::singleton()->addApi(obzFsApi, "data_obz");
   } catch (std::runtime_error& e) {
     Log::printf(LOG_ERROR, "Couldn't open archive what() = %s", e.what());
   }
