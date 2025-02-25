@@ -62,6 +62,8 @@ class GLProgram : public BaseProgram {
 class GLBuffer : public BaseBuffer {
   GLuint buffer;
   Type type;
+  size_t size;
+  void* _lock;
 
  public:
   GLBuffer();
@@ -72,7 +74,12 @@ class GLBuffer : public BaseBuffer {
 
   Type getType() { return type; }
 
+  // will automagically use glBufferSubData
   virtual void upload(Type type, Usage usage, size_t size, const void* data);
+  virtual void* lock(Type type, Access access);
+  virtual void unlock(void* lock);
+  virtual size_t getSize() { return size; }
+
   virtual void bind();
 };
 

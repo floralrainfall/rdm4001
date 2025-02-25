@@ -176,8 +176,16 @@ class BaseBuffer {
                       const void* data) = 0;
   virtual void bind() = 0;
 
- protected:
-  std::mutex lock;
+  enum Access {
+    ReadOnly,
+    WriteOnly,
+    ReadWrite,
+  };
+
+  virtual void* lock(Type type, Access access) = 0;
+  virtual void unlock(void* lock) = 0;
+
+  virtual size_t getSize() = 0;
 };
 
 /**

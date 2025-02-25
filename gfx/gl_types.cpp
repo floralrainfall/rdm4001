@@ -374,7 +374,36 @@ GLenum GLBuffer::bufUsage(Usage usage) {
 void GLBuffer::upload(Type type, Usage usage, size_t size, const void* data) {
   this->type = type;
   glBindBuffer(bufType(type), buffer);
-  glBufferData(bufType(type), size, data, bufUsage(usage));
+  if (this->size != size) {
+    glBufferData(bufType(type), size, data, bufUsage(usage));
+    this->size = size;
+  } else {
+    glBufferSubData(bufType(type), 0, size, data);
+  }
+  glBindBuffer(bufType(type), 0);
+}
+
+void* GLBuffer::lock(Type type, Access access) {
+  if (_lock) {
+    throw std::runtime_error("Lock already locked buffer");
+  }
+
+  GLenum accesses[] = {GL_READ_ONLY, GL_WRITE_ONLY, GL_READ_WRITE};
+
+  glBindBuffer(bufType(type), buffer);
+  _lock = glMapBuffer(bufType(type), accesses[access]);
+  glBindBuffer(bufType(type), 0);
+
+  return _lock;
+}
+
+void GLBuffer::unlock(void* lock) {
+  if (_lock != lock) {
+    throw std::runtime_error("Lock with invalid lock");
+  }
+
+  glBindBuffer(bufType(type), buffer);
+  glUnmapBuffer(bufType(type));
   glBindBuffer(bufType(type), 0);
 }
 

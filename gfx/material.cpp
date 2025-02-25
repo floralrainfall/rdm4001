@@ -41,7 +41,7 @@ ShaderFile ShaderCache::getCachedOrFile(const char* path) {
 }
 
 Technique::Technique(BaseDevice* device, std::string techniqueVs,
-                     std::string techniqueFs) {
+                     std::string techniqueFs, std::string techniqueGs) {
   program = device->createProgram();
   program->addShader(
       ShaderCache::singleton()->getCachedOrFile(techniqueVs.c_str()),
@@ -49,6 +49,11 @@ Technique::Technique(BaseDevice* device, std::string techniqueVs,
   program->addShader(
       ShaderCache::singleton()->getCachedOrFile(techniqueFs.c_str()),
       BaseProgram::Fragment);
+  if (!techniqueGs.empty()) {
+    program->addShader(
+        ShaderCache::singleton()->getCachedOrFile(techniqueGs.c_str()),
+        BaseProgram::Geometry);
+  }
   program->link();
 }
 
@@ -56,9 +61,10 @@ void Technique::bindProgram() { program->bind(); }
 
 std::shared_ptr<Technique> Technique::create(BaseDevice* device,
                                              std::string techniqueVs,
-                                             std::string techniqueFs) {
+                                             std::string techniqueFs,
+                                             std::string techniqueGs) {
   return std::shared_ptr<Technique>(
-      new Technique(device, techniqueVs, techniqueFs));
+      new Technique(device, techniqueVs, techniqueFs, techniqueGs));
 }
 
 Material::Material() {}
@@ -135,7 +141,11 @@ std::optional<std::shared_ptr<Material>> MaterialCache::getOrLoad(
           }
           std::string vsName = program["VSName"];
           std::string fsName = program["FSName"];
-          material->addTechnique(Technique::create(device, vsName, fsName));
+          std::string gsName = "";
+          if (program.find("GSName") != program.end())
+            gsName = program["GSName"];
+          material->addTechnique(
+              Technique::create(device, vsName, fsName, gsName));
         } catch (std::runtime_error& e) {
           Log::printf(
               LOG_ERROR,

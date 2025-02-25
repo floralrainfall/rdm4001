@@ -40,12 +40,13 @@ class ShaderCache {
 class Technique {
   std::unique_ptr<BaseProgram> program;
   Technique(BaseDevice* device, std::string techniqueVs,
-            std::string techniqueFs);
+            std::string techniqueFs, std::string techniqueGs);
 
  public:
   static std::shared_ptr<Technique> create(BaseDevice* device,
                                            std::string techniqueVs,
-                                           std::string techniqueFs);
+                                           std::string techniqueFs,
+                                           std::string techniqueGs = "");
 
   void bindProgram();
   BaseProgram* getProgram() { return program.get(); }
