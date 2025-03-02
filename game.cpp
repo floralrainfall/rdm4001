@@ -231,6 +231,8 @@ void Game::earlyInit() {
       }
       worldServer->getScheduler()->startAllJobs();
     }
+
+    initialized = true;
   } catch (std::exception& e) {
     Log::printf(LOG_FATAL, "Error initializing game: %s", e.what());
     exit(EXIT_FAILURE);
@@ -239,9 +241,15 @@ void Game::earlyInit() {
 
 void Game::stopServer() { worldServer.reset(); }
 
+#ifdef NDEBUG
+static CVar input_userelativemode("input_userelativemode", "1",
+                                  CVARF_SAVE | CVARF_GLOBAL);
+#else
 static CVar input_userelativemode("input_userelativemode", "0",
                                   CVARF_SAVE | CVARF_GLOBAL);
-static CVar input_enableimgui("input_enableimgui", "0",
+
+#endif
+static CVar input_enableimgui("input_enableimgui", "1",
                               CVARF_SAVE | CVARF_GLOBAL);
 
 void Game::pollEvents() {
@@ -255,6 +263,7 @@ void Game::pollEvents() {
   SDL_ShowCursor(!Input::singleton()->getMouseLocked());
   while (SDL_PollEvent(&event)) {
     if (input_enableimgui.getBool()) {
+      std::scoped_lock l(gfxEngine->getImguiLock());
       ImGui_ImplSDL2_NewFrame();
       ImGui_ImplSDL2_ProcessEvent(&event);
     }
@@ -367,7 +376,7 @@ void Game::pollEvents() {
 }
 
 void Game::mainLoop() {
-  earlyInit();
+  if (!initialized) earlyInit();
 
   if (!world && !worldServer) {
     Log::printf(LOG_FATAL,

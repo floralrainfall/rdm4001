@@ -153,8 +153,9 @@ void PhysicsWorld::stepWorld() {
               btIDebugDraw::DBG_DrawContactPoints);
           break;
       }
-    dynamicsWorld->stepSimulation(PHYSICS_FRAMERATE, 10);
+
+    if (stepSimulation) dynamicsWorld->stepSimulation(PHYSICS_FRAMERATE, 10);
   }
-  physicsStepping.fire();
+  if (stepSimulation) physicsStepping.fire();
 }
 };  // namespace rdm

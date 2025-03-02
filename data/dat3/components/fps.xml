@@ -8,6 +8,6 @@
   </in_vars>
   <script src="dat3/fps_controller.bas"></script>
   <dom>
-    <label color="gray" font="dat3/eras.ttf" id="fpsText">FPS: 0</label>
+    <label color="pink" font="dat3/monospace.ttf" id="fpsText">FPS: 0</label>
   </dom>
 </gui>

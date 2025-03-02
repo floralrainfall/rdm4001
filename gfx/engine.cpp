@@ -300,6 +300,7 @@ class RenderJob : public SchedulerJob {
 #ifndef DISABLE_EASY_PROFILER
     EASY_END_BLOCK;
 #endif
+    engine->imguiLock.unlock();
 
     engine->afterGuiRenderStepped.fire();
 
@@ -463,6 +464,7 @@ void Engine::render() {
   EASY_FUNCTION();
 #endif
 
+  imguiLock.lock();
   device->startImGui();
 
   renderStepped.fire();

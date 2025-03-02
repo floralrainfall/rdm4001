@@ -24,6 +24,7 @@ class Game {
  private:
   SDL_Window* window;
   bool ignoreNextMouseMoveEvent;
+  bool initialized;
   WorldConstructorSettings worldSettings;
 
  public:

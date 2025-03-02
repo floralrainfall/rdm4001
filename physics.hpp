@@ -37,12 +37,15 @@ class PhysicsWorld {
   std::unique_ptr<btIDebugDraw> debugDraw;
   bool debugDrawEnabled;
   bool debugDrawInit;
+  bool stepSimulation;
 
  public:
   PhysicsWorld(World* world);
 
   Signal<> physicsStepping;
   void stepWorld();
+
+  void setStepSimulation(bool s) { stepSimulation = s; };
 
   bool isDebugDrawEnabled() { return debugDrawEnabled; }
   bool isDebugDrawInitialized() { return debugDrawInit; }

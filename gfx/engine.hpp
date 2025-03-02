@@ -95,6 +95,7 @@ class Engine {
 
   glm::ivec2 windowResolution;
   glm::vec2 targetResolution;
+  std::mutex imguiLock;
 
   double maxFbScale;
   double forcedAspect;
@@ -103,6 +104,8 @@ class Engine {
 
  public:
   Engine(World* world, void* hwnd);
+
+  std::mutex& getImguiLock() { return imguiLock; }
 
   RenderPass& pass(RenderPass::Pass pass) { return passes[pass]; };
 

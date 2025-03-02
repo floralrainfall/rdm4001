@@ -68,6 +68,7 @@ static std::map<std::string, glm::vec3> definedColors = {
     {"black", glm::vec3(0.0)},
     {"red", glm::vec3(1.0, 0.0, 0.0)},
     {"green", glm::vec3(0.0, 1.0, 0.0)},
+    {"pink", glm::vec3(1.0, 0.0, 1.0)},
     {"blue", glm::vec3(0.0, 0.0, 1.0)},
     {"link", glm::vec3(0.2, 0.2, 0.6)},
     {"link_hover", glm::vec3(0.2, 0.2, 1.0)},
