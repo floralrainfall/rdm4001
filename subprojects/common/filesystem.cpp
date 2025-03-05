@@ -1,6 +1,9 @@
 #include "filesystem.hpp"
 
+#include <linux/limits.h>
+
 #include <algorithm>
+#include <cstdlib>
 
 #include "logging.hpp"
 
@@ -91,7 +94,25 @@ DataFolderAPI::DataFolderAPI(std::string basedir) {
   }
 }
 
+void DataFolderAPI::checkProperDir(const char* path) {
+  char real[PATH_MAX];
+  realpath((basedir + path).c_str(), real);
+  char realbase[PATH_MAX];
+  realpath(basedir.c_str(), realbase);
+
+  rdm::Log::printf(rdm::LOG_ERROR, "%s %s", real, realbase);
+
+  std::string realbase_s(realbase);
+  std::string realpath_s(real);
+
+  for (int i = 0; i < realbase_s.length(); i++)
+    if (realpath_s[i] != realbase_s[i])
+      throw std::runtime_error("Path outside of base");
+}
+
 bool DataFolderAPI::getFileExists(const char* path) {
+  checkProperDir(path);
+
   FILE* fp = fopen((basedir + path).c_str(), "r");
   bool ex = fp;
   if (fp) fclose(fp);
@@ -99,6 +120,8 @@ bool DataFolderAPI::getFileExists(const char* path) {
 }
 
 OptionalData DataFolderAPI::getFileData(const char* path) {
+  checkProperDir(path);
+
   FILE* fp = fopen((basedir + path).c_str(), "rb");
   if (fp) {
     fseek(fp, 0, SEEK_END);
@@ -115,6 +138,8 @@ OptionalData DataFolderAPI::getFileData(const char* path) {
 
 std::optional<FileIO*> DataFolderAPI::getFileIO(const char* path,
                                                 const char* mode) {
+  checkProperDir(path);
+
   FILE* fp = fopen((basedir + path).c_str(), mode);
   if (fp) {
     return new DataFileIO(fp);

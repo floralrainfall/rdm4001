@@ -49,8 +49,11 @@ class DataFileIO : public FileIO {
 class DataFolderAPI : public FileSystemAPI {
   std::string basedir;
 
+  void checkProperDir(const char* path);
+
  public:
   DataFolderAPI(std::string basedir = "");
+
   virtual bool getFileExists(const char* path);
   virtual OptionalData getFileData(const char* path);
   virtual std::optional<FileIO*> getFileIO(const char* path, const char* mode);
