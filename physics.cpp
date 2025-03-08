@@ -152,6 +152,10 @@ void PhysicsWorld::stepWorld() {
           dynamicsWorld->getDebugDrawer()->setDebugMode(
               btIDebugDraw::DBG_DrawContactPoints);
           break;
+        case 5:
+          dynamicsWorld->getDebugDrawer()->setDebugMode(
+              btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
+          break;
       }
 
     if (stepSimulation) dynamicsWorld->stepSimulation(PHYSICS_FRAMERATE, 10);

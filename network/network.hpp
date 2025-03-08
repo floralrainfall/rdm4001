@@ -8,6 +8,7 @@
 #include <string>
 
 #include "crc_hash.hpp"
+#include "defs.hpp"
 #include "entity.hpp"
 #include "player.hpp"
 #include "signal.hpp"
@@ -119,8 +120,6 @@ class NetworkManager {
   Signal<std::string> remoteDisconnect;
 
   enum PacketId {
-    WelcomePacket,          // S -> C, beginning of handshake
-    AuthenticatePacket,     // C -> S
     DisconnectPacket,       // S -> C
     NewIdPacket,            // S -> C
     DelIdPacket,            // S -> C
@@ -133,6 +132,9 @@ class NetworkManager {
     RconPacket,             // C -> S
     CvarPacket,             // S -> C, C -> S
     EventPacket,            // S -> C, C -> S
+
+    WelcomePacket = PROTOCOL_VERSION,  // S -> C, beginning of handshake
+    AuthenticatePacket,                // C -> S
   };
 
   void service();

@@ -9,8 +9,6 @@
 #include "state.hpp"
 #include "world.hpp"
 
-#define ENGINE_VERSION 0x1000
-
 namespace rdm {
 class Game {
  protected:

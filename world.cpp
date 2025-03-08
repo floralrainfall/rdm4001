@@ -3,6 +3,7 @@
 #include <chrono>
 #include <format>
 
+#include "fun.hpp"
 #include "input.hpp"
 #include "logging.hpp"
 #include "physics.hpp"
@@ -79,6 +80,7 @@ class WorldTitleJob : public SchedulerJob {
 
 World::World(WorldConstructorSettings settings) {
   title = "A rdm presentation";
+  name = settings.name;
 
   scheduler.reset(new Scheduler());
   scheduler->addJob(new WorldJob(this));

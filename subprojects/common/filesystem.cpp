@@ -100,8 +100,6 @@ void DataFolderAPI::checkProperDir(const char* path) {
   char realbase[PATH_MAX];
   realpath(basedir.c_str(), realbase);
 
-  rdm::Log::printf(rdm::LOG_ERROR, "%s %s", real, realbase);
-
   std::string realbase_s(realbase);
   std::string realpath_s(real);
 

@@ -12,6 +12,7 @@
 #include "SDL_events.h"
 #include "SDL_keycode.h"
 #include "SDL_stdinc.h"
+#include "defs.hpp"
 #include "fun.hpp"
 #include "gfx/gl_context.hpp"
 #include "input.hpp"
@@ -60,6 +61,8 @@ Game::Game() {
   cl_loglevel.changing.listen(
       [] { Log::singleton()->setLevel((LogType)cl_loglevel.getInt()); });
 
+  Log::printf(LOG_INFO, "RDM engine version %06x", ENGINE_VERSION);
+  Log::printf(LOG_INFO, "RDM protocol version %06x", PROTOCOL_VERSION);
   if (cl_copyright.getBool()) Log::printf(LOG_INFO, "%s", copyright());
 }
 

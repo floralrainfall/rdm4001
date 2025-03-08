@@ -4,6 +4,7 @@
 #include <mutex>
 #include <string>
 
+#include "fun.hpp"
 #include "graph.hpp"
 #include "network/network.hpp"
 #include "physics.hpp"
@@ -16,11 +17,13 @@ class Game;
 struct WorldConstructorSettings {
   bool network;
   bool physics;
+  std::string name;
   Game* game;
 
   WorldConstructorSettings() {
     network = false;
     physics = false;
+    name = Fun::getModuleName();
     game = NULL;
   }
 };
@@ -37,6 +40,7 @@ class World {
   void* user;
   Game* game;
   std::string title;
+  std::string name;
   bool running;
   double time;
 
@@ -63,6 +67,8 @@ class World {
 
   void setUser(void* p) { user = p; }
   void* getUser() { return user; }
+
+  const char* getName() { return name.c_str(); }
 
   void setRunning(bool running) { this->running = running; }
   bool getRunning() { return running; };
