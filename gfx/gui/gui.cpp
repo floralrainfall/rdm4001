@@ -135,34 +135,34 @@ void Component::render(GuiManager* manager, gfx::Engine* engine) {
   int padding = 4;
   gfx::BaseProgram* bp = manager->image->prepareDevice(engine->getDevice(), 0);
   for (auto& index : elementIndex) {
-    std::pair<std::string, Element> element =
-        std::make_pair(index, elements[index]);
-    switch (element.second.type) {
+    std::pair<std::string, Element*> element =
+        std::make_pair(index, &elements[index]);
+    switch (element.second->type) {
       case Element::TextField:
         if (selectedElement == &elements[index]) {
           std::string inText = Input::singleton()->getEditedText();
-          if (inText != element.second.value) {
-            element.second.value = inText;
-            element.second.dirty = true;
+          if (inText != element.second->value) {
+            element.second->value = inText;
+            element.second->dirty = true;
           }
-          element.second.color = definedColors["textarea_active"];
+          element.second->color = definedColors["textarea_active"];
         } else {
-          element.second.color = definedColors["textarea"];
+          element.second->color = definedColors["textarea"];
         }
-        if (element.second.value.empty()) {
-          element.second.value = "...........";
-          element.second.dirty = true;
+        if (element.second->value.empty()) {
+          element.second->value = "...........";
+          element.second->dirty = true;
         }
         bp->setParameter("bgcolor", DtVec4, {.vec4 = glm::vec4(0.4)});
       case Element::Label: {
-        if (element.second.dirty) {
-          OutFontTexture t = FontRender::render(element.second.font,
-                                                element.second.value.c_str());
+        if (element.second->dirty) {
+          OutFontTexture t = FontRender::render(element.second->font,
+                                                element.second->value.c_str());
           if (t.data != NULL) {
-            element.second.texture->upload2d(t.w, t.h, DtUnsignedByte,
-                                             BaseTexture::RGBA, t.data);
-            element.second.dirty = false;
-            element.second.textureSize = glm::ivec2(t.w, t.h);
+            element.second->texture->upload2d(t.w, t.h, DtUnsignedByte,
+                                              BaseTexture::RGBA, t.data);
+            element.second->dirty = false;
+            element.second->textureSize = glm::ivec2(t.w, t.h);
           } else {
             throw std::runtime_error("t.data == NULL");
           }
@@ -170,11 +170,11 @@ void Component::render(GuiManager* manager, gfx::Engine* engine) {
       }
       case Element::Image: {
         if (alignTop)
-          offset += inc_factor * (glm::max(element.second.minSize,
-                                           element.second.textureSize) +
+          offset += inc_factor * (glm::max(element.second->minSize,
+                                           element.second->textureSize) +
                                   glm::ivec2(padding));
-        BaseTexture* displayTexture = element.second.texture;
-        glm::vec3 displayColor = element.second.color;
+        BaseTexture* displayTexture = element.second->texture;
+        glm::vec3 displayColor = element.second->color;
         glm::vec2 pos = Input::singleton()->getMousePosition();
         glm::vec2 displayOffset = offset;
         if (alignRight)
@@ -184,30 +184,32 @@ void Component::render(GuiManager* manager, gfx::Engine* engine) {
         if (Math::pointInRect2d(
                 glm::vec4(
                     displayOffset.x +
-                        (alignRight ? -element.second.textureSize.x + fbSize.x
+                        (alignRight ? -element.second->textureSize.x + fbSize.x
                                     : 0),
-                    fbSize.y - displayOffset.y - element.second.textureSize.y,
-                    element.second.textureSize.x, element.second.textureSize.y),
+                    fbSize.y - displayOffset.y - element.second->textureSize.y,
+                    element.second->textureSize.x,
+                    element.second->textureSize.y),
                 pos)) {
-          if (element.second.link) displayColor = definedColors["link_hover"];
-          if (element.second.textureHover)
-            displayTexture = element.second.textureHover;
+          if (element.second->link) displayColor = definedColors["link_hover"];
+          if (element.second->textureHover)
+            displayTexture = element.second->textureHover;
           if (Input::singleton()->isMouseButtonDown(1)) {
-            if (element.second.link) displayColor = definedColors["link_press"];
-            if (element.second.texturePressed)
-              displayTexture = element.second.texturePressed;
-            if (!element.second.pressed) {
-              if (element.second.type == Element::TextField) {
+            if (element.second->link)
+              displayColor = definedColors["link_press"];
+            if (element.second->texturePressed)
+              displayTexture = element.second->texturePressed;
+            if (!element.second->pressed) {
+              if (element.second->type == Element::TextField) {
                 Input::singleton()->startEditingText(true);
                 selectedElement = &elements[index];
                 Log::printf(LOG_DEBUG, "Started editing text");
               } else {
-                element.second.mouseDown.fire();
+                element.second->mouseDown.fire();
               }
-              element.second.pressed = true;
+              element.second->pressed = true;
             }
           } else {
-            element.second.pressed = false;
+            element.second->pressed = false;
           }
         } else {
           if (Input::singleton()->isMouseButtonDown(1)) {
@@ -215,7 +217,7 @@ void Component::render(GuiManager* manager, gfx::Engine* engine) {
               selectedElement = NULL;
             }
           }
-          element.second.pressed = false;
+          element.second->pressed = false;
         }
         bp->setParameter(
             "texture0", DtSampler,
@@ -223,10 +225,10 @@ void Component::render(GuiManager* manager, gfx::Engine* engine) {
                                    .texture.texture = displayTexture});
         bp->setParameter(
             "scale", DtVec2,
-            BaseProgram::Parameter{.vec2 = element.second.textureSize});
+            BaseProgram::Parameter{.vec2 = element.second->textureSize});
         bp->setParameter("color", DtVec3,
                          BaseProgram::Parameter{.vec3 = displayColor});
-        if (element.second.type != Element::TextField) {
+        if (element.second->type != Element::TextField) {
           bp->setParameter("bgcolor", DtVec4,
                            {.vec4 = glm::vec4(displayColor, 0.0)});
         }
@@ -236,7 +238,7 @@ void Component::render(GuiManager* manager, gfx::Engine* engine) {
               BaseProgram::Parameter{
                   .vec2 =
                       displayOffset +
-                      glm::vec2(-element.second.textureSize.x + fbSize.x, 0)});
+                      glm::vec2(-element.second->textureSize.x + fbSize.x, 0)});
 
         } else {
           bp->setParameter("offset", DtVec2,
@@ -244,8 +246,8 @@ void Component::render(GuiManager* manager, gfx::Engine* engine) {
         }
         bp->bind();
         if (!alignTop)
-          offset += inc_factor * (glm::max(element.second.minSize,
-                                           element.second.textureSize) +
+          offset += inc_factor * (glm::max(element.second->minSize,
+                                           element.second->textureSize) +
                                   glm::ivec2(padding));
         manager->squareArrayPointers->bind();
         engine->getDevice()->draw(manager->squareElementBuffer.get(),
@@ -254,8 +256,7 @@ void Component::render(GuiManager* manager, gfx::Engine* engine) {
       default:
         break;
     }
-    element.second.dirty = false;
-    elements[element.first] = element.second;
+    element.second->dirty = false;
   }
 }
 
@@ -270,13 +271,13 @@ static void parseXmlNode(GuiManager* manager, Component* component,
       std::string name = child->name();
       std::string elid;
       if (name == "label") {
-        Component::Element em;
-        em.type = Component::Element::Label;
-        em.value = child->value();
-
         rapidxml::xml_attribute<>* id = child->first_attribute("id");
         elid = id ? id->value()
                   : std::format("label-{}", component->elements.size());
+
+        Component::Element& em = component->elements[elid];
+        em.type = Component::Element::Label;
+        em.value = child->value();
 
         rapidxml::xml_attribute<>* fontname = child->first_attribute("font");
         std::string _fontname =
@@ -313,16 +314,15 @@ static void parseXmlNode(GuiManager* manager, Component* component,
         em.textureHover = 0;
         em.texturePressed = 0;
         component->elementIndex.push_back(elid);
-        component->elements[elid] = em;
       } else if (name == "textfield") {
-        Component::Element em;
-        em.type = Component::Element::TextField;
-        em.value = child->value();
-        em.minSize = glm::vec2(0);
-
         rapidxml::xml_attribute<>* id = child->first_attribute("id");
         elid = id ? id->value()
                   : std::format("textfield-{}", component->elements.size());
+
+        Component::Element& em = component->elements[elid];
+        em.type = Component::Element::TextField;
+        em.value = child->value();
+        em.minSize = glm::vec2(0);
 
         rapidxml::xml_attribute<>* fontname = child->first_attribute("font");
         std::string _fontname =
@@ -343,7 +343,6 @@ static void parseXmlNode(GuiManager* manager, Component* component,
         em.textureHover = 0;
         em.texturePressed = 0;
         component->elementIndex.push_back(elid);
-        component->elements[elid] = em;
       } else if (name == "div") {
         TreeNode newNode;
         rapidxml::xml_attribute<>* id = child->first_attribute("id");
@@ -357,7 +356,10 @@ static void parseXmlNode(GuiManager* manager, Component* component,
         node.visible = true;
         node.children.push_back(newNode);
       } else if (name == "image") {
-        Component::Element em;
+        rapidxml::xml_attribute<>* id = child->first_attribute("id");
+        elid = id ? id->value()
+                  : std::format("image-{}", component->elements.size());
+        Component::Element& em = component->elements[elid];
         em.type = Component::Element::Image;
         em.color = glm::vec3(1);
         em.minSize = glm::vec2(0);
@@ -383,11 +385,7 @@ static void parseXmlNode(GuiManager* manager, Component* component,
                      .value();
         em.textureSize = glm::ivec2(t.first.width, t.first.height);
         em.texture = t.second;
-        rapidxml::xml_attribute<>* id = child->first_attribute("id");
-        elid = id ? id->value()
-                  : std::format("image-{}", component->elements.size());
         component->elementIndex.push_back(elid);
-        component->elements[elid] = em;
       } else {
         throw std::runtime_error("Unknown element");
       }
@@ -408,10 +406,6 @@ Component* GuiManager::parseXml(const char* file) {
     memset(xmld, 0, fileSize + 4);
     size_t rd = d.value()->read(xmld, fileSize);
     try {
-      Component component;
-
-      component.manager = this;
-
       rapidxml::xml_document<> doc;
       doc.parse<rapidxml::parse_full>(xmld);
 
@@ -437,6 +431,11 @@ Component* GuiManager::parseXml(const char* file) {
       std::map<std::string, Component::GrowMode> growModes;
       growModes["Horizontal"] = Component::Horizontal;
       growModes["Vertical"] = Component::Horizontal;
+
+      std::string name = node->first_attribute("name")->value();
+      Component& component = components[name];
+
+      component.manager = this;
 
       component.variablesDirty = true;
       component.name = rootName->value();
@@ -528,7 +527,6 @@ Component* GuiManager::parseXml(const char* file) {
         }
       }
 
-      std::string name = node->first_attribute("name")->value();
       component.variableChanged.listen([this, name] {
         Component* component = &components[name];
         for (auto& script : component->scripts) {
@@ -537,7 +535,6 @@ Component* GuiManager::parseXml(const char* file) {
         }
       });
 
-      components[name] = component;
       Log::printf(LOG_DEBUG, "Loaded XML %s", file);
 
       return &components[name];

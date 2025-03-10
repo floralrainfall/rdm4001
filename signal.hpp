@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <map>
+#include <mutex>
 #include <stdexcept>
 
 #include "logging.hpp"
@@ -25,6 +26,8 @@ ClosureId __newClosureId();
  */
 template <typename... Args>
 class Signal {
+  std::mutex m;
+
  public:
   typedef std::function<void(Args...)> Function;
 
@@ -37,6 +40,7 @@ class Signal {
    * @param a The arguments to pass to signal listeners.
    */
   void fire(Args... a) {
+    std::scoped_lock l(m);
 #ifndef DISABLE_EASY_PROFILER
     EASY_FUNCTION();
 #endif
@@ -82,14 +86,19 @@ class Signal {
    * @param a The function to add.
    */
   ClosureId listen(Function a) {
+    std::scoped_lock l(m);
     ClosureId id = __newClosureId();
     listeners[id] = a;
     return id;
   }
 
-  void addClosure(Function a) { pendingClosures.push_back(a); }
+  void addClosure(Function a) {
+    std::scoped_lock l(m);
+    pendingClosures.push_back(a);
+  }
 
   void removeListener(ClosureId id) {
+    std::scoped_lock l(m);
     auto it = listeners.find(id);
     if (it != listeners.end())
       listeners.erase(it);
@@ -97,7 +106,10 @@ class Signal {
       throw std::runtime_error("Removing invalid closure id");
   }
 
-  size_t size() { return listeners.size(); }
+  size_t size() {
+    std::scoped_lock l(m);
+    return listeners.size();
+  }
 
  private:
   std::map<ClosureId, Function> listeners;
