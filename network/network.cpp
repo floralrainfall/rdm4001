@@ -495,7 +495,6 @@ void NetworkManager::service() {
                     int rtt = stream.read<int>();
                     int ploss = stream.read<int>();
 
-                    Log::printf(LOG_DEBUG, "%i %i", peer, rtt);
                     auto it = peers.find(peer);
                     if (it != peers.end()) {
                       it->second.roundTripTime = rtt;
